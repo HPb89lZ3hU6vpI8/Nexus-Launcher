@@ -9060,6 +9060,9 @@ const UpcomingGameCard = ({ game, onClick }) => {
 
   return (
     <div className="upcoming-card" onClick={onClick}>
+      <svg className="upcoming-border-svg" viewBox="0 0 180 285" preserveAspectRatio="none">
+        <polygon points="10,0 180,0 180,275 170,285 0,285 0,10" />
+      </svg>
       <div className="upcoming-countdown-badge">
         {countdownStr}
       </div>

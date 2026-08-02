@@ -2935,25 +2935,48 @@ body {
   height: 0;
 }
 
-/* UPCOMING CARD 1:1 PHOTO 3 REVOLTG */
+/* UPCOMING CARD 1:1 PHOTO 3 REVOLTG WITH CHAMFERED CUT CORNERS AND VECTOR CYAN STROKE */
 .upcoming-card {
   position: relative;
   flex: 0 0 180px;
   height: 285px;
   background: #0d1520;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  overflow: hidden;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   transition: all 0.2s ease;
+  clip-path: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
+}
+
+.upcoming-border-svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1.5;
+  pointer-events: none;
+  z-index: 30;
+  transition: all 0.2s ease;
+}
+
+.upcoming-card:hover .upcoming-border-svg {
+  stroke: #00d2ff;
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.85));
 }
 
 .upcoming-card:hover {
-  border: 2px solid #00d2ff !important;
-  box-shadow: 0 0 18px rgba(0, 210, 255, 0.75);
   transform: translateY(-2px);
+  filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.6));
 }
 
 .upcoming-countdown-badge {
