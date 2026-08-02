@@ -9268,24 +9268,29 @@ const MainContent = ({ selectedGame, setSelectedGame, activeMenuLeft }) => {
       </div>
       
       {/* SẮP RA MẮT — chỉ hiện ở menu MIỄN PHÍ. Các menu STEAM/BATTLE/EA/UPLAY/EPIC ẩn. */}
-      {activeMenuLeft === 'mienphi' && <UpcomingSection onSelectGame={setSelectedGame} />}
+      {/* key={activeMenuLeft} → force remount khi đổi menu trái → animation entry re-trigger (cards staggered). */}
+      <div key={activeMenuLeft} className="menu-content-transition">
+        {activeMenuLeft === 'mienphi' && <UpcomingSection onSelectGame={setSelectedGame} />}
 
-      <div className="section-title-bar">
-        <div>
-          <span className="title-text">DANH SÁCH TRÒ CHƠI</span>
-          <span className="title-count">{filteredGames.length} kết quả</span>
-        </div>
-        <div className="title-bottom-line"></div>
-      </div>
-      
-      <div className="game-grid">
-        {filteredGames.length > 0 ? filteredGames.map(game => (
-          <GameCard key={game.id} game={game} onClick={setSelectedGame} />
-        )) : (
-          <div style={{color: 'var(--text-muted)', padding: '40px', textAlign: 'center', width: '100%', gridColumn: '1 / -1'}}>
-            Không tìm thấy trò chơi nào phù hợp.
+        <div className="section-title-bar">
+          <div>
+            <span className="title-text">DANH SÁCH TRÒ CHƠI</span>
+            <span className="title-count">{filteredGames.length} kết quả</span>
           </div>
-        )}
+          <div className="title-bottom-line"></div>
+        </div>
+
+        <div className="game-grid">
+          {filteredGames.length > 0 ? filteredGames.map(game => (
+            <GameCard key={game.id} game={game} onClick={setSelectedGame} />
+          )) : (
+            <div style={{color: 'var(--text-muted)', padding: '40px', textAlign: 'center', width: '100%', gridColumn: '1 / -1'}}>
+              {activeMenuLeft === 'mienphi'
+                ? 'Không tìm thấy trò chơi nào phù hợp.'
+                : 'Chưa hỗ trợ game.'}
+            </div>
+          )}
+        </div>
       </div>
       
       <div className="chat-btn">
@@ -9383,11 +9388,11 @@ const IntegrateContent = () => {
       themeColor: '#0e7490',
       borderColor: '#06b6d4',
       features: [
-        'Bản dịch chuẩn Team Cánh Cụt',
-        'Lời thoại sắc thái 18+ chân thực',
-        'Cập nhật tự động patch mới nhất',
-        'Hỗ trợ cài đặt tự động 1-Click',
-        'Tối ưu phông chữ Tiếng Việt'
+        'Việt hóa game AAA & Indie chất lượng cao',
+        'Hơn 100 dự án: Elden Ring, Black Myth Wukong, MGS V',
+        'Từng câu thoại dịch tỉ mỉ, bắt tai, hợp văn hóa Việt',
+        'Launcher riêng tải và cài đặt bản dịch',
+        'Cập nhật patch mới nhất từ team'
       ],
       btnText: 'KÍCH HOẠT NGAY'
     },
@@ -9398,25 +9403,33 @@ const IntegrateContent = () => {
       themeColor: '#047857',
       borderColor: '#10b981',
       features: [
-        'Game Studio Việt Nam phát hành',
-        'Việt hóa full Giao diện & Lời thoại',
-        'Tương thích mọi phiên bản Windows 10/11',
-        'Hỗ trợ sửa lỗi phông chữ tự động'
+        'Chuyển ngữ thủ công tỉ mỉ, giữ tinh thần gốc',
+        'Chất Lượng Thật – Cảm Xúc Thật',
+        'Thành lập 2019, tập trung chất lượng không chạy đua',
+        'Cài đặt nhanh chóng, không cần điều chỉnh thủ công',
+        'Bản Việt hóa game chất lượng nhất'
       ],
       btnText: 'KÍCH HOẠT NGAY'
     },
     {
       id: 'vip',
-      title: 'VIP HARDWARE BOOST',
-      badge: 'TỐI ƯU HIỆU NÂNG',
+      title: 'Easy-Install Games',
+      badge: 'CHIA SẺ GAME',
       themeColor: '#9f1239',
       borderColor: '#f43f5e',
       features: [
-        'Tự động tối ưu đồ họa GPU RTX/GTX',
-        'Tăng FPS & Giảm sụt khựng 1% Low',
-        'Quản lý VRAM chống tràn văng Game',
-        'Hỗ trợ bật DLSS / FSR Frame Gen'
+        'Tự động chia sẻ các game qua Steam',
+        'Có thể thêm các trò chơi cần thiết chơi ngay lập tức',
+        'Giới Hạn Rất Cao Có Thể Gây Lỗi'
       ],
+      unsupportedHeader: 'Các trò chơi không hỗ trợ:',
+      unsupported: [
+        'Trò Chơi Có Thiết Lập Denuvo Anti Tamper',
+        'Trò Chơi Online',
+        'Trò Chơi Cần Phần Mềm Thứ 3 Như Uplay, EA Play...',
+        'Trò Chơi Có Các Anti-Cheat Như Easy Anti-Cheat...'
+      ],
+      note: 'Để Có Thể Sử Dụng Tốt Nhất Hãy Liên Hệ Admin Để Thêm Trò Chơi',
       btnText: 'KÍCH HOẠT NGAY'
     }
   ];
@@ -9506,6 +9519,30 @@ const IntegrateContent = () => {
                       </li>
                     ))}
                   </ul>
+
+                  {card.unsupportedHeader && card.unsupported && card.unsupported.length > 0 && (
+                    <>
+                      <div className="unsupported-header" style={{ color: '#ff6b6b', fontSize: 11, fontWeight: 800, marginTop: 12, marginBottom: 6, letterSpacing: 0.3, opacity: isCurrent ? 1 : 0.5 }}>
+                        <i className="ph-bold ph-warning-circle" style={{ marginRight: 6, fontSize: 13 }}></i>
+                        {card.unsupportedHeader}
+                      </div>
+                      <ul className="feature-list">
+                        {card.unsupported.map((feat, fIdx) => (
+                          <li key={`u${fIdx}`}>
+                            <i className="ph-bold ph-x-circle" style={{ color: '#ef4444', opacity: isCurrent ? 0.95 : 0.5 }}></i>
+                            <span style={{ opacity: isCurrent ? 0.92 : 0.5 }}>{feat}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+
+                  {card.note && (
+                    <div className="card-note" style={{ color: 'var(--text-muted)', fontSize: 10.5, fontStyle: 'italic', marginTop: 10, paddingLeft: 8, borderLeft: `2px solid ${isCurrent ? card.borderColor : 'rgba(255,255,255,0.12)'}`, lineHeight: 1.4, opacity: isCurrent ? 0.9 : 0.5 }}>
+                      <i className="ph-bold ph-info" style={{ marginRight: 4, fontSize: 11 }}></i>
+                      {card.note}
+                    </div>
+                  )}
 
                   <button
                     className="card-action-btn"

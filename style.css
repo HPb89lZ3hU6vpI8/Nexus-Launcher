@@ -800,6 +800,67 @@ body {
   to { opacity: 1; transform: scale(1); }
 }
 
+/* === MENU TRANSITION (chuyên nghiệp — dùng khi đổi menu trái) ===
+   Trigger: React force remount div[key=activeMenuLeft].moenu-content-transition.
+   Layered: container fade+rise → section-title slide-down → cards staggered wave.
+   Easing cubic-bezier(0.22,1,0.36,1) = easeOutQuint (decel mượt, pro dashboard feel). */
+
+@keyframes menuContentEnter {
+  from { opacity: 0; transform: translateY(14px) scale(0.992); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);     }
+}
+@keyframes menuTitleEnter {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.menu-content-transition {
+  animation: menuContentEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: opacity, transform;
+  backface-visibility: hidden;            /* tránh flicker khi scale */
+}
+
+/* Section title "ĐĂNG RA MẮT/DANH SÁCH TRÒ CHƠI" — slide-down + fade, trễ 80ms
+   để container fade trước rồi title mới "kết xuất" (rõ tầng lớp). */
+.menu-content-transition .section-title-bar {
+  animation: menuTitleEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 0.08s;
+}
+
+/* UpcomingSection (chỉ MIỄN PHÍ) — fade+rise riêng, khớp container. */
+.menu-content-transition .upcoming-section {
+  animation: menuContentEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Game cards — staggered WAVE (cards đầu vào nhanh, sau trễ dần, cap 0.55s).
+   Selector specificity (3 lớp) override staggered cũ (2 lớp ở L863-871). */
+.menu-content-transition .game-grid .game-card {
+  animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.menu-content-transition .game-grid .game-card:nth-child(1)     { animation-delay: 0.10s; }
+.menu-content-transition .game-grid .game-card:nth-child(2)     { animation-delay: 0.14s; }
+.menu-content-transition .game-grid .game-card:nth-child(3)     { animation-delay: 0.18s; }
+.menu-content-transition .game-grid .game-card:nth-child(4)     { animation-delay: 0.22s; }
+.menu-content-transition .game-grid .game-card:nth-child(5)     { animation-delay: 0.26s; }
+.menu-content-transition .game-grid .game-card:nth-child(6)     { animation-delay: 0.30s; }
+.menu-content-transition .game-grid .game-card:nth-child(7)     { animation-delay: 0.34s; }
+.menu-content-transition .game-grid .game-card:nth-child(8)     { animation-delay: 0.38s; }
+.menu-content-transition .game-grid .game-card:nth-child(n+9)   { animation-delay: 0.42s; }
+.menu-content-transition .game-grid .game-card:nth-child(n+17)  { animation-delay: 0.46s; }
+.menu-content-transition .game-grid .game-card:nth-child(n+25)  { animation-delay: 0.50s; }
+.menu-content-transition .game-grid .game-card:nth-child(n+33)  { animation-delay: 0.55s; }
+
+/* Accessibility: tôn trọng prefer-reduced-motion — tắt animation khi user yêu cầu. */
+@media (prefers-reduced-motion: reduce) {
+  .menu-content-transition,
+  .menu-content-transition .section-title-bar,
+  .menu-content-transition .upcoming-section,
+  .menu-content-transition .game-grid .game-card {
+    animation: none !important;
+  }
+}
+
+
 /* CONTENT SCROLL AREA */
 .content-area {
   flex: 1;
