@@ -2543,30 +2543,12 @@ body {
   z-index: 1;
 }
 
-.bg-shapes .shape {
+.bg-shape-item {
   position: absolute;
-  border: 2px solid rgba(255, 255, 255, 0.04);
-  opacity: 0.5;
-}
-
-.bg-shapes .shape-square {
-  width: 40px; height: 40px; top: 15%; left: 10%; transform: rotate(15deg);
-}
-
-.bg-shapes .shape-triangle {
-  width: 0; height: 0;
-  border-left: 20px solid transparent;
-  border-right: 20px solid transparent;
-  border-bottom: 35px solid rgba(255, 255, 255, 0.04);
-  bottom: 20%; left: 15%; transform: rotate(-25deg);
-}
-
-.bg-shapes .shape-circle {
-  width: 50px; height: 50px; border-radius: 50%; top: 20%; right: 12%;
-}
-
-.bg-shapes .shape-cross {
-  width: 35px; height: 35px; bottom: 25%; right: 18%; transform: rotate(45deg);
+  opacity: 0.35;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px currentColor);
 }
 
 .integrate-slider-wrapper {
