@@ -9422,12 +9422,12 @@ const IntegrateContent = () => {
         'Có thể thêm các trò chơi cần thiết chơi ngay lập tức',
         'Giới Hạn Rất Cao Có Thể Gây Lỗi'
       ],
-      unsupportedHeader: 'Các trò chơi không hỗ trợ:',
+      unsupportedHeader: 'CÁC TRÒ CHƠI KHÔNG HỖ TRỢ',
       unsupported: [
-        'Trò Chơi Có Thiết Lập Denuvo Anti Tamper',
-        'Trò Chơi Online',
-        'Trò Chơi Cần Phần Mềm Thứ 3 Như Uplay, EA Play...',
-        'Trò Chơi Có Các Anti-Cheat Như Easy Anti-Cheat...'
+        'Denuvo Anti-Tamper',
+        'Game Online',
+        'Launcher thứ 3 (Uplay/EA...)',
+        'Anti-Cheat (EAC...)'
       ],
       note: 'Để Có Thể Sử Dụng Tốt Nhất Hãy Liên Hệ Admin Để Thêm Trò Chơi',
       btnText: 'KÍCH HOẠT NGAY'
@@ -9522,24 +9522,24 @@ const IntegrateContent = () => {
                     </ul>
 
                     {card.unsupportedHeader && card.unsupported && card.unsupported.length > 0 && (
-                      <>
-                        <div className="unsupported-header" style={{ color: '#ff6b6b', fontSize: 11, fontWeight: 800, marginTop: 10, marginBottom: 5, letterSpacing: 0.3, opacity: isCurrent ? 1 : 0.6 }}>
-                          <i className="ph-bold ph-warning-circle" style={{ marginRight: 5, fontSize: 12.5 }}></i>
-                          {card.unsupportedHeader}
+                      <div className="unsupported-box">
+                        <div className="unsupported-box-header">
+                          <i className="ph-bold ph-warning-circle"></i>
+                          <span>{card.unsupportedHeader}</span>
                         </div>
-                        <ul className="feature-list unsupported-list">
-                          {card.unsupported.map((feat, fIdx) => (
-                            <li key={`u${fIdx}`}>
-                              <i className="ph-bold ph-x-circle" style={{ color: '#ef4444', opacity: isCurrent ? 0.95 : 0.6 }}></i>
-                              <span style={{ opacity: isCurrent ? 0.92 : 0.6 }}>{feat}</span>
-                            </li>
+                        <div className="unsupported-tags-grid">
+                          {card.unsupported.map((item, fIdx) => (
+                            <div className="unsupported-tag-pill" key={fIdx}>
+                              <i className="ph-bold ph-x-circle"></i>
+                              <span>{item}</span>
+                            </div>
                           ))}
-                        </ul>
-                      </>
+                        </div>
+                      </div>
                     )}
 
                     {card.note && (
-                      <div className="card-note" style={{ color: 'var(--text-muted)', fontSize: 10.5, fontStyle: 'italic', marginTop: 8, paddingLeft: 8, borderLeft: `2px solid ${isCurrent ? card.borderColor : 'rgba(255,255,255,0.12)'}`, lineHeight: 1.35, opacity: isCurrent ? 0.9 : 0.6 }}>
+                      <div className="card-note" style={{ color: 'var(--text-muted)', fontSize: 10.5, fontStyle: 'italic', marginTop: 10, paddingLeft: 8, borderLeft: `2px solid ${isCurrent ? card.borderColor : 'rgba(255,255,255,0.12)'}`, lineHeight: 1.35, opacity: isCurrent ? 0.9 : 0.6 }}>
                         <i className="ph-bold ph-info" style={{ marginRight: 4, fontSize: 11 }}></i>
                         {card.note}
                       </div>
