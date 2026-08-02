@@ -3009,39 +3009,40 @@ body {
   background: #060b11;
 }
 
-/* Background blurred fill — che rìa, tạo depth (RevoltG style) */
+/* Background blurred fill — che rìa, tạo depth */
 .upcoming-img-wrapper .upcoming-img-bg {
   position: absolute;
   inset: -15%;
   width: 130%;
   height: 130%;
   object-fit: cover;
-  object-position: center;
-  filter: blur(28px) brightness(0.75) saturate(1.2);
+  object-position: top center;
+  filter: blur(28px) brightness(0.7) saturate(1.2);
   z-index: 0;
   pointer-events: none;
 }
 
-/* Foreground ảnh thật — contain, thấy all, cân tâm, KHÔNG méo */
+/* Foreground ảnh thật — cover, top, giữ logo/tên game Steam ở trên */
 .upcoming-img-wrapper .upcoming-img-fg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: center;
+  object-fit: cover;
+  object-position: top center;
   z-index: 1;
   transition: transform 0.3s ease;
   pointer-events: none;
 }
 
-/* Gradient overlay che viền transition giữa blur bg + sharp fg */
+/* Fade mượt rìa dưới (chỉ dưới, không che logo trên) */
 .upcoming-img-wrapper::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(6,11,17,0.4) 0%, transparent 25%, transparent 75%, rgba(6,11,17,0.4) 100%);
-  z-index: 0;
+  left: 0; right: 0; bottom: 0;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, rgba(11,18,28,0.85));
+  z-index: 2;
   pointer-events: none;
 }
 
@@ -5262,39 +5263,40 @@ body {
   background: #060b11;
 }
 
-/* Background blurred fill — che rìa, tạo depth (RevoltG style) */
+/* Background blurred fill — che rìa, tạo depth */
 .upcoming-img-wrapper .upcoming-img-bg {
   position: absolute;
   inset: -15%;
   width: 130%;
   height: 130%;
   object-fit: cover;
-  object-position: center;
-  filter: blur(28px) brightness(0.75) saturate(1.2);
+  object-position: top center;
+  filter: blur(28px) brightness(0.7) saturate(1.2);
   z-index: 0;
   pointer-events: none;
 }
 
-/* Foreground ảnh thật — contain, thấy all, cân tâm, KHÔNG méo */
+/* Foreground ảnh thật — cover, top, giữ logo/tên game Steam ở trên */
 .upcoming-img-wrapper .upcoming-img-fg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: center;
+  object-fit: cover;
+  object-position: top center;
   z-index: 1;
   transition: transform 0.3s ease;
   pointer-events: none;
 }
 
-/* Gradient overlay che viền transition giữa blur bg + sharp fg */
+/* Fade mượt rìa dưới (chỉ dưới, không che logo trên) */
 .upcoming-img-wrapper::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(6,11,17,0.4) 0%, transparent 25%, transparent 75%, rgba(6,11,17,0.4) 100%);
-  z-index: 0;
+  left: 0; right: 0; bottom: 0;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, rgba(11,18,28,0.85));
+  z-index: 2;
   pointer-events: none;
 }
 
