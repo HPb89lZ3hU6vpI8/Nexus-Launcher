@@ -9413,7 +9413,7 @@ const IntegrateContent = () => {
     },
     {
       id: 'vip',
-      title: 'Easy-Install Games',
+      title: 'EASY-INSTALL GAMES',
       badge: 'CHIA SẺ GAME',
       themeColor: '#9f1239',
       borderColor: '#f43f5e',
@@ -9511,61 +9511,65 @@ const IntegrateContent = () => {
                 </div>
 
                 <div className="card-body">
-                  <ul className="feature-list">
-                    {card.features.map((feat, fIdx) => (
-                      <li key={fIdx}>
-                        <i className="ph-bold ph-check-circle" style={{ color: isCurrent ? card.borderColor : '#556877' }}></i>
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="card-body-content">
+                    <ul className="feature-list">
+                      {card.features.map((feat, fIdx) => (
+                        <li key={fIdx}>
+                          <i className="ph-bold ph-check-circle" style={{ color: isCurrent ? card.borderColor : '#556877' }}></i>
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
 
-                  {card.unsupportedHeader && card.unsupported && card.unsupported.length > 0 && (
-                    <>
-                      <div className="unsupported-header" style={{ color: '#ff6b6b', fontSize: 11, fontWeight: 800, marginTop: 12, marginBottom: 6, letterSpacing: 0.3, opacity: isCurrent ? 1 : 0.5 }}>
-                        <i className="ph-bold ph-warning-circle" style={{ marginRight: 6, fontSize: 13 }}></i>
-                        {card.unsupportedHeader}
+                    {card.unsupportedHeader && card.unsupported && card.unsupported.length > 0 && (
+                      <>
+                        <div className="unsupported-header" style={{ color: '#ff6b6b', fontSize: 11, fontWeight: 800, marginTop: 10, marginBottom: 5, letterSpacing: 0.3, opacity: isCurrent ? 1 : 0.6 }}>
+                          <i className="ph-bold ph-warning-circle" style={{ marginRight: 5, fontSize: 12.5 }}></i>
+                          {card.unsupportedHeader}
+                        </div>
+                        <ul className="feature-list unsupported-list">
+                          {card.unsupported.map((feat, fIdx) => (
+                            <li key={`u${fIdx}`}>
+                              <i className="ph-bold ph-x-circle" style={{ color: '#ef4444', opacity: isCurrent ? 0.95 : 0.6 }}></i>
+                              <span style={{ opacity: isCurrent ? 0.92 : 0.6 }}>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+
+                    {card.note && (
+                      <div className="card-note" style={{ color: 'var(--text-muted)', fontSize: 10.5, fontStyle: 'italic', marginTop: 8, paddingLeft: 8, borderLeft: `2px solid ${isCurrent ? card.borderColor : 'rgba(255,255,255,0.12)'}`, lineHeight: 1.35, opacity: isCurrent ? 0.9 : 0.6 }}>
+                        <i className="ph-bold ph-info" style={{ marginRight: 4, fontSize: 11 }}></i>
+                        {card.note}
                       </div>
-                      <ul className="feature-list">
-                        {card.unsupported.map((feat, fIdx) => (
-                          <li key={`u${fIdx}`}>
-                            <i className="ph-bold ph-x-circle" style={{ color: '#ef4444', opacity: isCurrent ? 0.95 : 0.5 }}></i>
-                            <span style={{ opacity: isCurrent ? 0.92 : 0.5 }}>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
+                    )}
+                  </div>
 
-                  {card.note && (
-                    <div className="card-note" style={{ color: 'var(--text-muted)', fontSize: 10.5, fontStyle: 'italic', marginTop: 10, paddingLeft: 8, borderLeft: `2px solid ${isCurrent ? card.borderColor : 'rgba(255,255,255,0.12)'}`, lineHeight: 1.4, opacity: isCurrent ? 0.9 : 0.5 }}>
-                      <i className="ph-bold ph-info" style={{ marginRight: 4, fontSize: 11 }}></i>
-                      {card.note}
-                    </div>
-                  )}
-
-                  <button
-                    className="card-action-btn"
-                    style={{
-                      background: isCurrent ? card.borderColor : '#19222c',
-                      color: isCurrent ? '#ffffff' : '#6b7c8d',
-                      boxShadow: isCurrent ? `0 4px 14px ${card.borderColor}66` : 'none',
-                      cursor: (card.id === 'cloud' && cloudState === 'idle') ? 'pointer' : 'default'
-                    }}
-                    disabled={card.id === 'cloud' && cloudState !== 'idle'}
-                    onClick={card.id === 'cloud' ? handleCloudClick : undefined}
-                  >
-                    {card.id === 'cloud'
-                      ? (cloudState === 'checking' ? 'ĐANG KIỂM TRA...'
-                         : cloudState === 'installed' ? 'ĐÃ KÍCH HOẠT'
-                         : cloudState === 'installing' ? 'ĐANG CÀI ĐẶT...'
-                         : cloudState === 'just_installed' ? 'ĐÃ CÀI ĐẶT'
-                         : 'KÍCH HOẠT NGAY')
-                      : card.btnText}
-                  </button>
-                  {card.id === 'cloud' && cloudNote && (
-                    <div style={{ color: '#ff6b6b', fontSize: 11, marginTop: 6, textAlign: 'center' }}>{cloudNote}</div>
-                  )}
+                  <div className="card-action-wrapper">
+                    <button
+                      className="card-action-btn"
+                      style={{
+                        background: isCurrent ? card.borderColor : '#19222c',
+                        color: isCurrent ? '#ffffff' : '#6b7c8d',
+                        boxShadow: isCurrent ? `0 4px 14px ${card.borderColor}66` : 'none',
+                        cursor: (card.id === 'cloud' && cloudState === 'idle') || card.id !== 'cloud' ? 'pointer' : 'default'
+                      }}
+                      disabled={card.id === 'cloud' && cloudState !== 'idle'}
+                      onClick={card.id === 'cloud' ? handleCloudClick : undefined}
+                    >
+                      {card.id === 'cloud'
+                        ? (cloudState === 'checking' ? 'ĐANG KIỂM TRA...'
+                           : cloudState === 'installed' ? 'ĐÃ KÍCH HOẠT'
+                           : cloudState === 'installing' ? 'ĐANG CÀI ĐẶT...'
+                           : cloudState === 'just_installed' ? 'ĐÃ CÀI ĐẶT'
+                           : 'KÍCH HOẠT NGAY')
+                        : card.btnText}
+                    </button>
+                    {card.id === 'cloud' && cloudNote && (
+                      <div style={{ color: '#ff6b6b', fontSize: 11, marginTop: 6, textAlign: 'center' }}>{cloudNote}</div>
+                    )}
+                  </div>
                 </div>
               </div>
             );
