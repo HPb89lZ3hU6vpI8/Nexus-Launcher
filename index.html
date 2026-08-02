@@ -8112,7 +8112,9 @@ const GameCard = ({ game, onClick }) => {
       <div className="game-info">
         <div className="game-title">
           <span className="game-name">{game.title}</span>
-          <i className="fa-brands fa-steam"></i>
+          {game.title && game.title.includes("Assassin's")
+            ? <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text-muted)', transform: 'scale(0.83)', transformOrigin: 'center', flexShrink: 0 }}><UplaySvg /></span>
+            : <i className="fa-brands fa-steam"></i>}
         </div>
         <div className="game-meta">
           <div className="meta-icons">
@@ -9265,6 +9267,67 @@ const MainContent = ({ selectedGame, setSelectedGame }) => {
 const IntegrateContent = () => {
   const [activeIndex, setActiveIndex] = React.useState(0);
 
+  // === Cloud Save state machine ===
+  // 'checking' | 'installed' | 'idle' | 'installing' | 'just_installed'
+  const [cloudState, setCloudState] = React.useState('checking');
+  const [cloudNote, setCloudNote] = React.useState('');
+
+  // Luc mount: doc precheck tu api (Python main() set api.cloud_save_precheck truoc khi mo UI).
+  // Neu precheck chua co -> fallback goi check_cloud_save truc tiep.
+  React.useEffect(() => {
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    const pre = api && api.cloud_save_precheck;
+    if (pre && typeof pre === 'object' && 'installed' in pre) {
+      setCloudState(pre.installed ? 'installed' : 'idle');
+      return;
+    }
+    // Fallback: goi check_cloud_save (pywebview bridge).
+    if (!api || !api.check_cloud_save) {
+      setCloudState('idle');  // Chua co bridge (dev browser) -> cho phep click de xem error.
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await api.check_cloud_save();
+        if (!cancelled) setCloudState(r && r.installed ? 'installed' : 'idle');
+      } catch (e) {
+        if (!cancelled) setCloudState('idle');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Click "KÍCH HOẠT NGAY" -> kill Steam + download + extract + move 4 file.
+  const handleCloudClick = async () => {
+    if (cloudState !== 'idle') return;
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    if (!api || !api.install_cloud_save) {
+      setCloudNote('Vui lòng mở qua ứng dụng NexusGames.');
+      return;
+    }
+    setCloudNote('');
+    setCloudState('installing');
+    try {
+      const r = await api.install_cloud_save();
+      if (r && r.already) {
+        setCloudState('installed');
+        return;
+      }
+      if (r && r.success) {
+        setCloudState('just_installed');
+      } else {
+        setCloudState('idle');
+        setCloudNote((r && r.error) || 'Lỗi không xác định.');
+      }
+    } catch (e) {
+      setCloudState('idle');
+      setCloudNote('Lỗi: ' + ((e && e.message) ? e.message : String(e)));
+    }
+  };
+
   const cards = [
     {
       id: 'cloud',
@@ -9280,7 +9343,7 @@ const IntegrateContent = () => {
         'Keep Data When Switching Devices',
         'High Storage Capacity'
       ],
-      btnText: 'ĐỒNG BỘ NGAY'
+      btnText: 'KÍCH HOẠT NGAY'
     },
     {
       id: 'canhcut',
@@ -9413,16 +9476,28 @@ const IntegrateContent = () => {
                     ))}
                   </ul>
 
-                  <button 
-                    className="card-action-btn" 
-                    style={{ 
+                  <button
+                    className="card-action-btn"
+                    style={{
                       background: isCurrent ? card.borderColor : '#19222c',
                       color: isCurrent ? '#ffffff' : '#6b7c8d',
-                      boxShadow: isCurrent ? `0 4px 14px ${card.borderColor}66` : 'none'
+                      boxShadow: isCurrent ? `0 4px 14px ${card.borderColor}66` : 'none',
+                      cursor: (card.id === 'cloud' && cloudState === 'idle') ? 'pointer' : 'default'
                     }}
+                    disabled={card.id === 'cloud' && cloudState !== 'idle'}
+                    onClick={card.id === 'cloud' ? handleCloudClick : undefined}
                   >
-                    {card.btnText}
+                    {card.id === 'cloud'
+                      ? (cloudState === 'checking' ? 'ĐANG KIỂM TRA...'
+                         : cloudState === 'installed' ? 'ĐÃ KÍCH HOẠT'
+                         : cloudState === 'installing' ? 'ĐANG CÀI ĐẶT...'
+                         : cloudState === 'just_installed' ? 'ĐÃ CÀI ĐẶT'
+                         : 'KÍCH HOẠT NGAY')
+                      : card.btnText}
                   </button>
+                  {card.id === 'cloud' && cloudNote && (
+                    <div style={{ color: '#ff6b6b', fontSize: 11, marginTop: 6, textAlign: 'center' }}>{cloudNote}</div>
+                  )}
                 </div>
               </div>
             );
