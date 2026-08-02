@@ -9039,7 +9039,6 @@ const UPCOMING_GAMES = [
 const UpcomingGameCard = ({ game, onClick }) => {
   const targetTime = React.useMemo(() => new Date(game.targetDate).getTime(), [game.targetDate]);
   const [now, setNow] = React.useState(() => Date.now());
-  const [isHorizontal, setIsHorizontal] = React.useState(false);
 
   React.useEffect(() => {
     const timer = setInterval(() => {
@@ -9057,37 +9056,17 @@ const UpcomingGameCard = ({ game, onClick }) => {
   const pad = (n) => String(n).padStart(2, '0');
   const countdownStr = `${pad(d)} ngày ${pad(h)}:${pad(m)}:${pad(s)}`;
 
-  const handleImgLoad = (e) => {
-    if (e.target.naturalWidth && e.target.naturalHeight) {
-      if (e.target.naturalWidth > e.target.naturalHeight * 1.15) {
-        setIsHorizontal(true);
-      } else {
-        setIsHorizontal(false);
-      }
-    }
-  };
-
   const imgSrc = game.cover || game.thumbnail || `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/library_600x900.jpg`;
 
   return (
     <div className="upcoming-card" onClick={onClick}>
-      <div className="upcoming-border-overlay"></div>
       <div className="upcoming-countdown-badge">
         {countdownStr}
       </div>
-      <div className={`upcoming-img-wrapper ${isHorizontal ? 'is-horizontal' : ''}`}>
-        {isHorizontal && (
-          <img 
-            src={imgSrc} 
-            alt="" 
-            className="upcoming-bg-blur"
-          />
-        )}
+      <div className="upcoming-img-wrapper">
         <img 
           src={imgSrc} 
           alt={game.title} 
-          onLoad={handleImgLoad}
-          className="upcoming-main-img"
         />
       </div>
       <div className="upcoming-card-info">

@@ -2935,54 +2935,25 @@ body {
   height: 0;
 }
 
-/* UPCOMING CARD 1:1 PHOTO 2 & PHOTO 3 */
+/* UPCOMING CARD 1:1 PHOTO 3 REVOLTG */
 .upcoming-card {
   position: relative;
   flex: 0 0 180px;
   height: 285px;
   background: #0d1520;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.upcoming-border-overlay {
-  position: absolute;
-  inset: 0;
-  border: 2px solid transparent;
-  pointer-events: none;
-  z-index: 30;
   transition: all 0.2s ease;
 }
 
-.upcoming-card:hover .upcoming-border-overlay {
-  border-color: #00d2ff;
-  box-shadow: inset 0 0 12px rgba(0, 210, 255, 0.5);
-  clip-path: polygon(
-    10px 0,
-    100% 0,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
-    0 100%,
-    0 10px
-  );
-}
-
 .upcoming-card:hover {
-  box-shadow: 0 0 20px rgba(0, 210, 255, 0.75);
+  border: 2px solid #00d2ff !important;
+  box-shadow: 0 0 18px rgba(0, 210, 255, 0.75);
   transform: translateY(-2px);
-  clip-path: polygon(
-    10px 0,
-    100% 0,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
-    0 100%,
-    0 10px
-  );
 }
 
 .upcoming-countdown-badge {
@@ -3009,42 +2980,16 @@ body {
   overflow: hidden;
   position: relative;
   background: #060b11;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.upcoming-bg-blur {
-  position: absolute;
-  inset: -12px;
-  width: calc(100% + 24px);
-  height: calc(100% + 24px);
-  object-fit: cover;
-  filter: blur(14px) brightness(0.35);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.upcoming-main-img {
-  position: relative;
-  z-index: 2;
+.upcoming-img-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   transition: transform 0.3s ease;
   pointer-events: none;
 }
-
-.upcoming-img-wrapper.is-horizontal .upcoming-main-img {
-  object-fit: contain;
-  width: 96%;
-  height: 96%;
-}
-
-.upcoming-card:hover .upcoming-main-img {
-  transform: scale(1.05);
-}
-
 
 .upcoming-card-info {
   flex: 1;
