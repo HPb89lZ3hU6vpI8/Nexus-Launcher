@@ -3012,33 +3012,27 @@ body {
 /* Background blurred fill — che rìa, tạo depth (RevoltG style) */
 .upcoming-img-wrapper .upcoming-img-bg {
   position: absolute;
+  inset: -20%;
+  width: 140%;
+  height: 140%;
+  object-fit: cover;
+  object-position: center;
+  filter: blur(18px) brightness(0.5) saturate(1.15);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Foreground ảnh thật — cover full khung, cân tâm, KHÔNG rìa */
+.upcoming-img-wrapper .upcoming-img-fg {
+  position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
-  filter: blur(18px) brightness(0.5) saturate(1.15);
-  transform: scale(1.18);
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* Foreground ảnh thật — contain, cân tâm, KHÔNG méo */
-.upcoming-img-wrapper .upcoming-img-fg {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
   z-index: 1;
   transition: transform 0.3s ease;
   pointer-events: none;
-}
-
-/* Ảnh landscape (header.jpg, header_alt_assets) → cover, no rìa, crop 2 bên center (art chính) */
-.upcoming-img-wrapper .upcoming-img-fg[src*="header"] {
-  object-fit: cover;
-  object-position: center;
 }
 
 .upcoming-card:hover .upcoming-img-wrapper .upcoming-img-fg {
@@ -5261,33 +5255,27 @@ body {
 /* Background blurred fill — che rìa, tạo depth (RevoltG style) */
 .upcoming-img-wrapper .upcoming-img-bg {
   position: absolute;
+  inset: -20%;
+  width: 140%;
+  height: 140%;
+  object-fit: cover;
+  object-position: center;
+  filter: blur(18px) brightness(0.5) saturate(1.15);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Foreground ảnh thật — cover full khung, cân tâm, KHÔNG rìa */
+.upcoming-img-wrapper .upcoming-img-fg {
+  position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
-  filter: blur(18px) brightness(0.5) saturate(1.15);
-  transform: scale(1.18);
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* Foreground ảnh thật — contain, cân tâm, KHÔNG méo */
-.upcoming-img-wrapper .upcoming-img-fg {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
   z-index: 1;
   transition: transform 0.3s ease;
   pointer-events: none;
-}
-
-/* Ảnh landscape (header.jpg, header_alt_assets) → cover, no rìa, crop 2 bên center (art chính) */
-.upcoming-img-wrapper .upcoming-img-fg[src*="header"] {
-  object-fit: cover;
-  object-position: center;
 }
 
 .upcoming-card:hover .upcoming-img-wrapper .upcoming-img-fg {
