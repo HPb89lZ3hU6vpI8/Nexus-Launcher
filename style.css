@@ -838,18 +838,24 @@ body {
   font-size: 13px;
   font-weight: 800;
   margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s ease;
+}
+.game-title .game-name {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-transform: uppercase;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: color 0.2s ease;
+  flex: 1;
+  min-width: 0;
 }
 .game-title i {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 14px;
+  flex-shrink: 0;
 }
 
 /* HOVER EFFECT: CYAN TITLE */
