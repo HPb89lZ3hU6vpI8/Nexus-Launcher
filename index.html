@@ -9089,7 +9089,7 @@ const UpcomingGameCard = ({ game, onClick }) => {
           className="upcoming-img-fg"
           src={imgSrc}
           alt={game.title}
-          style={isFallback ? { objectFit: 'contain', backgroundColor: '#0f1722' } : {}}
+          style={isFallback ? { objectFit: 'contain', objectPosition: 'center' } : {}}
           onError={handleImageError}
         />
       </div>
