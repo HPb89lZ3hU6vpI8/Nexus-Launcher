@@ -5853,6 +5853,16 @@ function steamThumb(appId, hash) {
   return `${STEAM_STORE_CDN}/${appId}/${hash}.116x65.jpg`;
 }
 
+// Phat hien platform cua game (de filter theo menu trai: mienphi/steam/battle/eaplay/uplay/epic).
+// - Neu game co truong `platform` tuong minh -> dung gia tri do (future-proof cho Battle/EA/Epic).
+// - Nguoc lai derive tu title: Assassin's Creed series -> 'uplay'; con lai -> 'steam'.
+// Logic nay PHAI khop voi icon render o GameCard (regex /Assassin[''']s/i).
+function getGamePlatform(game) {
+  if (game && game.platform) return game.platform;
+  if (game && game.title && /Assassin['’‘]s/i.test(game.title)) return 'uplay';
+  return 'steam';
+}
+
 // Map appId -> screenshot hashes THUC TE tu Steam Store API (cap nhat 2026-07-11)
 const STEAM_MEDIA = {
   "2001760": {
@@ -8113,7 +8123,7 @@ const GameCard = ({ game, onClick }) => {
       <div className="game-info">
         <div className="game-title">
           <span className="game-name">{game.title}</span>
-          {game.title && game.title.includes("Assassin's")
+          {game.title && /Assassin['’‘]s/i.test(game.title)
             ? <span style={{ display: 'inline-flex', alignItems: 'center', color: 'var(--text-muted)', transform: 'scale(0.83)', transformOrigin: 'center', flexShrink: 0 }}><UplaySvg /></span>
             : <i className="fa-brands fa-steam"></i>}
         </div>
@@ -9173,7 +9183,7 @@ const UpcomingSection = ({ onSelectGame }) => {
   );
 };
 
-const MainContent = ({ selectedGame, setSelectedGame }) => {
+const MainContent = ({ selectedGame, setSelectedGame, activeMenuLeft }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [filterType, setFilterType] = React.useState('all');
   const [showFilterDropdown, setShowFilterDropdown] = React.useState(false);
@@ -9193,6 +9203,11 @@ const MainContent = ({ selectedGame, setSelectedGame }) => {
     if (searchQuery && !game.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (filterType === 'viethoa' && !game.viethoa) return false;
     if (filterType === 'denuvo' && !(game.redeem || (game.tags && game.tags.some(t => t.toLowerCase().includes('denuvo'))))) return false;
+    // Platform filter: khi chon menu trai khac 'mienphi' -> chi hien game co platform do.
+    // 'mienphi' = all games (khong filter platform). Battle/EA/Epic chua co game -> list rong.
+    if (activeMenuLeft && activeMenuLeft !== 'mienphi') {
+      if (getGamePlatform(game) !== activeMenuLeft) return false;
+    }
     return true;
   }).sort((a, b) => sortKey(a.title).localeCompare(sortKey(b.title), 'en', { sensitivity: 'base' }));
 
@@ -9252,7 +9267,8 @@ const MainContent = ({ selectedGame, setSelectedGame }) => {
         </div>
       </div>
       
-      <UpcomingSection onSelectGame={setSelectedGame} />
+      {/* SẮP RA MẮT — chỉ hiện ở menu MIỄN PHÍ. Các menu STEAM/BATTLE/EA/UPLAY/EPIC ẩn. */}
+      {activeMenuLeft === 'mienphi' && <UpcomingSection onSelectGame={setSelectedGame} />}
 
       <div className="section-title-bar">
         <div>
@@ -9813,9 +9829,13 @@ const App = () => {
         ) : activeTab === 'integrate' ? (
           <IntegrateContent />
         ) : (
-          (activeMenuLeft === 'mienphi' || activeMenuLeft === 'steam') 
-            ? <MainContent selectedGame={selectedGame} setSelectedGame={setSelectedGame} /> 
-            : <NotSupportedContent platform={activeMenuLeft} />
+          // Tat ca menu trai deu route sang MainContent — MainContent tu filter theo activeMenuLeft.
+          // 'mienphi' = all games + Sắp Ra Mắt; 'steam'/'battle'/'eaplay'/'uplay'/'epic' = chi game platform do.
+          <MainContent
+            selectedGame={selectedGame}
+            setSelectedGame={setSelectedGame}
+            activeMenuLeft={activeMenuLeft}
+          />
         )}
       </div>
     </React.Fragment>
