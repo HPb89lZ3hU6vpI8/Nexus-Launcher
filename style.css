@@ -2828,15 +2828,25 @@ body {
 
 /* SECTION TITLE BAR (PHOTO 1, PHOTO 2 & PHOTO 3 REVOLTG 1:1) */
 .section-title-bar {
-  background: linear-gradient(90deg, #091018 0%, rgba(9, 16, 24, 0.5) 60%, transparent 100%);
+  position: relative;
+  background: #091018;
   border-left: 3.5px solid #00d2ff;
-  border-bottom: 1px solid #1a2838;
   padding: 10px 18px;
   margin: 24px 0 18px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-radius: 2px;
+  border-radius: 2px 4px 4px 2px;
+}
+
+.title-bottom-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #00d2ff 0%, rgba(0, 210, 255, 0.45) 35%, rgba(0, 210, 255, 0) 80%);
+  pointer-events: none;
 }
 
 .section-title-bar .title-text {
@@ -2919,10 +2929,6 @@ body {
   cursor: grab;
 }
 
-.upcoming-track.dragging {
-  cursor: grabbing;
-}
-
 .upcoming-track::-webkit-scrollbar {
   display: none;
   width: 0;
@@ -2935,23 +2941,48 @@ body {
   flex: 0 0 180px;
   height: 285px;
   background: #0d1520;
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 4px;
   overflow: hidden;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.upcoming-card::after {
-  content: "";
+.upcoming-border-overlay {
   position: absolute;
   inset: 0;
   border: 2px solid transparent;
   pointer-events: none;
+  z-index: 30;
   transition: all 0.2s ease;
-  z-index: 20;
+}
+
+.upcoming-card:hover .upcoming-border-overlay {
+  border-color: #00d2ff;
+  box-shadow: inset 0 0 12px rgba(0, 210, 255, 0.5);
+  clip-path: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
+}
+
+.upcoming-card:hover {
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.75);
+  transform: translateY(-2px);
+  clip-path: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
 }
 
 .upcoming-countdown-badge {
@@ -3030,33 +3061,6 @@ body {
   align-items: center;
   gap: 5px;
   text-transform: uppercase;
-}
-
-/* HOVER BEHAVIOR PHOTO 2 REVOLTG 1:1 FULL CYAN BORDER & CUT CORNERS */
-.upcoming-card:hover {
-  box-shadow: 0 0 20px rgba(0, 210, 255, 0.75), inset 0 0 10px rgba(0, 210, 255, 0.2);
-  transform: translateY(-2px);
-  clip-path: polygon(
-    10px 0,
-    100% 0,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
-    0 100%,
-    0 10px
-  );
-}
-
-.upcoming-card:hover::after {
-  border-color: #00d2ff;
-  box-shadow: inset 0 0 12px rgba(0, 210, 255, 0.4);
-  clip-path: polygon(
-    10px 0,
-    100% 0,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
-    0 100%,
-    0 10px
-  );
 }
 
 .upcoming-card:hover .upcoming-countdown-badge {

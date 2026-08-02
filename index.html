@@ -8537,6 +8537,20 @@ const GameDetail = ({ game, onBack }) => {
   );
 };
 
+const UPCOMING_COVER_MAP = {
+  2001760: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80',
+  2584270: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1110910/library_600x900.jpg',
+  3859630: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2131630/library_600x900.jpg',
+  2713000: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1182900/library_600x900.jpg',
+  2075800: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1172380/library_600x900.jpg',
+  3751260: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=600&auto=format&fit=crop&q=80',
+  3219630: 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=600&auto=format&fit=crop&q=80',
+  4115450: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600&auto=format&fit=crop&q=80',
+  2272360: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1361210/library_600x900.jpg',
+  3669870: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/870780/library_600x900.jpg',
+  1636440: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2124490/library_600x900.jpg'
+};
+
 const UPCOMING_GAMES = [
   { id: 'up_2001760', appId: 2001760, title: 'BEAST OF REINCARNATION', days: 2, hours: 9, mins: 45, secs: 60, tags: ['Hành Động', 'Nhập Vai'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-10400', ram: '16 GB', gpu: 'NVIDIA RTX 2050 / GTX 1650', storage: '70 GB' } },
   { id: 'up_3167920', appId: 3167920, title: 'LOW-BUDGET REPAIRS', days: 11, hours: 9, mins: 45, secs: 60, tags: ['Mô Phỏng', 'Hài Hước'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-8400', ram: '16 GB', gpu: 'NVIDIA GTX 1060', storage: '20 GB' } },
@@ -8559,7 +8573,9 @@ const UpcomingGameCard = ({ game, onClick }) => {
   const [seconds, setSeconds] = React.useState(() => {
     return game.days * 86400 + game.hours * 3600 + game.mins * 60 + game.secs;
   });
-  const [imgSrc, setImgSrc] = React.useState(`https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/library_600x900.jpg`);
+  
+  const initialImg = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/library_600x900.jpg`;
+  const [imgSrc, setImgSrc] = React.useState(initialImg);
 
   React.useEffect(() => {
     const timer = setInterval(() => {
@@ -8576,8 +8592,17 @@ const UpcomingGameCard = ({ game, onClick }) => {
   const pad = (n) => String(n).padStart(2, '0');
   const countdownStr = `${pad(d)} ngày ${pad(h)}:${pad(m)}:${pad(s)}`;
 
+  const handleImgError = () => {
+    if (UPCOMING_COVER_MAP[game.appId]) {
+      setImgSrc(UPCOMING_COVER_MAP[game.appId]);
+    } else {
+      setImgSrc(`https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appId}/header.jpg`);
+    }
+  };
+
   return (
-    <div className="upcoming-card" onClick={() => onClick(game)}>
+    <div className="upcoming-card" onClick={onClick}>
+      <div className="upcoming-border-overlay"></div>
       <div className="upcoming-countdown-badge">
         {countdownStr}
       </div>
@@ -8585,13 +8610,7 @@ const UpcomingGameCard = ({ game, onClick }) => {
         <img 
           src={imgSrc} 
           alt={game.title} 
-          onError={() => {
-            if (imgSrc.includes('library_600x900.jpg')) {
-              setImgSrc(`https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appId}/header.jpg`);
-            } else if (imgSrc.includes('header.jpg')) {
-              setImgSrc(`https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appId}/capsule_616x353.jpg`);
-            }
-          }} 
+          onError={handleImgError} 
         />
       </div>
       <div className="upcoming-card-info">
@@ -8609,54 +8628,39 @@ const UpcomingGameCard = ({ game, onClick }) => {
 
 const UpcomingSection = ({ onSelectGame }) => {
   const trackRef = React.useRef(null);
-  const dragState = React.useRef({ down: false, moved: false, startX: 0, scrollLeft: 0, pointerId: null });
-  const [isDragging, setIsDragging] = React.useState(false);
+  const isMouseDown = React.useRef(false);
+  const startX = React.useRef(0);
+  const scrollLeftPos = React.useRef(0);
+  const hasDragged = React.useRef(false);
 
-  const DRAG_THRESHOLD = 6;
-
-  const handlePointerDown = (e) => {
-    if (e.button !== undefined && e.button !== 0) return;
-    const el = trackRef.current;
-    if (!el) return;
-    try { el.setPointerCapture(e.pointerId); } catch (err) {}
-    dragState.current = {
-      down: true,
-      moved: false,
-      startX: e.clientX,
-      scrollLeft: el.scrollLeft,
-      pointerId: e.pointerId,
-    };
+  const handleMouseDown = (e) => {
+    isMouseDown.current = true;
+    hasDragged.current = false;
+    startX.current = e.pageX - trackRef.current.offsetLeft;
+    scrollLeftPos.current = trackRef.current.scrollLeft;
   };
 
-  const handlePointerMove = (e) => {
-    const s = dragState.current;
-    if (!s.down) return;
-    const el = trackRef.current;
-    if (!el) return;
-    const dx = e.clientX - s.startX;
-    if (!s.moved && Math.abs(dx) > DRAG_THRESHOLD) {
-      s.moved = true;
-      setIsDragging(true);
+  const handleMouseMove = (e) => {
+    if (!isMouseDown.current) return;
+    const x = e.pageX - trackRef.current.offsetLeft;
+    const walk = (x - startX.current);
+    if (Math.abs(walk) > 5) {
+      hasDragged.current = true;
     }
-    if (s.moved) {
+    if (hasDragged.current) {
       e.preventDefault();
-      el.scrollLeft = s.scrollLeft - dx;
+      trackRef.current.scrollLeft = scrollLeftPos.current - walk;
     }
   };
 
-  const endDrag = (e) => {
-    const s = dragState.current;
-    if (!s.down) return;
-    const el = trackRef.current;
-    if (el && s.pointerId !== null) {
-      try { el.releasePointerCapture(s.pointerId); } catch (err) {}
+  const handleMouseUpOrLeave = () => {
+    isMouseDown.current = false;
+  };
+
+  const handleCardClick = (game) => {
+    if (!hasDragged.current) {
+      onSelectGame(game);
     }
-    s.down = false;
-    s.pointerId = null;
-    setTimeout(() => {
-      s.moved = false;
-      setIsDragging(false);
-    }, 50);
   };
 
   return (
@@ -8672,22 +8676,18 @@ const UpcomingSection = ({ onSelectGame }) => {
       </div>
 
       <div 
-        className={`upcoming-track ${isDragging ? 'dragging' : ''}`}
+        className="upcoming-track"
         ref={trackRef}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUpOrLeave}
+        onMouseLeave={handleMouseUpOrLeave}
       >
         {UPCOMING_GAMES.map(game => (
           <UpcomingGameCard 
             key={game.id} 
             game={game} 
-            onClick={(g) => {
-              if (!dragState.current.moved) {
-                onSelectGame(g);
-              }
-            }} 
+            onClick={() => handleCardClick(game)} 
           />
         ))}
       </div>
@@ -8781,6 +8781,7 @@ const MainContent = ({ selectedGame, setSelectedGame }) => {
           <span className="title-text">DANH SÁCH TRÒ CHƠI</span>
           <span className="title-count">{filteredGames.length} kết quả</span>
         </div>
+        <div className="title-bottom-line"></div>
       </div>
       
       <div className="game-grid">
