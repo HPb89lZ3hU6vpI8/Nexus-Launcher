@@ -9069,11 +9069,12 @@ const UpcomingGameCard = ({ game, onClick }) => {
         {countdownStr}
       </div>
       <div className="upcoming-img-wrapper">
-        <img className="upcoming-img-bg" src={imgSrc} alt="" aria-hidden="true" />
+        <img className="upcoming-img-bg" src={imgSrc} alt="" aria-hidden="true" onError={(e) => { if(e.target.src.includes('library_600x900')) e.target.src = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/header.jpg`; }} />
         <img
           className="upcoming-img-fg"
           src={imgSrc}
           alt={game.title}
+          onError={(e) => { if(e.target.src.includes('library_600x900')) e.target.src = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/header.jpg`; }}
         />
       </div>
       <div className="upcoming-card-info">
