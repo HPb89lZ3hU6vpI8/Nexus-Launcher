@@ -8537,68 +8537,43 @@ const GameDetail = ({ game, onBack }) => {
   );
 };
 
-const UPCOMING_COVER_MAP = {
-  2001760: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80',
-  2584270: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1110910/library_600x900.jpg',
-  3859630: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2131630/library_600x900.jpg',
-  2713000: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1182900/library_600x900.jpg',
-  2075800: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1172380/library_600x900.jpg',
-  3751260: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=600&auto=format&fit=crop&q=80',
-  3219630: 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=600&auto=format&fit=crop&q=80',
-  4115450: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600&auto=format&fit=crop&q=80',
-  2272360: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1361210/library_600x900.jpg',
-  3669870: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/870780/library_600x900.jpg',
-  1636440: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2124490/library_600x900.jpg'
-};
-
 const UPCOMING_GAMES = [
-  { id: 'up_2001760', appId: 2001760, title: 'BEAST OF REINCARNATION', days: 2, hours: 9, mins: 45, secs: 60, tags: ['Hành Động', 'Nhập Vai'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-10400', ram: '16 GB', gpu: 'NVIDIA RTX 2050 / GTX 1650', storage: '70 GB' } },
-  { id: 'up_3167920', appId: 3167920, title: 'LOW-BUDGET REPAIRS', days: 11, hours: 9, mins: 45, secs: 60, tags: ['Mô Phỏng', 'Hài Hước'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-8400', ram: '16 GB', gpu: 'NVIDIA GTX 1060', storage: '20 GB' } },
-  { id: 'up_2825860', appId: 2825860, title: 'THE SINKING CITY 2', days: 16, hours: 9, mins: 45, secs: 60, tags: ['Kinh Dị', 'Trinh Thám'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-10700K', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '50 GB' } },
-  { id: 'up_2584270', appId: 2584270, title: 'MORTAL SHELL II', days: 18, hours: 9, mins: 45, secs: 60, tags: ['Soulslike', 'Hành Động'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-11400', ram: '16 GB', gpu: 'NVIDIA RTX 2050', storage: '40 GB' } },
-  { id: 'up_2254990', appId: 2254990, title: 'PERMAFROST', days: 19, hours: 9, mins: 45, secs: 60, tags: ['Sinh Tồn', 'Thế Giới Mở'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-9600K', ram: '16 GB', gpu: 'NVIDIA GTX 1660 Ti', storage: '35 GB' } },
-  { id: 'up_3859630', appId: 3859630, title: 'METAL GEAR SOLID VOL.2', days: 25, hours: 9, mins: 45, secs: 60, tags: ['Hành Động', 'Lén Lút'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-9700', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '60 GB' } },
-  { id: 'up_2713000', appId: 2713000, title: 'RESONANCE: A PLAGUE TALE', days: 25, hours: 9, mins: 45, secs: 60, tags: ['Cốt Truyện', 'Phiêu Lưu'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i7-10700', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '55 GB' } },
-  { id: 'up_2075800', appId: 2075800, title: 'STAR WARS ZERO COMPANY™', days: 26, hours: 9, mins: 45, secs: 60, tags: ['Chiến Thuật', 'Bắn Súng'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-11400F', ram: '16 GB', gpu: 'NVIDIA RTX 2050', storage: '65 GB' } },
-  { id: 'up_3751260', appId: 3751260, title: 'THE BLOOD OF DAWNWALKER', days: 32, hours: 9, mins: 45, secs: 60, tags: ['Ma Cà Rồng', 'Nhập Vai'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i7-11700', ram: '16 GB', gpu: 'NVIDIA RTX 3060', storage: '80 GB' } },
-  { id: 'up_2638890', appId: 2638890, title: 'ONIMUSHA: WAY OF THE SWORD', days: 45, hours: 9, mins: 45, secs: 60, tags: ['Samurai', 'Hành Động'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i5-12400', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '50 GB' } },
-  { id: 'up_3219630', appId: 3219630, title: 'HALLOWEEN: THE GAME', days: 60, hours: 9, mins: 45, secs: 60, tags: ['Kinh Dị', 'Săn Đêm'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-10400', ram: '16 GB', gpu: 'NVIDIA GTX 1660', storage: '45 GB' } },
-  { id: 'up_4115450', appId: 4115450, title: 'PHANTOM BLADE ZERO', days: 75, hours: 9, mins: 45, secs: 60, tags: ['Chặt Chém', 'Võ Thuật'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-12700', ram: '16 GB', gpu: 'NVIDIA RTX 3060', storage: '90 GB' } },
-  { id: 'up_2272360', appId: 2272360, title: 'WARHAMMER 40,000: DOW IV', days: 90, hours: 9, mins: 45, secs: 60, tags: ['Chiến Thuật RTS', 'Sci-Fi'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i7-10700K', ram: '16 GB', gpu: 'NVIDIA RTX 2070', storage: '75 GB' } },
-  { id: 'up_3669870', appId: 3669870, title: 'CONTROL RESONANT', days: 105, hours: 9, mins: 45, secs: 60, tags: ['Siêu Năng Lực', 'Bắn Súng'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-11700K', ram: '16 GB', gpu: 'NVIDIA RTX 3060', storage: '70 GB' } },
-  { id: 'up_1636440', appId: 1636440, title: 'SILENT HILL: TOWNFALL', days: 120, hours: 9, mins: 45, secs: 60, tags: ['Bí Ẩn', 'Kinh Dị Tâm Lý'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-10600K', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '50 GB' } }
+  { id: 'up_2001760', appId: 2001760, title: 'BEAST OF REINCARNATION', targetDate: '2026-08-04T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1817070/library_600x900.jpg', tags: ['Hành Động', 'Nhập Vai'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-10400', ram: '16 GB', gpu: 'NVIDIA RTX 2050 / GTX 1650', storage: '70 GB' } },
+  { id: 'up_3167920', appId: 3167920, title: 'LOW-BUDGET REPAIRS', targetDate: '2026-08-13T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3167920/library_600x900.jpg', tags: ['Mô Phỏng', 'Hài Hước'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-8400', ram: '16 GB', gpu: 'NVIDIA GTX 1060', storage: '20 GB' } },
+  { id: 'up_2825860', appId: 2825860, title: 'THE SINKING CITY 2', targetDate: '2026-08-18T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2825860/library_600x900.jpg', tags: ['Kinh Dị', 'Trinh Thám'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-10700K', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '50 GB' } },
+  { id: 'up_2584270', appId: 2584270, title: 'MORTAL SHELL II', targetDate: '2026-08-20T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1110910/library_600x900.jpg', tags: ['Soulslike', 'Hành Động'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-11400', ram: '16 GB', gpu: 'NVIDIA RTX 2050', storage: '40 GB' } },
+  { id: 'up_2254990', appId: 2254990, title: 'PERMAFROST', targetDate: '2026-08-21T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2254990/library_600x900.jpg', tags: ['Sinh Tồn', 'Thế Giới Mở'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-9600K', ram: '16 GB', gpu: 'NVIDIA GTX 1660 Ti', storage: '35 GB' } },
+  { id: 'up_3859630', appId: 3859630, title: 'METAL GEAR SOLID VOL.2', targetDate: '2026-08-27T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2131630/library_600x900.jpg', tags: ['Hành Động', 'Lén Lút'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-9700', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '60 GB' } },
+  { id: 'up_2713000', appId: 2713000, title: 'RESONANCE: A PLAGUE TALE', targetDate: '2026-08-27T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1182900/library_600x900.jpg', tags: ['Cốt Truyện', 'Phiêu Lưu'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i7-10700', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '55 GB' } },
+  { id: 'up_2075800', appId: 2075800, title: 'STAR WARS ZERO COMPANY™', targetDate: '2026-08-27T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1172380/library_600x900.jpg', tags: ['Chiến Thuật', 'Bắn Súng'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-11400F', ram: '16 GB', gpu: 'NVIDIA RTX 2050', storage: '65 GB' } },
+  { id: 'up_3751260', appId: 3751260, title: 'THE BLOOD OF DAWNWALKER', targetDate: '2026-09-03T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2680010/library_600x900.jpg', tags: ['Ma Cà Rồng', 'Nhập Vai'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i7-11700', ram: '16 GB', gpu: 'NVIDIA RTX 3060', storage: '80 GB' } },
+  { id: 'up_2638890', appId: 2638890, title: 'ONIMUSHA: WAY OF THE SWORD', targetDate: '2026-09-04T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2638890/library_600x900.jpg', tags: ['Samurai', 'Hành Động'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i5-12400', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '50 GB' } },
+  { id: 'up_2272360', appId: 2272360, title: 'WARHAMMER 40,000: DOW IV', targetDate: '2026-09-17T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1361210/library_600x900.jpg', tags: ['Chiến Thuật RTS', 'Sci-Fi'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i7-10700K', ram: '16 GB', gpu: 'NVIDIA RTX 2070', storage: '75 GB' } },
+  { id: 'up_1636440', appId: 1636440, title: 'SILENT HILL: TOWNFALL', targetDate: '2026-09-24T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2124490/library_600x900.jpg', tags: ['Bí Ẩn', 'Kinh Dị Tâm Lý'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-10600K', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '50 GB' } },
+  { id: 'up_3219630', appId: 3219630, title: 'HALLOWEEN: THE GAME', targetDate: '2026-10-01T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/582660/library_600x900.jpg', tags: ['Kinh Dị', 'Săn Đêm'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-10400', ram: '16 GB', gpu: 'NVIDIA GTX 1660', storage: '45 GB' } },
+  { id: 'up_4115450', appId: 4115450, title: 'PHANTOM BLADE ZERO', targetDate: '2026-10-29T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1086940/library_600x900.jpg', tags: ['Chặt Chém', 'Võ Thuật'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-12700', ram: '16 GB', gpu: 'NVIDIA RTX 3060', storage: '90 GB' } },
+  { id: 'up_3669870', appId: 3669870, title: 'CONTROL RESONANT', targetDate: '2026-11-15T10:00:00Z', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/870780/library_600x900.jpg', tags: ['Siêu Năng Lực', 'Bắn Súng'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-11700K', ram: '16 GB', gpu: 'NVIDIA RTX 3060', storage: '70 GB' } }
 ];
 
 const UpcomingGameCard = ({ game, onClick }) => {
-  const [seconds, setSeconds] = React.useState(() => {
-    return game.days * 86400 + game.hours * 3600 + game.mins * 60 + game.secs;
-  });
-  
-  const initialImg = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/library_600x900.jpg`;
-  const [imgSrc, setImgSrc] = React.useState(initialImg);
+  const targetTime = React.useMemo(() => new Date(game.targetDate).getTime(), [game.targetDate]);
+  const [now, setNow] = React.useState(() => Date.now());
 
   React.useEffect(() => {
     const timer = setInterval(() => {
-      setSeconds(prev => (prev > 0 ? prev - 1 : 0));
+      setNow(Date.now());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
+  const diff = Math.max(0, Math.floor((targetTime - now) / 1000));
+  const d = Math.floor(diff / 86400);
+  const h = Math.floor((diff % 86400) / 3600);
+  const m = Math.floor((diff % 3600) / 60);
+  const s = diff % 60;
 
   const pad = (n) => String(n).padStart(2, '0');
   const countdownStr = `${pad(d)} ngày ${pad(h)}:${pad(m)}:${pad(s)}`;
-
-  const handleImgError = () => {
-    if (UPCOMING_COVER_MAP[game.appId]) {
-      setImgSrc(UPCOMING_COVER_MAP[game.appId]);
-    } else {
-      setImgSrc(`https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appId}/header.jpg`);
-    }
-  };
 
   return (
     <div className="upcoming-card" onClick={onClick}>
@@ -8608,9 +8583,8 @@ const UpcomingGameCard = ({ game, onClick }) => {
       </div>
       <div className="upcoming-img-wrapper">
         <img 
-          src={imgSrc} 
+          src={game.cover} 
           alt={game.title} 
-          onError={handleImgError} 
         />
       </div>
       <div className="upcoming-card-info">
