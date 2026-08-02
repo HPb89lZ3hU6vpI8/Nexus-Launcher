@@ -7600,12 +7600,15 @@ const GameCard = ({ game, onClick }) => {
         </div>
         <div className="game-meta">
           <div className="meta-icons">
-            <span><i className="ph ph-user"></i></span>
+            <span className="meta-users"><i className="ph-bold ph-users-three"></i></span>
             {game.percent && !game.percent.includes('-') && (
-               <span className="cyan"><i className="ph ph-infinity"></i></span>
+               <span className="meta-online"><i className="ph-bold ph-infinity"></i></span>
             )}
             {game.percent && (
-               <span className={game.percent.includes('-') ? '' : 'cyan'}><i className="ph ph-thumbs-up"></i> {game.percent}</span>
+               <div className="meta-rate-badge">
+                 <i className="fa-solid fa-thumbs-up"></i>
+                 <span>{game.percent}</span>
+               </div>
             )}
           </div>
           {game.viethoa && (
