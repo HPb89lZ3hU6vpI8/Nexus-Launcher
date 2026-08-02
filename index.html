@@ -8470,25 +8470,39 @@ const GameDetail = ({ game, onBack }) => {
 
 const MainContent = ({ selectedGame, setSelectedGame }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [filterType, setFilterType] = React.useState('all');
+  const [showFilterDropdown, setShowFilterDropdown] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleClickOutside = () => setShowFilterDropdown(false);
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
 
   if (selectedGame) {
     return <GameDetail game={selectedGame} onBack={() => setSelectedGame(null)} />;
   }
 
-  // Sort theo title (alphabet, case-insensitive) — nhóm game cùng series gần nhau
-  // (Dead Space, Dead Space 2, Dead Space 3 / Resident Evil 2,3,4,7 / Dragon Ball...).
   const sortKey = (t) => t.toLowerCase().replace(/[™®©]/g, '').trim();
   const filteredGames = GAME_DATA.filter(game => {
     if (searchQuery && !game.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (filterType === 'viethoa' && !game.viethoa) return false;
+    if (filterType === 'denuvo' && !(game.redeem || (game.tags && game.tags.some(t => t.toLowerCase().includes('denuvo'))))) return false;
     return true;
   }).sort((a, b) => sortKey(a.title).localeCompare(sortKey(b.title), 'en', { sensitivity: 'base' }));
 
+  const getFilterLabel = () => {
+    if (filterType === 'viethoa') return 'Game Việt Hoá';
+    if (filterType === 'denuvo') return 'Game Denuvo';
+    return 'LỌC';
+  };
+
   return (
     <div className="content-area">
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+      <div className="search-filter-wrapper">
         <div className="search-filter-container">
           <div className="sf-search">
-            <i className="ph ph-magnifying-glass"></i>
+            <i className="ph-bold ph-magnifying-glass"></i>
             <input 
               type="text" 
               placeholder="Tìm kiếm trò chơi..." 
@@ -8496,6 +8510,39 @@ const MainContent = ({ selectedGame, setSelectedGame }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+          </div>
+          <div className="sf-divider"></div>
+          <div className="sf-filter-dropdown-wrapper">
+            <button 
+              className="sf-filter-btn" 
+              onClick={(e) => { e.stopPropagation(); setShowFilterDropdown(!showFilterDropdown); }}
+            >
+              <i className="ph-bold ph-faders"></i>
+              <span>{getFilterLabel()}</span>
+              <i className={`ph-bold ph-caret-${showFilterDropdown ? 'up' : 'down'}`}></i>
+            </button>
+            {showFilterDropdown && (
+              <div className="sf-filter-menu" onClick={(e) => e.stopPropagation()}>
+                <div 
+                  className={`sf-filter-item ${filterType === 'all' ? 'active' : ''}`}
+                  onClick={() => { setFilterType('all'); setShowFilterDropdown(false); }}
+                >
+                  <i className="ph-bold ph-squares-four"></i> Tất cả
+                </div>
+                <div 
+                  className={`sf-filter-item ${filterType === 'viethoa' ? 'active' : ''}`}
+                  onClick={() => { setFilterType('viethoa'); setShowFilterDropdown(false); }}
+                >
+                  <i className="ph-bold ph-translate"></i> Game Việt Hoá
+                </div>
+                <div 
+                  className={`sf-filter-item ${filterType === 'denuvo' ? 'active' : ''}`}
+                  onClick={() => { setFilterType('denuvo'); setShowFilterDropdown(false); }}
+                >
+                  <i className="ph-bold ph-key"></i> Game Denuvo
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

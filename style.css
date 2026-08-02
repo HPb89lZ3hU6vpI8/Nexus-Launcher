@@ -319,101 +319,166 @@ body {
   transform: scaleX(1);
 }
 
-/* PREMIUM SEARCH SECTION */
+/* STICKY SEARCH & FILTER SECTION (1:1 REVOLTG PHOTO 1, 2, 3) */
+.search-filter-wrapper {
+  position: sticky;
+  top: -24px;
+  z-index: 100;
+  background: var(--bg-dark);
+  padding: 12px 0 16px 0;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 .search-filter-container {
   display: flex;
-  align-items: stretch;
-  border: 1px solid rgba(255, 255, 255, 0.05); /* Subtle border when not focused */
-  border-radius: 24px;
-  overflow: visible;
-  height: 48px;
-  background: rgba(16, 18, 22, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  position: relative;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.03);
-}
-
-.search-filter-container:focus-within {
-  border-color: var(--accent-cyan); /* Crisp cyan border */
-  background: rgba(20, 22, 27, 0.9);
-  box-shadow: 0 8px 25px rgba(0, 216, 230, 0.25), inset 0 0 0 1px var(--accent-cyan);
-  transform: translateY(-2px);
-}
-
-.sf-section {
-  display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 20px;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--text-main);
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  width: 100%;
+  max-width: 620px;
+  height: 44px;
+  background: #09131a;
+  border: 1.5px solid #00d2ff; /* Always glowing cyan border */
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(0, 210, 255, 0.3), inset 0 0 4px rgba(0, 210, 255, 0.15);
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: visible;
 }
 
-.sf-section:hover {
-  background: rgba(255,255,255,0.1);
-  color: var(--accent-cyan);
-}
-
-.sf-divider {
-  width: 1px;
-  height: 20px;
-  background-color: rgba(255,255,255,0.15);
-  margin-top: 12px;
+.search-filter-container:hover,
+.search-filter-container:focus-within {
+  box-shadow: 0 0 18px rgba(0, 210, 255, 0.45), inset 0 0 6px rgba(0, 210, 255, 0.2);
+  border-color: #00e5ff;
 }
 
 .sf-search {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 0 24px;
-  width: 350px;
-  transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  background: inherit;
-  border-radius: 24px;
+  gap: 10px;
+  padding: 0 16px;
+  flex: 1;
+  height: 100%;
 }
 
-.search-filter-container:focus-within .sf-search {
-  width: 480px;
+.sf-search i {
+  font-size: 17px;
+  color: #00d2ff !important; /* Always glowing cyan icon */
+  text-shadow: 0 0 8px rgba(0, 210, 255, 0.6);
+  flex-shrink: 0;
 }
 
 .search-input {
   background: transparent;
   border: none;
   outline: none;
-  color: var(--text-main);
+  color: #ffffff;
   font-size: 14px;
   font-weight: 600;
   width: 100%;
   font-family: inherit;
-  transition: all 0.3s ease;
-}
-
-.search-filter-container i {
-  font-size: 18px;
-  color: var(--text-muted);
-  transition: all 0.4s ease;
-}
-
-.search-filter-container:focus-within i {
-  color: var(--accent-cyan);
-  text-shadow: 0 0 8px var(--accent-cyan);
-  transform: scale(1.1) rotate(5deg);
 }
 
 .sf-search input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.4);
   font-weight: 500;
-  transition: color 0.3s ease;
   letter-spacing: 0.5px;
 }
 
-.search-filter-container:focus-within .sf-search input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+.sf-divider {
+  width: 1px;
+  height: 24px;
+  background-color: rgba(0, 210, 255, 0.35);
+  flex-shrink: 0;
+}
+
+.sf-filter-dropdown-wrapper {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.sf-filter-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+  height: 100%;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.sf-filter-btn:hover {
+  background: rgba(0, 210, 255, 0.12);
+}
+
+.sf-filter-btn i {
+  font-size: 16px;
+  color: #00d2ff !important; /* Always cyan icon */
+  text-shadow: 0 0 6px rgba(0, 210, 255, 0.5);
+}
+
+/* DROPDOWN MENU (PHOTO 3 REVOLTG 1:1) */
+.sf-filter-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 210px;
+  background: #0b151e;
+  border: 1.5px solid #00d2ff;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 12px rgba(0, 210, 255, 0.3);
+  padding: 6px 0;
+  z-index: 200;
+  animation: fadeInDown 0.2s ease-out;
+}
+
+.sf-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  color: #c5d3df;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sf-filter-item i {
+  font-size: 16px;
+  color: #5e798f;
+  transition: color 0.15s ease;
+}
+
+.sf-filter-item:hover {
+  background: rgba(0, 210, 255, 0.12);
+  color: #ffffff;
+}
+
+.sf-filter-item:hover i {
+  color: #00d2ff;
+}
+
+.sf-filter-item.active {
+  color: #00d2ff;
+  font-weight: 800;
+  background: rgba(0, 210, 255, 0.15);
+}
+
+.sf-filter-item.active i {
+  color: #00d2ff;
+  text-shadow: 0 0 6px rgba(0, 210, 255, 0.5);
 }
 
 .topbar-right {
