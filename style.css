@@ -38,77 +38,79 @@ body {
   overflow: hidden;
 }
 
-/* SIDEBAR */
+/* SIDEBAR (REVOLTG 1:1 COMPACT SLEEK) */
 .sidebar {
-  width: 78px;
-  background-color: var(--sidebar-bg);
+  width: 68px;
+  background-color: #0b1016;
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-right: 1px solid var(--border-color);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
   z-index: 100;
+  padding-top: 4px;
 }
 
 .sidebar-logo {
-  padding: 14px 0;
-  border-bottom: 1px solid var(--border-color);
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
+
 .sidebar-logo img {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
 }
 
 .sidebar-item {
-  width: 64px;
-  height: 56px;
-  margin: 4px auto;
+  width: 54px;
+  height: 46px;
+  margin: 2px auto;
   padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #7d93a6;
+  color: #556877;
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 800;
-  font-size: 10px;
+  font-size: 9px;
   position: relative;
-  border-radius: 8px;
-  border: 1px solid #2d3b4e !important; /* Viền xám sáng rõ khi idle */
-  background: #1a2330 !important; /* Khung xám nổi rõ hẳn khi không di chuột */
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  border: 1px solid #1d2632;
+  background: #121820;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.02);
 }
 
 .sidebar-item i,
 .sidebar-item svg {
-  font-size: 20px;
+  font-size: 18px;
   transition: all 0.2s ease;
   margin-bottom: 2px;
-  color: #7d93a6;
+  color: #556877;
 }
 
-/* Hover State - Nền xám sáng hẳn & Viền nổi bật */
+/* Hover State - Nền xám sáng hơn & Viền mờ nhã nhặn */
 .sidebar-item:hover {
-  background: #243144 !important;
-  border-color: #4a5e78 !important;
+  background: #19222c;
+  border-color: #2b3848;
 }
 
 .sidebar-item:hover i,
 .sidebar-item:hover svg,
 .sidebar-item:hover span {
-  color: #ffffff !important;
+  color: #ffffff;
 }
 
 /* Active State (Selected) - Cyan Glowing Chamfer Border */
 .sidebar-item.active-menu-left {
   border: 1px solid transparent !important;
-  background: #111822 !important;
-  box-shadow: 0 0 12px rgba(0, 210, 255, 0.35);
+  background: #0f151c !important;
+  box-shadow: 0 0 10px rgba(0, 210, 255, 0.35);
 }
 
 .sidebar-item.active-menu-left::before {
@@ -204,8 +206,8 @@ body {
 
 .sidebar-item .badge-99 {
   position: absolute;
-  top: -8px;
-  right: -18px;
+  top: -6px;
+  right: -12px;
   background-color: var(--accent-green);
   color: #000;
   font-weight: 900;
