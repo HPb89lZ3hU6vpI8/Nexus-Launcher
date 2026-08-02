@@ -396,7 +396,7 @@ const GAME_DATA = [
       storage: '80 GB available space',
       note: 'SSD required'
     },
-    redeem: true
+    redeem: false
   },
   { 
     id: 5, 
@@ -6995,9 +6995,20 @@ const RevoltPcLogo = () => (
   </svg>
 );
 
+const MoneyBanknoteIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" width="22px" height="22px" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 255, 136, 0.8))', marginBottom: '2px' }}>
+    <rect x="2" y="5" width="20" height="14" rx="3" fill="#00ff88" fillOpacity="0.25" stroke="#00ff88" strokeWidth="2" />
+    <circle cx="12" cy="12" r="3.5" fill="#00ff88" />
+    <circle cx="5.5" cy="8.5" r="1" fill="#00ff88" />
+    <circle cx="18.5" cy="8.5" r="1" fill="#00ff88" />
+    <circle cx="5.5" cy="15.5" r="1" fill="#00ff88" />
+    <circle cx="18.5" cy="15.5" r="1" fill="#00ff88" />
+  </svg>
+);
+
 const Sidebar = ({ activeMenuLeft, setActiveMenuLeft }) => {
   const menuItems = [
-    { id: 'mienphi', icon: <i className="fa-solid fa-money-bill-wave" style={{ color: '#00ff88', fontSize: '22px', filter: 'drop-shadow(0 0 8px rgba(0, 255, 136, 0.8))' }}></i>, label: 'MIỄN PHÍ', isFree: true },
+    { id: 'mienphi', icon: <MoneyBanknoteIcon />, label: 'MIỄN PHÍ', isFree: true },
     { id: 'steam', icon: <i className="fa-brands fa-steam brand-steam"></i>, label: 'STEAM' },
     { id: 'battle', icon: <BattleNetSvg />, label: 'BATTLE' },
     { id: 'eaplay', icon: <EaSvg />, label: 'EA PLAY' },
@@ -8583,6 +8594,146 @@ const MainContent = ({ selectedGame, setSelectedGame }) => {
         <i className="fa-solid fa-comment-dots"></i>
       </div>
     </div>
+const IntegrateContent = () => {
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
+  const cards = [
+    {
+      id: 'cloud',
+      title: 'CLOUD SAVE',
+      badge: 'ĐỒNG BỘ DỮ LIỆU',
+      themeColor: '#f59e0b',
+      features: [
+        'Sync Save Data Game',
+        'Sync Achievements',
+        'Sync Playtime',
+        'Sync Added Steam Games',
+        'Keep Data When Switching Devices',
+        'High Storage Capacity'
+      ],
+      btnText: 'ĐỒNG BỘ NGAY'
+    },
+    {
+      id: 'canhcut',
+      title: 'CÁNH CỤT VIỆT HÓA',
+      badge: 'DỊCH THUẬT CAO CẤP',
+      themeColor: '#06b6d4',
+      features: [
+        'Bản dịch chuẩn Team Cánh Cụt',
+        'Lời thoại sắc thái 18+ chân thực',
+        'Cập nhật tự động patch mới nhất',
+        'Hỗ trợ cài đặt tự động 1-Click',
+        'Tối ưu phông chữ Tiếng Việt'
+      ],
+      btnText: 'KÍCH HOẠT NGAY'
+    },
+    {
+      id: 'thuanviet',
+      title: 'GAME THUẦN VIỆT HÓA',
+      badge: 'VIỆT HÓA TOÀN DIỆN',
+      themeColor: '#10b981',
+      features: [
+        'Game Studio Việt Nam phát hành',
+        'Việt hóa full Giao diện & Lời thoại',
+        'Tương thích mọi phiên bản Windows 10/11',
+        'Hỗ trợ sửa lỗi phông chữ tự động'
+      ],
+      btnText: 'KÍCH HOẠT NGAY'
+    },
+    {
+      id: 'vip',
+      title: 'VIP HARDWARE BOOST',
+      badge: 'TỐI ƯU HIỆU NĂNG',
+      themeColor: '#ec4899',
+      features: [
+        'Tự động tối ưu đồ họa GPU RTX/GTX',
+        'Tăng FPS & Giảm sụt khựng 1% Low',
+        'Quản lý VRAM chống tràn văng Game',
+        'Hỗ trợ bật DLSS / FSR Frame Gen'
+      ],
+      btnText: 'KÍCH HOẠT NGAY'
+    }
+  ];
+
+  const handlePrev = () => {
+    setActiveIndex(prev => (prev > 0 ? prev - 1 : cards.length - 1));
+  };
+
+  const handleNext = () => {
+    setActiveIndex(prev => (prev < cards.length - 1 ? prev + 1 : 0));
+  };
+
+  return (
+    <div className="integrate-container">
+      <div className="bg-shapes">
+        <div className="shape shape-square"></div>
+        <div className="shape shape-triangle"></div>
+        <div className="shape shape-circle"></div>
+        <div className="shape shape-cross"></div>
+      </div>
+
+      <div className="integrate-slider-wrapper">
+        <button className="slider-arrow arrow-left" onClick={handlePrev}>
+          <i className="ph-bold ph-caret-left"></i>
+        </button>
+
+        <div className="integrate-cards-track">
+          {cards.map((card, idx) => {
+            const isCurrent = idx === activeIndex;
+            const offset = idx - activeIndex;
+
+            return (
+              <div 
+                key={card.id} 
+                className={`integrate-card ${isCurrent ? 'active-card' : ''}`}
+                style={{
+                  transform: `translateX(${offset * 310}px) scale(${isCurrent ? 1.05 : 0.88})`,
+                  opacity: Math.abs(offset) > 2 ? 0 : isCurrent ? 1 : 0.6,
+                  zIndex: isCurrent ? 10 : 10 - Math.abs(offset),
+                  borderColor: isCurrent ? card.themeColor : 'rgba(255,255,255,0.08)',
+                  boxShadow: isCurrent ? `0 14px 40px rgba(0,0,0,0.7), 0 0 25px ${card.themeColor}66` : 'none'
+                }}
+                onClick={() => setActiveIndex(idx)}
+              >
+                <div className="card-header" style={{ background: `linear-gradient(135deg, ${card.themeColor}dd, ${card.themeColor}aa)` }}>
+                  <div className="card-title">{card.title}</div>
+                  <div className="card-badge">{card.badge}</div>
+                </div>
+
+                <div className="card-body">
+                  <ul className="feature-list">
+                    {card.features.map((feat, fIdx) => (
+                      <li key={fIdx}>
+                        <i className="ph-bold ph-check-circle" style={{ color: card.themeColor }}></i>
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button className="card-action-btn" style={{ background: isCurrent ? card.themeColor : 'rgba(255,255,255,0.1)' }}>
+                    {card.btnText}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <button className="slider-arrow arrow-right" onClick={handleNext}>
+          <i className="ph-bold ph-caret-right"></i>
+        </button>
+      </div>
+
+      <div className="slider-dots">
+        {cards.map((_, idx) => (
+          <div 
+            key={idx} 
+            className={`dot ${idx === activeIndex ? 'active' : ''}`} 
+            onClick={() => setActiveIndex(idx)}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -8863,6 +9014,8 @@ const App = () => {
           <HomeContent />
         ) : activeTab === 'profile' ? (
           <UserProfileContent currentUser={currentUser} userData={userData} />
+        ) : activeTab === 'integrate' ? (
+          <IntegrateContent />
         ) : (
           (activeMenuLeft === 'mienphi' || activeMenuLeft === 'steam') 
             ? <MainContent selectedGame={selectedGame} setSelectedGame={setSelectedGame} /> 
