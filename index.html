@@ -7006,13 +7006,19 @@ const MoneyBanknoteIcon = () => (
   </svg>
 );
 
+const UplaySvg = () => (
+  <svg viewBox="0 0 100 100" width="24px" height="24px" className="brand-svg brand-uplay" style={{ marginBottom: '2px' }}>
+    <path d="M50 15 C 30 15, 15 30, 15 50 C 15 70, 30 85, 50 85 C 70 85, 85 70, 85 50 C 85 36, 76 24, 63 19 C 48 13, 31 20, 26 34 C 21 47, 28 62, 42 67 C 54 71, 67 65, 70 53 C 73 42, 66 31, 55 29 C 46 27, 37 33, 36 42 C 35 50, 41 57, 49 57 C 55 57, 59 52, 58 47" fill="none" stroke="currentColor" strokeWidth="10" strokeLinecap="round" />
+  </svg>
+);
+
 const Sidebar = ({ activeMenuLeft, setActiveMenuLeft }) => {
   const menuItems = [
     { id: 'mienphi', icon: <MoneyBanknoteIcon />, label: 'MIỄN PHÍ', isFree: true },
     { id: 'steam', icon: <i className="fa-brands fa-steam brand-steam"></i>, label: 'STEAM' },
     { id: 'battle', icon: <BattleNetSvg />, label: 'BATTLE' },
     { id: 'eaplay', icon: <EaSvg />, label: 'EA PLAY' },
-    { id: 'uplay', icon: <i className="fa-brands fa-ubisoft brand-uplay" style={{ fontSize: '20px' }}></i>, label: 'UPLAY' },
+    { id: 'uplay', icon: <UplaySvg />, label: 'UPLAY' },
     { id: 'epic', icon: <EpicSvg />, label: 'EPIC' }
   ];
 
@@ -7654,6 +7660,7 @@ const GameCard = ({ game, onClick }) => {
 const GameDetail = ({ game, onBack }) => {
   const [activeMediaIndex, setActiveMediaIndex] = React.useState(0);
   const [activeRightTab, setActiveRightTab] = React.useState('info');
+  const [isImageModalOpen, setIsImageModalOpen] = React.useState(false);
   
   // Tag + % đánh giá + số lượng đánh giá = CỐ ĐỊNH (từ GAME_DATA, số hôm nay).
   // Hình/video/thumbnail dùng Steam CDN (STEAM_MEDIA) — không liên quan tới đây.
@@ -8227,7 +8234,8 @@ const GameDetail = ({ game, onBack }) => {
                     ref={(el) => mediaRefs.current[index] = el}
                     src={media.src}
                     alt={game.title}
-                    style={{width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, opacity: isActive ? 1 : 0, pointerEvents: isActive ? 'auto' : 'none', zIndex: isActive ? 1 : 0}}
+                    onClick={() => setIsImageModalOpen(true)}
+                    style={{width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, opacity: isActive ? 1 : 0, pointerEvents: isActive ? 'auto' : 'none', zIndex: isActive ? 1 : 0, cursor: 'zoom-in'}}
                   />
                 );
               }
@@ -8493,6 +8501,20 @@ const GameDetail = ({ game, onBack }) => {
 
         </div>
       </div>
+
+      {isImageModalOpen && validMedia[activeMediaIndex] && validMedia[activeMediaIndex].type === 'image' && (
+        <div className="image-zoom-modal-overlay" onClick={() => setIsImageModalOpen(false)}>
+          <div className="image-zoom-modal-card" onClick={(e) => e.stopPropagation()}>
+            <img src={validMedia[activeMediaIndex].src} alt={game.title} className="image-zoom-modal-img" />
+            <div className="image-zoom-modal-info">
+              Image {activeMediaIndex + 1} of {validMedia.length}
+            </div>
+            <button className="image-zoom-modal-close" onClick={() => setIsImageModalOpen(false)}>
+              <i className="ph-bold ph-x"></i>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
