@@ -66,22 +66,22 @@ body {
 .sidebar-item {
   width: 64px;
   height: 56px;
-  margin: 3px auto;
+  margin: 4px auto;
   padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #5c6e7e;
+  color: #7d93a6;
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 800;
   font-size: 10px;
   position: relative;
   border-radius: 8px;
-  border: 1px solid #1f2835;
-  background: #131922;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.03);
+  border: 1px solid #2d3b4e !important; /* Viền xám sáng rõ khi idle */
+  background: #1a2330 !important; /* Khung xám nổi rõ hẳn khi không di chuột */
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06);
 }
 
 .sidebar-item i,
@@ -89,25 +89,25 @@ body {
   font-size: 20px;
   transition: all 0.2s ease;
   margin-bottom: 2px;
-  color: #5c6e7e;
+  color: #7d93a6;
 }
 
-/* Hover State - Nền xám sáng hơn & Viền nổi bật */
+/* Hover State - Nền xám sáng hẳn & Viền nổi bật */
 .sidebar-item:hover {
-  background: #1a222e;
-  border-color: rgba(255, 255, 255, 0.2);
+  background: #243144 !important;
+  border-color: #4a5e78 !important;
 }
 
 .sidebar-item:hover i,
 .sidebar-item:hover svg,
 .sidebar-item:hover span {
-  color: #ffffff;
+  color: #ffffff !important;
 }
 
 /* Active State (Selected) - Cyan Glowing Chamfer Border */
 .sidebar-item.active-menu-left {
-  border: 1px solid transparent;
-  background: #111822;
+  border: 1px solid transparent !important;
+  background: #111822 !important;
   box-shadow: 0 0 12px rgba(0, 210, 255, 0.35);
 }
 
