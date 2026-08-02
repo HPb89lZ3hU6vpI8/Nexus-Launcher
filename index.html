@@ -7012,7 +7012,7 @@ const Sidebar = ({ activeMenuLeft, setActiveMenuLeft }) => {
     { id: 'steam', icon: <i className="fa-brands fa-steam brand-steam"></i>, label: 'STEAM' },
     { id: 'battle', icon: <BattleNetSvg />, label: 'BATTLE' },
     { id: 'eaplay', icon: <EaSvg />, label: 'EA PLAY' },
-    { id: 'xbox', icon: <i className="fa-brands fa-xbox brand-xbox"></i>, label: 'XBOX' },
+    { id: 'uplay', icon: <i className="fa-brands fa-ubisoft brand-uplay" style={{ fontSize: '20px' }}></i>, label: 'UPLAY' },
     { id: 'epic', icon: <EpicSvg />, label: 'EPIC' }
   ];
 
@@ -9041,7 +9041,7 @@ const App = () => {
 
   return (
     <React.Fragment>
-      {(activeTab === 'game' || activeTab === 'integrate') && !selectedGame && <Sidebar activeMenuLeft={activeMenuLeft} setActiveMenuLeft={setActiveMenuLeft} />}
+      {activeTab === 'game' && !selectedGame && <Sidebar activeMenuLeft={activeMenuLeft} setActiveMenuLeft={setActiveMenuLeft} />}
       <div className="main-area">
         <TopBar 
           activeTab={activeTab} 

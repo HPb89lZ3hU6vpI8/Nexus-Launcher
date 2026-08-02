@@ -194,7 +194,7 @@ body {
 /* --- MÀU GỐC THƯƠNG HIỆU (CHỈ HIỂN THỊ KHI HOVER HOẶC ACTIVE) --- */
 .sidebar-item:hover .brand-battle, .sidebar-item.active-menu-left .brand-battle { color: #148eff !important; }
 .sidebar-item:hover .brand-ea, .sidebar-item.active-menu-left .brand-ea { color: #ff4747 !important; }
-.sidebar-item:hover .brand-xbox, .sidebar-item.active-menu-left .brand-xbox { color: #107c10 !important; }
+.sidebar-item:hover .brand-uplay, .sidebar-item.active-menu-left .brand-uplay { color: #00a2ff !important; filter: drop-shadow(0 0 8px rgba(0, 162, 255, 0.8)); }
 .sidebar-item:hover .brand-epic, .sidebar-item.active-menu-left .brand-epic { color: #ffffff !important; }
 .sidebar-item:hover .brand-steam, .sidebar-item.active-menu-left .brand-steam { color: #c5c3c0 !important; }
 .sidebar-item .icon-wrapper {
