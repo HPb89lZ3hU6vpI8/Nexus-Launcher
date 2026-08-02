@@ -2935,26 +2935,25 @@ body {
   height: 0;
 }
 
-/* UPCOMING CARD 1:1 PHOTO 3 REVOLTG WITH CHAMFERED CUT CORNERS AND VECTOR CYAN STROKE */
+/* UPCOMING CARD — KHUNG NGANG LANDSCAPE (như Danh Sách Game), chamfer 16px, giữ bo viền SVG */
 .upcoming-card {
   position: relative;
-  flex: 0 0 180px;
-  width: 180px;
-  min-width: 180px;
-  max-width: 180px;
-  height: 285px;
+  flex: 0 0 290px;
+  width: 290px;
+  min-width: 290px;
+  max-width: 290px;
   background: #0d1520;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   transition: all 0.2s ease;
   clip-path: polygon(
-    10px 0,
+    16px 0,
     100% 0,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
+    100% calc(100% - 16px),
+    calc(100% - 16px) 100%,
     0 100%,
-    0 10px
+    0 16px
   );
   box-sizing: border-box;
 }
@@ -3003,7 +3002,7 @@ body {
 
 .upcoming-img-wrapper {
   width: 100%;
-  height: 215px;
+  aspect-ratio: 460 / 215;
   overflow: hidden;
   position: relative;
   background: #060b11;
@@ -3076,7 +3075,8 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 130px;
+  flex: 1;
+  min-width: 0;
   text-transform: uppercase;
 }
 
@@ -5193,23 +5193,22 @@ body {
   height: 0;
 }
 
-/* UPCOMING CARD 1:1 PHOTO 3 REVOLTG WITH CHAMFERED CUT CORNERS AND VECTOR CYAN STROKE */
+/* UPCOMING CARD — KHUNG NGANG LANDSCAPE (duplicate block, cascade backup) */
 .upcoming-card {
   position: relative;
-  flex: 0 0 180px;
-  height: 285px;
+  flex: 0 0 290px;
   background: #0d1520;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   transition: all 0.2s ease;
   clip-path: polygon(
-    10px 0,
+    16px 0,
     100% 0,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
+    100% calc(100% - 16px),
+    calc(100% - 16px) 100%,
     0 100%,
-    0 10px
+    0 16px
   );
 }
 
@@ -5257,7 +5256,7 @@ body {
 
 .upcoming-img-wrapper {
   width: 100%;
-  height: 215px;
+  aspect-ratio: 460 / 215;
   overflow: hidden;
   position: relative;
   background: #060b11;
