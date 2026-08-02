@@ -9019,7 +9019,7 @@ const GameDetail = ({ game, onBack }) => {
 };
 
 const UPCOMING_GAMES = [
-  { id: 'up_2001760', appId: 2001760, title: 'BEAST OF REINCARNATION', targetDate: '2026-08-04T17:00:00+07:00', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/d068139fe039e26a6a9d9f57ac5d89785b984d33/header.jpg?t=1785194490', tags: ['Hành động', 'Phiêu lưu', 'Nhập vai (RPG)'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-10400', ram: '16 GB', gpu: 'NVIDIA RTX 2050 / GTX 1650', storage: '70 GB' } },
+  { id: 'up_2001760', appId: 2001760, title: 'BEAST OF REINCARNATION', targetDate: '2026-08-04T17:00:00+07:00', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2001760/d068139fe039e26a6a9d9f57ac5d89785b984d33/header.jpg', tags: ['Hành động', 'Phiêu lưu', 'Nhập vai (RPG)'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-10400', ram: '16 GB', gpu: 'NVIDIA RTX 2050 / GTX 1650', storage: '70 GB' } },
   { id: 'up_3167920', appId: 3167920, title: 'LOW-BUDGET REPAIRS', targetDate: '2026-08-14T00:00:00+07:00', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3167920/library_600x900.jpg', tags: ['Indie', 'Mô phỏng'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-8400', ram: '16 GB', gpu: 'NVIDIA GTX 1060', storage: '20 GB' } },
   { id: 'up_2825860', appId: 2825860, title: 'THE SINKING CITY 2', targetDate: '2026-08-18T22:00:00+07:00', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2825860/library_600x900.jpg', tags: ['Hành động', 'Phiêu lưu'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-10700K', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '50 GB' } },
   { id: 'up_2584270', appId: 2584270, title: 'MORTAL SHELL II', targetDate: '2026-08-20T21:00:00+07:00', cover: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2584270/c938ec2ae21d6e5c35b025ddcbdb766684ed87a7/header_alt_assets_1.jpg?t=1785356511', tags: ['Hành động'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-11400', ram: '16 GB', gpu: 'NVIDIA RTX 2050', storage: '40 GB' } },
@@ -9056,7 +9056,7 @@ const UpcomingGameCard = ({ game, onClick }) => {
   const pad = (n) => String(n).padStart(2, '0');
   const countdownStr = `${pad(d)} ngày ${pad(h)}:${pad(m)}:${pad(s)}`;
 
-  const imgSrc = game.cover || game.thumbnail || `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/library_600x900.jpg`;
+  const imgSrc = game.cover || game.thumbnail || `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/header.jpg`;
 
   return (
     <div className="upcoming-card" onClick={onClick}>
