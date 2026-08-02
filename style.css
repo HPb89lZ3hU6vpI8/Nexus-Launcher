@@ -3035,6 +3035,12 @@ body {
   pointer-events: none;
 }
 
+/* Ảnh landscape (header.jpg, header_alt_assets) → cover, no rìa, crop 2 bên center (art chính) */
+.upcoming-img-wrapper .upcoming-img-fg[src*="header"] {
+  object-fit: cover;
+  object-position: center;
+}
+
 .upcoming-card:hover .upcoming-img-wrapper .upcoming-img-fg {
   transform: scale(1.05);
 }
@@ -5276,6 +5282,12 @@ body {
   z-index: 1;
   transition: transform 0.3s ease;
   pointer-events: none;
+}
+
+/* Ảnh landscape (header.jpg, header_alt_assets) → cover, no rìa, crop 2 bên center (art chính) */
+.upcoming-img-wrapper .upcoming-img-fg[src*="header"] {
+  object-fit: cover;
+  object-position: center;
 }
 
 .upcoming-card:hover .upcoming-img-wrapper .upcoming-img-fg {
