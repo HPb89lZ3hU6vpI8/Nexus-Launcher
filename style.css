@@ -3012,26 +3012,36 @@ body {
 /* Background blurred fill — che rìa, tạo depth (RevoltG style) */
 .upcoming-img-wrapper .upcoming-img-bg {
   position: absolute;
-  inset: -20%;
-  width: 140%;
-  height: 140%;
+  inset: -15%;
+  width: 130%;
+  height: 130%;
   object-fit: cover;
   object-position: center;
-  filter: blur(18px) brightness(0.5) saturate(1.15);
+  filter: blur(28px) brightness(0.75) saturate(1.2);
   z-index: 0;
   pointer-events: none;
 }
 
-/* Foreground ảnh thật — cover full khung, cân tâm, KHÔNG rìa */
+/* Foreground ảnh thật — contain, thấy all, cân tâm, KHÔNG méo */
 .upcoming-img-wrapper .upcoming-img-fg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   z-index: 1;
   transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+/* Gradient overlay che viền transition giữa blur bg + sharp fg */
+.upcoming-img-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(6,11,17,0.4) 0%, transparent 25%, transparent 75%, rgba(6,11,17,0.4) 100%);
+  z-index: 0;
   pointer-events: none;
 }
 
@@ -5255,26 +5265,36 @@ body {
 /* Background blurred fill — che rìa, tạo depth (RevoltG style) */
 .upcoming-img-wrapper .upcoming-img-bg {
   position: absolute;
-  inset: -20%;
-  width: 140%;
-  height: 140%;
+  inset: -15%;
+  width: 130%;
+  height: 130%;
   object-fit: cover;
   object-position: center;
-  filter: blur(18px) brightness(0.5) saturate(1.15);
+  filter: blur(28px) brightness(0.75) saturate(1.2);
   z-index: 0;
   pointer-events: none;
 }
 
-/* Foreground ảnh thật — cover full khung, cân tâm, KHÔNG rìa */
+/* Foreground ảnh thật — contain, thấy all, cân tâm, KHÔNG méo */
 .upcoming-img-wrapper .upcoming-img-fg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   z-index: 1;
   transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+/* Gradient overlay che viền transition giữa blur bg + sharp fg */
+.upcoming-img-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(6,11,17,0.4) 0%, transparent 25%, transparent 75%, rgba(6,11,17,0.4) 100%);
+  z-index: 0;
   pointer-events: none;
 }
 
