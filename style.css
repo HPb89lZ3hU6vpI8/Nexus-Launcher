@@ -64,48 +64,51 @@ body {
 }
 
 .sidebar-item {
-  width: 66px;
-  height: 60px;
-  margin: 2px auto;
+  width: 64px;
+  height: 56px;
+  margin: 3px auto;
   padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
+  color: #5c6e7e;
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 800;
-  font-size: 11px;
+  font-size: 10px;
   position: relative;
-  border-radius: 12px;
-  border: 1px solid transparent;
-  background: transparent;
+  border-radius: 8px;
+  border: 1px solid #1f2835;
+  background: #131922;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.03);
 }
 
 .sidebar-item i,
 .sidebar-item svg {
-  font-size: 24px;
+  font-size: 20px;
   transition: all 0.2s ease;
   margin-bottom: 2px;
+  color: #5c6e7e;
 }
 
-/* Hover State - Lớp phủ mờ phẳng (Steam/RevoltG style) */
+/* Hover State - Nền xám sáng hơn & Viền nổi bật */
 .sidebar-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: #1a222e;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .sidebar-item:hover i,
 .sidebar-item:hover svg,
 .sidebar-item:hover span {
-  color: var(--text-main); /* Mặc định hover chữ và icon sáng lên màu trắng */
+  color: #ffffff;
 }
 
-/* Active State (Selected) - Xóa nền mờ, Sáng viền, Chữ trắng, Icon màu */
+/* Active State (Selected) - Cyan Glowing Chamfer Border */
 .sidebar-item.active-menu-left {
   border: 1px solid transparent;
-  background: transparent; /* Select thì không có lớp phủ mờ */
-  box-shadow: -4px 0 12px -4px var(--accent-cyan), inset 4px 0 12px -4px var(--accent-cyan);
+  background: #111822;
+  box-shadow: 0 0 12px rgba(0, 210, 255, 0.35);
 }
 
 .sidebar-item.active-menu-left::before {
@@ -145,7 +148,8 @@ body {
 /* --- TÙY CHỈNH CHO MỤC MIỄN PHÍ --- */
 /* Khi hover Miễn Phí: Nền mờ phẳng, Icon xanh lá, Chữ trắng */
 .sidebar-item.item-free:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: #1a222e;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 .sidebar-item.item-free:hover i,
 .sidebar-item.item-free:hover svg {
