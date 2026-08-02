@@ -9042,12 +9042,53 @@ const UpcomingGameCard = ({ game, onClick }) => {
   const targetTime = React.useMemo(() => new Date(game.targetDate).getTime(), [game.targetDate]);
   const [now, setNow] = React.useState(() => Date.now());
 
+  const initialImg = game.cover || game.thumbnail || `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/library_600x900.jpg`;
+  const [imgSrc, setImgSrc] = React.useState(initialImg);
+  const [isFallback, setIsFallback] = React.useState(false);
+
   React.useEffect(() => {
     const timer = setInterval(() => {
       setNow(Date.now());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const diff = Math.max(0, Math.floor((targetTime - now) / 1000));
+  const d = Math.floor(diff / 86400);
+  const h = Math.floor((diff % 86400) / 3600);
+  const m = Math.floor((diff % 3600) / 60);
+  const s = diff % 60;
+
+  const pad = (n) => String(n).padStart(2, '0');
+  const countdownStr = `${pad(d)} ngày ${pad(h)}:${pad(m)}:${pad(s)}`;
+
+  const handleImageError = () => {
+    if (!isFallback) {
+      setIsFallback(true);
+      setImgSrc(`https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/header.jpg`);
+    }
+  };
+
+  return (
+    <div className="upcoming-card" onClick={onClick}>
+      <svg className="upcoming-border-svg" viewBox="0 0 180 285" preserveAspectRatio="none">
+        <polygon points="10,0 180,0 180,275 170,285 0,285 0,10" />
+      </svg>
+      <div className="upcoming-countdown-badge">
+        {countdownStr}
+      </div>
+      <div className="upcoming-img-wrapper">
+        <img className="upcoming-img-bg" src={imgSrc} alt="" aria-hidden="true" onError={handleImageError} />
+        <img
+          className="upcoming-img-fg"
+          src={imgSrc}
+          alt={game.title}
+          style={isFallback ? { objectFit: 'contain', backgroundColor: '#0f1722' } : {}}
+          onError={handleImageError}
+        />
+      </div>
+      <div className="upcoming-card-info">
+        <div className="upcoming-title-row">
 
   const diff = Math.max(0, Math.floor((targetTime - now) / 1000));
   const d = Math.floor(diff / 86400);
