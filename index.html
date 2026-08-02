@@ -6996,13 +6996,13 @@ const RevoltPcLogo = () => (
 );
 
 const MoneyBanknoteIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" width="22px" height="22px" style={{ filter: 'drop-shadow(0 0 6px rgba(0, 255, 136, 0.8))', marginBottom: '2px' }}>
-    <rect x="2" y="5" width="20" height="14" rx="3" fill="#00ff88" fillOpacity="0.25" stroke="#00ff88" strokeWidth="2" />
-    <circle cx="12" cy="12" r="3.5" fill="#00ff88" />
-    <circle cx="5.5" cy="8.5" r="1" fill="#00ff88" />
-    <circle cx="18.5" cy="8.5" r="1" fill="#00ff88" />
-    <circle cx="5.5" cy="15.5" r="1" fill="#00ff88" />
-    <circle cx="18.5" cy="15.5" r="1" fill="#00ff88" />
+  <svg viewBox="0 0 24 24" fill="none" width="22px" height="22px" className="brand-svg brand-mienphi" style={{ marginBottom: '2px' }}>
+    <rect x="2" y="5" width="20" height="14" rx="3" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="2" />
+    <circle cx="12" cy="12" r="3.5" fill="currentColor" />
+    <circle cx="5.5" cy="8.5" r="1" fill="currentColor" />
+    <circle cx="18.5" cy="8.5" r="1" fill="currentColor" />
+    <circle cx="5.5" cy="15.5" r="1" fill="currentColor" />
+    <circle cx="18.5" cy="15.5" r="1" fill="currentColor" />
   </svg>
 );
 
@@ -8537,6 +8537,101 @@ const GameDetail = ({ game, onBack }) => {
   );
 };
 
+const UPCOMING_GAMES = [
+  { id: 'up_2001760', appId: 2001760, title: 'BEAST OF REINCARNATION', days: 2, hours: 9, mins: 45, secs: 60, tags: ['Hành Động', 'Nhập Vai'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-10400', ram: '16 GB', gpu: 'NVIDIA RTX 2050 / GTX 1650', storage: '70 GB' } },
+  { id: 'up_3167920', appId: 3167920, title: 'LOW-BUDGET REPAIRS', days: 11, hours: 9, mins: 45, secs: 60, tags: ['Mô Phỏng', 'Hài Hước'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-8400', ram: '16 GB', gpu: 'NVIDIA GTX 1060', storage: '20 GB' } },
+  { id: 'up_2825860', appId: 2825860, title: 'THE SINKING CITY 2', days: 16, hours: 9, mins: 45, secs: 60, tags: ['Kinh Dị', 'Trinh Thám'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-10700K', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '50 GB' } },
+  { id: 'up_2584270', appId: 2584270, title: 'MORTAL SHELL II', days: 18, hours: 9, mins: 45, secs: 60, tags: ['Soulslike', 'Hành Động'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-11400', ram: '16 GB', gpu: 'NVIDIA RTX 2050', storage: '40 GB' } },
+  { id: 'up_2254990', appId: 2254990, title: 'PERMAFROST', days: 19, hours: 9, mins: 45, secs: 60, tags: ['Sinh Tồn', 'Thế Giới Mở'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-9600K', ram: '16 GB', gpu: 'NVIDIA GTX 1660 Ti', storage: '35 GB' } },
+  { id: 'up_3859630', appId: 3859630, title: 'METAL GEAR SOLID VOL.2', days: 25, hours: 9, mins: 45, secs: 60, tags: ['Hành Động', 'Lén Lút'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-9700', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '60 GB' } },
+  { id: 'up_2713000', appId: 2713000, title: 'RESONANCE: A PLAGUE TALE', days: 25, hours: 9, mins: 45, secs: 60, tags: ['Cốt Truyện', 'Phiêu Lưu'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i7-10700', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '55 GB' } },
+  { id: 'up_2075800', appId: 2075800, title: 'STAR WARS ZERO COMPANY™', days: 26, hours: 9, mins: 45, secs: 60, tags: ['Chiến Thuật', 'Bắn Súng'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-11400F', ram: '16 GB', gpu: 'NVIDIA RTX 2050', storage: '65 GB' } },
+  { id: 'up_3751260', appId: 3751260, title: 'THE BLOOD OF DAWNWALKER', days: 32, hours: 9, mins: 45, secs: 60, tags: ['Ma Cà Rồng', 'Nhập Vai'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i7-11700', ram: '16 GB', gpu: 'NVIDIA RTX 3060', storage: '80 GB' } },
+  { id: 'up_2638890', appId: 2638890, title: 'ONIMUSHA: WAY OF THE SWORD', days: 45, hours: 9, mins: 45, secs: 60, tags: ['Samurai', 'Hành Động'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i5-12400', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '50 GB' } },
+  { id: 'up_3219630', appId: 3219630, title: 'HALLOWEEN: THE GAME', days: 60, hours: 9, mins: 45, secs: 60, tags: ['Kinh Dị', 'Săn Đêm'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-10400', ram: '16 GB', gpu: 'NVIDIA GTX 1660', storage: '45 GB' } },
+  { id: 'up_4115450', appId: 4115450, title: 'PHANTOM BLADE ZERO', days: 75, hours: 9, mins: 45, secs: 60, tags: ['Chặt Chém', 'Võ Thuật'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-12700', ram: '16 GB', gpu: 'NVIDIA RTX 3060', storage: '90 GB' } },
+  { id: 'up_2272360', appId: 2272360, title: 'WARHAMMER 40,000: DOW IV', days: 90, hours: 9, mins: 45, secs: 60, tags: ['Chiến Thuật RTS', 'Sci-Fi'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i7-10700K', ram: '16 GB', gpu: 'NVIDIA RTX 2070', storage: '75 GB' } },
+  { id: 'up_3669870', appId: 3669870, title: 'CONTROL RESONANT', days: 105, hours: 9, mins: 45, secs: 60, tags: ['Siêu Năng Lực', 'Bắn Súng'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10/11 64-bit', cpu: 'Intel Core i7-11700K', ram: '16 GB', gpu: 'NVIDIA RTX 3060', storage: '70 GB' } },
+  { id: 'up_1636440', appId: 1636440, title: 'SILENT HILL: TOWNFALL', days: 120, hours: 9, mins: 45, secs: 60, tags: ['Bí Ẩn', 'Kinh Dị Tâm Lý'], reviewText: 'Sắp Ra Mắt', reviewCount: 'Chưa Phát Hành', percent: '100%', sysreq: { os: 'Windows 10 64-bit', cpu: 'Intel Core i5-10600K', ram: '16 GB', gpu: 'NVIDIA RTX 2060', storage: '50 GB' } }
+];
+
+const UpcomingGameCard = ({ game, onClick }) => {
+  const [seconds, setSeconds] = React.useState(() => {
+    return game.days * 86400 + game.hours * 3600 + game.mins * 60 + game.secs;
+  });
+  const [imgSrc, setImgSrc] = React.useState(`https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appId}/library_600x900.jpg`);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setSeconds(prev => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+
+  const pad = (n) => String(n).padStart(2, '0');
+  const countdownStr = `${pad(d)} ngày ${pad(h)}:${pad(m)}:${pad(s)}`;
+
+  return (
+    <div className="upcoming-card" onClick={() => onClick(game)}>
+      <div className="upcoming-countdown-badge">
+        {countdownStr}
+      </div>
+      <div className="upcoming-img-wrapper">
+        <img 
+          src={imgSrc} 
+          alt={game.title} 
+          onError={() => setImgSrc(`https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appId}/header.jpg`)} 
+        />
+      </div>
+      <div className="upcoming-card-info">
+        <div className="upcoming-title-row">
+          <span className="upcoming-title">{game.title}</span>
+          <i className="fa-brands fa-steam upcoming-steam-icon"></i>
+        </div>
+        <div className="upcoming-status">
+          <i className="ph-fill ph-rocket"></i> SẮP PHÁT HÀNH
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const UpcomingSection = ({ onSelectGame }) => {
+  const trackRef = React.useRef(null);
+
+  const scrollRight = () => {
+    if (trackRef.current) {
+      trackRef.current.scrollBy({ left: 380, behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div className="upcoming-section">
+      <div className="upcoming-header">
+        <div className="upcoming-header-left">
+          <i className="fa-regular fa-clock upcoming-clock-icon"></i>
+          <span>SẮP RA MẮT</span>
+        </div>
+        <button className="upcoming-scroll-btn" onClick={scrollRight}>
+          KÉO SANG <i className="ph-bold ph-arrow-right"></i>
+        </button>
+      </div>
+
+      <div className="upcoming-track" ref={trackRef}>
+        {UPCOMING_GAMES.map(game => (
+          <UpcomingGameCard key={game.id} game={game} onClick={onSelectGame} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
 const MainContent = ({ selectedGame, setSelectedGame }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [filterType, setFilterType] = React.useState('all');
@@ -8616,8 +8711,13 @@ const MainContent = ({ selectedGame, setSelectedGame }) => {
         </div>
       </div>
       
-      <div className="section-title" style={{marginBottom: '16px'}}>
-        DANH SÁCH TRÒ CHƠI <span style={{fontSize: '14px', color: 'var(--text-muted)', fontWeight: '600', marginLeft: '8px'}}>{filteredGames.length} kết quả</span>
+      <UpcomingSection onSelectGame={setSelectedGame} />
+
+      <div className="section-title-bar">
+        <div>
+          <span className="title-text">DANH SÁCH TRÒ CHƠI</span>
+          <span className="title-count">{filteredGames.length} kết quả</span>
+        </div>
       </div>
       
       <div className="game-grid">

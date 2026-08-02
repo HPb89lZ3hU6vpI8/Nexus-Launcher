@@ -192,6 +192,7 @@ body {
 }
 
 /* --- MÀU GỐC THƯƠNG HIỆU (CHỈ HIỂN THỊ KHI HOVER HOẶC ACTIVE) --- */
+.sidebar-item:hover .brand-mienphi, .sidebar-item.active-menu-left .brand-mienphi { color: #00ff88 !important; filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.85)); }
 .sidebar-item:hover .brand-battle, .sidebar-item.active-menu-left .brand-battle { color: #148eff !important; }
 .sidebar-item:hover .brand-ea, .sidebar-item.active-menu-left .brand-ea { color: #ff4747 !important; }
 .sidebar-item:hover .brand-uplay, .sidebar-item.active-menu-left .brand-uplay { color: #00a2ff !important; filter: drop-shadow(0 0 8px rgba(0, 162, 255, 0.8)); }
@@ -238,8 +239,9 @@ body {
   }
 }
 
-/* Green Money Icon & Glowing Green Text for MIỄN PHÍ */
-.sidebar-item.item-free span {
+/* Green Money Icon & Glowing Green Text for MIỄN PHÍ (ONLY WHEN HOVERED OR ACTIVE) */
+.sidebar-item.item-free:hover span,
+.sidebar-item.item-free.active-menu-left span {
   color: #00ff88 !important;
   font-weight: 900;
   text-shadow: 0 0 8px rgba(0, 255, 136, 0.7);
@@ -2821,4 +2823,238 @@ body {
 .image-zoom-modal-close:hover {
   color: #00d2ff;
   transform: scale(1.2);
+}
+
+
+/* SECTION TITLE BAR (PHOTO 1 & PHOTO 2 REVOLTG 1:1) */
+.section-title-bar {
+  background: #091018;
+  border-left: 3.5px solid #00d2ff;
+  border-bottom: 2px solid #00d2ff;
+  padding: 10px 18px;
+  margin: 24px 0 18px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border-radius: 2px 4px 4px 2px;
+}
+
+.section-title-bar .title-text {
+  font-family: 'Saira', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(0, 210, 255, 0.6);
+}
+
+.section-title-bar .title-count {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+  margin-left: 12px;
+}
+
+/* UPCOMING GAMES SECTION (PHOTO 2 & PHOTO 3 1:1) */
+.upcoming-section {
+  margin-bottom: 24px;
+  background: rgba(9, 15, 23, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.upcoming-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.upcoming-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+  font-family: 'Saira', sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.upcoming-clock-icon {
+  color: #00d2ff;
+  font-size: 18px;
+  animation: clockSpin 12s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(0, 210, 255, 0.8));
+}
+
+@keyframes clockSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.upcoming-scroll-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.upcoming-scroll-btn:hover {
+  color: #00d2ff;
+  transform: translateX(3px);
+}
+
+.upcoming-track {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 6px 4px 14px 4px;
+}
+
+.upcoming-track::-webkit-scrollbar {
+  height: 6px;
+}
+.upcoming-track::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+}
+.upcoming-track::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+.upcoming-track::-webkit-scrollbar-thumb:hover {
+  background: #00d2ff;
+}
+
+/* UPCOMING CARD 1:1 PHOTO 2 & PHOTO 3 */
+.upcoming-card {
+  position: relative;
+  flex: 0 0 180px;
+  height: 285px;
+  background: #0d1520;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.upcoming-countdown-badge {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 28px;
+  background: rgba(10, 16, 24, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: 'Saira', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  transition: opacity 0.2s ease;
+}
+
+.upcoming-img-wrapper {
+  width: 100%;
+  height: 215px;
+  overflow: hidden;
+  position: relative;
+  background: #060b11;
+}
+
+.upcoming-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.upcoming-card-info {
+  flex: 1;
+  padding: 10px 12px;
+  background: #0b121c;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.upcoming-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.upcoming-title {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  font-family: 'Saira', sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
+}
+
+.upcoming-steam-icon {
+  color: #94a3b8;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.upcoming-status {
+  color: #00d2ff;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-transform: uppercase;
+}
+
+/* HOVER BEHAVIOR PHOTO 3 1:1 */
+.upcoming-card:hover {
+  border: 2px solid #00d2ff !important;
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.6), inset 0 0 10px rgba(0, 210, 255, 0.2);
+  transform: translateY(-2px);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
+}
+
+.upcoming-card:hover .upcoming-countdown-badge {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.upcoming-card:hover .upcoming-title {
+  color: #00d2ff !important;
+}
+
+.upcoming-card:hover .upcoming-img-wrapper img {
+  transform: scale(1.05);
 }
