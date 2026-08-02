@@ -7661,6 +7661,20 @@ const GameDetail = ({ game, onBack }) => {
   const [activeMediaIndex, setActiveMediaIndex] = React.useState(0);
   const [activeRightTab, setActiveRightTab] = React.useState('info');
   const [isImageModalOpen, setIsImageModalOpen] = React.useState(false);
+  const [isClosingModal, setIsClosingModal] = React.useState(false);
+
+  const handleOpenModal = () => {
+    setIsClosingModal(false);
+    setIsImageModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsClosingModal(true);
+    setTimeout(() => {
+      setIsImageModalOpen(false);
+      setIsClosingModal(false);
+    }, 220);
+  };
   
   // Tag + % đánh giá + số lượng đánh giá = CỐ ĐỊNH (từ GAME_DATA, số hôm nay).
   // Hình/video/thumbnail dùng Steam CDN (STEAM_MEDIA) — không liên quan tới đây.
@@ -8234,7 +8248,7 @@ const GameDetail = ({ game, onBack }) => {
                     ref={(el) => mediaRefs.current[index] = el}
                     src={media.src}
                     alt={game.title}
-                    onClick={() => setIsImageModalOpen(true)}
+                    onClick={handleOpenModal}
                     style={{width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, opacity: isActive ? 1 : 0, pointerEvents: isActive ? 'auto' : 'none', zIndex: isActive ? 1 : 0, cursor: 'zoom-in'}}
                   />
                 );
@@ -8503,15 +8517,19 @@ const GameDetail = ({ game, onBack }) => {
       </div>
 
       {isImageModalOpen && validMedia[activeMediaIndex] && validMedia[activeMediaIndex].type === 'image' && (
-        <div className="image-zoom-modal-overlay" onClick={() => setIsImageModalOpen(false)}>
+        <div className={`image-zoom-modal-overlay ${isClosingModal ? 'closing' : ''}`} onClick={handleCloseModal}>
           <div className="image-zoom-modal-card" onClick={(e) => e.stopPropagation()}>
-            <img src={validMedia[activeMediaIndex].src} alt={game.title} className="image-zoom-modal-img" />
-            <div className="image-zoom-modal-info">
-              Image {activeMediaIndex + 1} of {validMedia.length}
+            <div className="image-zoom-frame-inner">
+              <img src={validMedia[activeMediaIndex].src} alt={game.title} className="image-zoom-modal-img" />
             </div>
-            <button className="image-zoom-modal-close" onClick={() => setIsImageModalOpen(false)}>
-              <i className="ph-bold ph-x"></i>
-            </button>
+            <div className="image-zoom-modal-bar">
+              <div className="image-zoom-modal-info">
+                Image {activeMediaIndex + 1} of {validMedia.length}
+              </div>
+              <button className="image-zoom-modal-close" onClick={handleCloseModal}>
+                <i className="ph-bold ph-x"></i>
+              </button>
+            </div>
           </div>
         </div>
       )}
