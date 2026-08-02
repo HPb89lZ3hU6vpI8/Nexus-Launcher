@@ -8559,7 +8559,7 @@ const UpcomingGameCard = ({ game, onClick }) => {
   const [seconds, setSeconds] = React.useState(() => {
     return game.days * 86400 + game.hours * 3600 + game.mins * 60 + game.secs;
   });
-  const [imgSrc, setImgSrc] = React.useState(`https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appId}/library_600x900.jpg`);
+  const [imgSrc, setImgSrc] = React.useState(`https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/library_600x900.jpg`);
 
   React.useEffect(() => {
     const timer = setInterval(() => {
@@ -8585,7 +8585,13 @@ const UpcomingGameCard = ({ game, onClick }) => {
         <img 
           src={imgSrc} 
           alt={game.title} 
-          onError={() => setImgSrc(`https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appId}/header.jpg`)} 
+          onError={() => {
+            if (imgSrc.includes('library_600x900.jpg')) {
+              setImgSrc(`https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appId}/header.jpg`);
+            } else if (imgSrc.includes('header.jpg')) {
+              setImgSrc(`https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appId}/capsule_616x353.jpg`);
+            }
+          }} 
         />
       </div>
       <div className="upcoming-card-info">
@@ -8603,11 +8609,54 @@ const UpcomingGameCard = ({ game, onClick }) => {
 
 const UpcomingSection = ({ onSelectGame }) => {
   const trackRef = React.useRef(null);
+  const dragState = React.useRef({ down: false, moved: false, startX: 0, scrollLeft: 0, pointerId: null });
+  const [isDragging, setIsDragging] = React.useState(false);
 
-  const scrollRight = () => {
-    if (trackRef.current) {
-      trackRef.current.scrollBy({ left: 380, behavior: 'smooth' });
+  const DRAG_THRESHOLD = 6;
+
+  const handlePointerDown = (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    const el = trackRef.current;
+    if (!el) return;
+    try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    dragState.current = {
+      down: true,
+      moved: false,
+      startX: e.clientX,
+      scrollLeft: el.scrollLeft,
+      pointerId: e.pointerId,
+    };
+  };
+
+  const handlePointerMove = (e) => {
+    const s = dragState.current;
+    if (!s.down) return;
+    const el = trackRef.current;
+    if (!el) return;
+    const dx = e.clientX - s.startX;
+    if (!s.moved && Math.abs(dx) > DRAG_THRESHOLD) {
+      s.moved = true;
+      setIsDragging(true);
     }
+    if (s.moved) {
+      e.preventDefault();
+      el.scrollLeft = s.scrollLeft - dx;
+    }
+  };
+
+  const endDrag = (e) => {
+    const s = dragState.current;
+    if (!s.down) return;
+    const el = trackRef.current;
+    if (el && s.pointerId !== null) {
+      try { el.releasePointerCapture(s.pointerId); } catch (err) {}
+    }
+    s.down = false;
+    s.pointerId = null;
+    setTimeout(() => {
+      s.moved = false;
+      setIsDragging(false);
+    }, 50);
   };
 
   return (
@@ -8617,20 +8666,34 @@ const UpcomingSection = ({ onSelectGame }) => {
           <i className="fa-regular fa-clock upcoming-clock-icon"></i>
           <span>SẮP RA MẮT</span>
         </div>
-        <button className="upcoming-scroll-btn" onClick={scrollRight}>
+        <span className="upcoming-scroll-hint">
           KÉO SANG <i className="ph-bold ph-arrow-right"></i>
-        </button>
+        </span>
       </div>
 
-      <div className="upcoming-track" ref={trackRef}>
+      <div 
+        className={`upcoming-track ${isDragging ? 'dragging' : ''}`}
+        ref={trackRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+      >
         {UPCOMING_GAMES.map(game => (
-          <UpcomingGameCard key={game.id} game={game} onClick={onSelectGame} />
+          <UpcomingGameCard 
+            key={game.id} 
+            game={game} 
+            onClick={(g) => {
+              if (!dragState.current.moved) {
+                onSelectGame(g);
+              }
+            }} 
+          />
         ))}
       </div>
     </div>
   );
 };
-
 
 const MainContent = ({ selectedGame, setSelectedGame }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
