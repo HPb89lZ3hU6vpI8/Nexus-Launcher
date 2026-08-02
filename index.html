@@ -9067,9 +9067,11 @@ const UpcomingGameCard = ({ game, onClick }) => {
         {countdownStr}
       </div>
       <div className="upcoming-img-wrapper">
-        <img 
-          src={imgSrc} 
-          alt={game.title} 
+        <img className="upcoming-img-bg" src={imgSrc} alt="" aria-hidden="true" />
+        <img
+          className="upcoming-img-fg"
+          src={imgSrc}
+          alt={game.title}
         />
       </div>
       <div className="upcoming-card-info">
