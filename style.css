@@ -2589,12 +2589,23 @@ body {
   justify-content: center;
 }
 
+.integrate-header-title {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  z-index: 5;
+  text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+}
+
 .integrate-card {
   position: absolute;
   width: 300px;
   height: 440px;
   background: #0d151e;
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   overflow: hidden;
   cursor: pointer;
@@ -2602,10 +2613,6 @@ body {
   flex-direction: column;
   transition: all 0.45s cubic-bezier(0.25, 0.8, 0.25, 1);
   backdrop-filter: blur(12px);
-}
-
-.integrate-card:hover {
-  transform: translateY(-4px) scale(1.02) !important;
 }
 
 .integrate-card .card-header {
