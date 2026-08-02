@@ -7017,9 +7017,9 @@ const Sidebar = ({ activeMenuLeft, setActiveMenuLeft }) => {
           className={`sidebar-item ${item.isFree ? 'item-free' : ''} ${activeMenuLeft === item.id ? 'active-menu-left' : ''}`}
           onClick={() => setActiveMenuLeft(item.id)}
         >
+          {item.isFree && <div className="badge-99">99+</div>}
           <div className="icon-wrapper">
             {item.icon}
-            {item.isFree && <div className="badge-99">99+</div>}
           </div>
           <span>{item.label}</span>
         </div>
