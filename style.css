@@ -854,7 +854,7 @@ body {
 }
 .game-title i {
   color: var(--text-muted);
-  font-size: 17px;
+  font-size: 20px;
   flex-shrink: 0;
 }
 
@@ -873,14 +873,14 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
 }
 
 /* 1:1 REVOLTG METRIC ICONS & BADGE */
 .meta-users {
-  color: #38ef7d;
-  font-size: 15px;
+  color: #25c05b;
+  font-size: 13px;
   display: flex;
   align-items: center;
 }
@@ -896,18 +896,18 @@ body {
   display: flex;
   align-items: center;
   gap: 5px;
-  background: rgba(14, 38, 54, 0.6);
-  border: 1px solid rgba(56, 172, 236, 0.4);
+  background: #142533;
+  border: 1px solid #1e4563;
   border-radius: 4px;
   padding: 2px 7px;
-  color: #4facfe;
+  color: #4ca5ff;
   font-size: 11px;
   font-weight: 800;
 }
 
 .meta-rate-badge i {
   font-size: 11px;
-  color: #4facfe;
+  color: #4ca5ff;
 }
 
 .lang-tag-yellow {
