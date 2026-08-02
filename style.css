@@ -3003,9 +3003,25 @@ body {
   overflow: hidden;
   position: relative;
   background: #060b11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.upcoming-img-wrapper img {
+.upcoming-bg-blur {
+  position: absolute;
+  inset: -15px;
+  width: calc(100% + 30px);
+  height: calc(100% + 30px);
+  object-fit: cover;
+  filter: blur(16px) brightness(0.3);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.upcoming-main-img {
+  position: relative;
+  z-index: 2;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -3013,6 +3029,19 @@ body {
   transition: transform 0.3s ease;
   pointer-events: none;
 }
+
+/* Khi anh la banner ngang (nhu header.jpg goc cua ban) */
+.upcoming-img-wrapper.is-horizontal .upcoming-main-img {
+  object-fit: contain;
+  width: 98%;
+  height: auto;
+  max-height: 98%;
+}
+
+.upcoming-card:hover .upcoming-main-img {
+  transform: scale(1.04);
+}
+
 
 .upcoming-card-info {
   flex: 1;
