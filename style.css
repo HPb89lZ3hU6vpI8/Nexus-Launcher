@@ -823,9 +823,13 @@ body {
 }
 
 .tab-content-transition {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
   animation: tabContentEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: opacity, transform, filter;
-  width: 100%;
 }
 
 @keyframes menuContentEnter {
@@ -2249,11 +2253,7 @@ body {
 }
 
 /* ========================================================
-/* VERTICAL RESPONSIVE: DA BO — fixed px design + transform scale (JS) lo dong deu moi do phan giai.
-   @media max-height cu fire theo real viewport gay lech ti le (video to, font be) -> xoa. */
-
-/* ========================================================
-   GATE SCREEN (check token tu webview 5.py)
+   VERTICAL RESPONSIVE: DA BO — fixed px design + transform scale (JS) lo dong deu moi do phan giai.
    ======================================================== */
 .gate-screen {
   position: fixed;
@@ -4571,11 +4571,7 @@ body {
 }
 
 /* ========================================================
-/* VERTICAL RESPONSIVE: DA BO — fixed px design + transform scale (JS) lo dong deu moi do phan giai.
-   @media max-height cu fire theo real viewport gay lech ti le (video to, font be) -> xoa. */
-
-/* ========================================================
-   GATE SCREEN (check token tu webview 5.py)
+   VERTICAL RESPONSIVE: DA BO — fixed px design + transform scale (JS) lo dong deu moi do phan giai.
    ======================================================== */
 .gate-screen {
   position: fixed;

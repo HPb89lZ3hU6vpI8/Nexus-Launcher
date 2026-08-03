@@ -9870,17 +9870,25 @@ const App = () => {
           userData={userData}
         />
         {activeTab === 'home' ? (
-          <HomeContent />
+          <div key="home" className="tab-content-transition">
+            <HomeContent />
+          </div>
         ) : activeTab === 'profile' ? (
-          <UserProfileContent currentUser={currentUser} userData={userData} />
+          <div key="profile" className="tab-content-transition">
+            <UserProfileContent currentUser={currentUser} userData={userData} />
+          </div>
         ) : activeTab === 'integrate' ? (
-          <IntegrateContent />
+          <div key="integrate" className="tab-content-transition">
+            <IntegrateContent />
+          </div>
         ) : (
-          <MainContent
-            selectedGame={selectedGame}
-            setSelectedGame={setSelectedGame}
-            activeMenuLeft={activeMenuLeft}
-          />
+          <div key="game" className="tab-content-transition">
+            <MainContent
+              selectedGame={selectedGame}
+              setSelectedGame={setSelectedGame}
+              activeMenuLeft={activeMenuLeft}
+            />
+          </div>
         )}
       </div>
     </React.Fragment>
