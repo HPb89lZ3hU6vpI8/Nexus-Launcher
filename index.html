@@ -9497,8 +9497,8 @@ const IntegrateContent = () => {
                 key={card.id} 
                 className={`integrate-card ${isCurrent ? 'active-card' : ''}`}
                 style={{
-                  transform: `translateX(${offset * 370}px) scale(${isCurrent ? 1.04 : 0.84})`,
-                  opacity: Math.abs(offset) > 2 ? 0 : isCurrent ? 1 : 0.5,
+                  transform: `translateX(${offset * 335}px) scale(${isCurrent ? 1.04 : 0.86})`,
+                  opacity: Math.abs(offset) > 2 ? 0 : isCurrent ? 1 : 0.55,
                   zIndex: isCurrent ? 10 : 10 - Math.abs(offset),
                   borderColor: isCurrent ? card.borderColor : 'rgba(255,255,255,0.06)',
                   boxShadow: isCurrent ? `0 14px 40px rgba(0,0,0,0.8), 0 0 25px ${card.borderColor}55` : 'none'
