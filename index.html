@@ -8345,8 +8345,7 @@ const GameDetail = ({ game, onBack }) => {
           return;
         }
       }
-      // 3. Write registry (AppTicket + ETicket) — chỉ cho game có redeem (Denuvo).
-      //    Chen TRUOC share_game. Non-redeem game -> skip (method trả skipped:true).
+      if (game.redeem === true) {
         // 3. Disable Windows Update cho game Denuvo redeem (neu dang bat)
         setAccessState('disabling_wu');
         const rw = await api.disable_windows_update();
