@@ -9284,10 +9284,16 @@ const MainContent = ({ selectedGame, setSelectedGame, activeMenuLeft }) => {
           {filteredGames.length > 0 ? filteredGames.map(game => (
             <GameCard key={game.id} game={game} onClick={setSelectedGame} />
           )) : (
-            <div style={{color: 'var(--text-muted)', padding: '40px', textAlign: 'center', width: '100%', gridColumn: '1 / -1'}}>
-              {activeMenuLeft === 'mienphi'
-                ? 'Không tìm thấy trò chơi nào phù hợp.'
-                : 'Chưa hỗ trợ game.'}
+            <div className="empty-games-placeholder">
+              <div className="empty-icon-glow">
+                <i className="ph-bold ph-game-controller"></i>
+              </div>
+              <div className="empty-title">CHƯA CÓ TRÒ CHƠI NÀO</div>
+              <div className="empty-subtitle">
+                {activeMenuLeft === 'mienphi'
+                  ? 'Không tìm thấy trò chơi nào phù hợp với bộ lọc.'
+                  : 'Nền tảng này đang được cập nhật thêm game. Vui lòng quay lại sau!'}
+              </div>
             </div>
           )}
         </div>
@@ -9864,19 +9870,25 @@ const App = () => {
           userData={userData}
         />
         {activeTab === 'home' ? (
-          <HomeContent />
+          <div key="home" className="tab-content-transition">
+            <HomeContent />
+          </div>
         ) : activeTab === 'profile' ? (
-          <UserProfileContent currentUser={currentUser} userData={userData} />
+          <div key="profile" className="tab-content-transition">
+            <UserProfileContent currentUser={currentUser} userData={userData} />
+          </div>
         ) : activeTab === 'integrate' ? (
-          <IntegrateContent />
+          <div key="integrate" className="tab-content-transition">
+            <IntegrateContent />
+          </div>
         ) : (
-          // Tat ca menu trai deu route sang MainContent — MainContent tu filter theo activeMenuLeft.
-          // 'mienphi' = all games + Sắp Ra Mắt; 'steam'/'battle'/'eaplay'/'uplay'/'epic' = chi game platform do.
-          <MainContent
-            selectedGame={selectedGame}
-            setSelectedGame={setSelectedGame}
-            activeMenuLeft={activeMenuLeft}
-          />
+          <div key="game" className="tab-content-transition">
+            <MainContent
+              selectedGame={selectedGame}
+              setSelectedGame={setSelectedGame}
+              activeMenuLeft={activeMenuLeft}
+            />
+          </div>
         )}
       </div>
     </React.Fragment>

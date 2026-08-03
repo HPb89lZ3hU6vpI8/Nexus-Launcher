@@ -805,57 +805,254 @@ body {
    Layered: container fade+rise → section-title slide-down → cards staggered wave.
    Easing cubic-bezier(0.22,1,0.36,1) = easeOutQuint (decel mượt, pro dashboard feel). */
 
-@keyframes menuContentEnter {
-  from { opacity: 0; transform: translateY(14px) scale(0.992); }
-  to   { opacity: 1; transform: translateY(0)    scale(1);     }
+/* ==========================================================================
+   MASTER ANIMATION SUITE 2.0 (COMMERCIAL-GRADE 60FPS FOR ALL TABS)
+   ========================================================================== */
+
+@keyframes tabContentEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
 }
+
+.tab-content-transition {
+  animation: tabContentEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform, filter;
+  width: 100%;
+}
+
+@keyframes menuContentEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
 @keyframes menuTitleEnter {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0);    }
+  0% { opacity: 0; transform: translateY(-8px); filter: blur(4px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes cardStaggerPop {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.91);
+    filter: blur(4px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.012);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes bentoCellPop {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.93);
+    filter: blur(6px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.01);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes radarPulse {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+@keyframes avatarGlowBreath {
+  0% { box-shadow: 0 0 15px rgba(0, 210, 255, 0.25); }
+  50% { box-shadow: 0 0 30px rgba(0, 210, 255, 0.55); }
+  100% { box-shadow: 0 0 15px rgba(0, 210, 255, 0.25); }
+}
+
+@keyframes emptyStatePulse {
+  0% { transform: scale(0.96); opacity: 0.7; }
+  50% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(0.96); opacity: 0.7; }
+}
+
+@keyframes floatShapeCross {
+  0%, 100% { transform: translateY(0) rotate(15deg); }
+  50% { transform: translateY(-12px) rotate(35deg); }
+}
+
+@keyframes floatShapeTriangle {
+  0%, 100% { transform: translateY(0) rotate(-30deg) scale(1); }
+  50% { transform: translateY(-15px) rotate(-15deg) scale(1.08); }
+}
+
+@keyframes floatShapeSquare {
+  0%, 100% { transform: translateY(0) rotate(45deg); }
+  50% { transform: translateY(-10px) rotate(60deg); }
+}
+
+@keyframes floatShapeCircle {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.35; }
+  50% { transform: translateY(-14px) scale(1.15); opacity: 0.65; }
+}
+
+@keyframes activeCardPulse {
+  0% { box-shadow: 0 14px 40px rgba(0,0,0,0.8), 0 0 20px rgba(244,63,94,0.35); }
+  50% { box-shadow: 0 18px 50px rgba(0,0,0,0.9), 0 0 35px rgba(244,63,94,0.65); }
+  100% { box-shadow: 0 14px 40px rgba(0,0,0,0.8), 0 0 20px rgba(244,63,94,0.35); }
 }
 
 .menu-content-transition {
-  animation: menuContentEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  will-change: opacity, transform;
-  backface-visibility: hidden;            /* tránh flicker khi scale */
+  animation: menuContentEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform, filter;
+  backface-visibility: hidden;
 }
 
-/* Section title "ĐĂNG RA MẮT/DANH SÁCH TRÒ CHƠI" — slide-down + fade, trễ 80ms
-   để container fade trước rồi title mới "kết xuất" (rõ tầng lớp). */
 .menu-content-transition .section-title-bar {
-  animation: menuTitleEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: 0.08s;
+  animation: menuTitleEnter 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.04s;
 }
 
-/* UpcomingSection (chỉ MIỄN PHÍ) — fade+rise riêng, khớp container. */
 .menu-content-transition .upcoming-section {
-  animation: menuContentEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: menuContentEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Game cards — staggered WAVE (cards đầu vào nhanh, sau trễ dần, cap 0.55s).
-   Selector specificity (3 lớp) override staggered cũ (2 lớp ở L863-871). */
 .menu-content-transition .game-grid .game-card {
-  animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cardStaggerPop 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.menu-content-transition .game-grid .game-card:nth-child(1)     { animation-delay: 0.10s; }
-.menu-content-transition .game-grid .game-card:nth-child(2)     { animation-delay: 0.14s; }
-.menu-content-transition .game-grid .game-card:nth-child(3)     { animation-delay: 0.18s; }
-.menu-content-transition .game-grid .game-card:nth-child(4)     { animation-delay: 0.22s; }
-.menu-content-transition .game-grid .game-card:nth-child(5)     { animation-delay: 0.26s; }
-.menu-content-transition .game-grid .game-card:nth-child(6)     { animation-delay: 0.30s; }
-.menu-content-transition .game-grid .game-card:nth-child(7)     { animation-delay: 0.34s; }
-.menu-content-transition .game-grid .game-card:nth-child(8)     { animation-delay: 0.38s; }
-.menu-content-transition .game-grid .game-card:nth-child(n+9)   { animation-delay: 0.42s; }
-.menu-content-transition .game-grid .game-card:nth-child(n+17)  { animation-delay: 0.46s; }
-.menu-content-transition .game-grid .game-card:nth-child(n+25)  { animation-delay: 0.50s; }
-.menu-content-transition .game-grid .game-card:nth-child(n+33)  { animation-delay: 0.55s; }
+.menu-content-transition .game-grid .game-card:nth-child(1)     { animation-delay: 0.03s; }
+.menu-content-transition .game-grid .game-card:nth-child(2)     { animation-delay: 0.06s; }
+.menu-content-transition .game-grid .game-card:nth-child(3)     { animation-delay: 0.09s; }
+.menu-content-transition .game-grid .game-card:nth-child(4)     { animation-delay: 0.12s; }
+.menu-content-transition .game-grid .game-card:nth-child(5)     { animation-delay: 0.15s; }
+.menu-content-transition .game-grid .game-card:nth-child(6)     { animation-delay: 0.18s; }
+.menu-content-transition .game-grid .game-card:nth-child(7)     { animation-delay: 0.21s; }
+.menu-content-transition .game-grid .game-card:nth-child(8)     { animation-delay: 0.24s; }
+.menu-content-transition .game-grid .game-card:nth-child(n+9)   { animation-delay: 0.27s; }
+.menu-content-transition .game-grid .game-card:nth-child(n+17)  { animation-delay: 0.30s; }
+
+/* Bento Grid Animations */
+.bento-grid .bento-cell {
+  animation: bentoCellPop 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease !important;
+}
+
+.bento-grid .bento-cell:nth-child(1) { animation-delay: 0.04s; }
+.bento-grid .bento-cell:nth-child(2) { animation-delay: 0.08s; }
+.bento-grid .bento-cell:nth-child(3) { animation-delay: 0.12s; }
+.bento-grid .bento-cell:nth-child(4) { animation-delay: 0.16s; }
+.bento-grid .bento-cell:nth-child(5) { animation-delay: 0.20s; }
+.bento-grid .bento-cell:nth-child(6) { animation-delay: 0.24s; }
+
+.bento-grid .bento-cell:hover {
+  transform: translateY(-4px) scale(1.012) !important;
+  border-color: rgba(0, 210, 255, 0.35) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 210, 255, 0.12) !important;
+}
+
+.bento-status .status-dot {
+  animation: radarPulse 2s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
+}
+
+.avatar-ring {
+  animation: avatarGlowBreath 3.5s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+
+.avatar-ring:hover {
+  transform: scale(1.06) rotate(3deg);
+}
+
+/* Background floating shapes */
+.bg-shape-item:nth-child(4n+1) { animation: floatShapeCross 5s ease-in-out infinite; }
+.bg-shape-item:nth-child(4n+2) { animation: floatShapeTriangle 6s ease-in-out infinite; }
+.bg-shape-item:nth-child(4n+3) { animation: floatShapeSquare 7s ease-in-out infinite; }
+.bg-shape-item:nth-child(4n+4) { animation: floatShapeCircle 5.5s ease-in-out infinite; }
+
+.integrate-card.active-card {
+  animation: activeCardPulse 4s ease-in-out infinite;
+}
+
+/* Empty Games Placeholder */
+.empty-games-placeholder {
+  grid-column: 1 / -1;
+  width: 100%;
+  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: rgba(13, 21, 30, 0.4);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(8px);
+  animation: menuContentEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.empty-icon-glow {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(0, 210, 255, 0.08);
+  border: 1px solid rgba(0, 210, 255, 0.25);
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-cyan);
+  font-size: 32px;
+  margin-bottom: 16px;
+  animation: emptyStatePulse 3s ease-in-out infinite;
+}
+
+.empty-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.empty-subtitle {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  max-width: 420px;
+  line-height: 1.4;
+}
 
 /* Accessibility: tôn trọng prefer-reduced-motion — tắt animation khi user yêu cầu. */
 @media (prefers-reduced-motion: reduce) {
   .menu-content-transition,
   .menu-content-transition .section-title-bar,
   .menu-content-transition .upcoming-section,
-  .menu-content-transition .game-grid .game-card {
+  .menu-content-transition .game-grid .game-card,
+  .empty-games-placeholder {
     animation: none !important;
   }
 }
