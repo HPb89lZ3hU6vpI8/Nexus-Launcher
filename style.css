@@ -844,41 +844,35 @@ body {
 @keyframes menuContentEnter {
   0% {
     opacity: 0;
-    transform: translateX(28px) scale(0.96);
-    filter: blur(8px);
+    transform: translateX(20px) scale(0.98);
   }
   70% {
     opacity: 1;
-    transform: translateX(-3px) scale(1.005);
-    filter: blur(1px);
+    transform: translateX(-2px) scale(1.002);
   }
   100% {
     opacity: 1;
     transform: translateX(0) scale(1);
-    filter: blur(0);
   }
 }
 
 @keyframes menuTitleEnter {
-  0% { opacity: 0; transform: translateY(-12px); filter: blur(4px); }
-  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+  0% { opacity: 0; transform: translateY(-8px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes cardStaggerPop {
   0% {
     opacity: 0;
-    transform: translateY(34px) rotateX(14deg) scale(0.86);
-    filter: blur(6px);
+    transform: translateY(20px) scale(0.94);
   }
   70% {
     opacity: 1;
-    transform: translateY(-4px) rotateX(0deg) scale(1.025);
-    filter: blur(0);
+    transform: translateY(-2px) scale(1.01);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) rotateX(0deg) scale(1);
-    filter: blur(0);
+    transform: translateY(0) scale(1);
   }
 }
 
