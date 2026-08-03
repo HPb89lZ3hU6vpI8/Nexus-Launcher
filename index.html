@@ -9269,7 +9269,7 @@ const MainContent = ({ selectedGame, setSelectedGame, activeMenuLeft }) => {
       
       {/* SẮP RA MẮT — chỉ hiện ở menu MIỄN PHÍ. Các menu STEAM/BATTLE/EA/UPLAY/EPIC ẩn. */}
       {/* key={activeMenuLeft} → force remount khi đổi menu trái → animation entry re-trigger (cards staggered). */}
-      <div key={activeMenuLeft} className="menu-content-transition">
+      <div key={`${activeMenuLeft}_${filterType}`} className="menu-content-transition">
         {activeMenuLeft === 'mienphi' && <UpcomingSection onSelectGame={setSelectedGame} />}
 
         <div className="section-title-bar">
@@ -9870,25 +9870,17 @@ const App = () => {
           userData={userData}
         />
         {activeTab === 'home' ? (
-          <div key="home" className="tab-content-transition">
-            <HomeContent />
-          </div>
+          <HomeContent />
         ) : activeTab === 'profile' ? (
-          <div key="profile" className="tab-content-transition">
-            <UserProfileContent currentUser={currentUser} userData={userData} />
-          </div>
+          <UserProfileContent currentUser={currentUser} userData={userData} />
         ) : activeTab === 'integrate' ? (
-          <div key="integrate" className="tab-content-transition">
-            <IntegrateContent />
-          </div>
+          <IntegrateContent />
         ) : (
-          <div key="game" className="tab-content-transition">
-            <MainContent
-              selectedGame={selectedGame}
-              setSelectedGame={setSelectedGame}
-              activeMenuLeft={activeMenuLeft}
-            />
-          </div>
+          <MainContent
+            selectedGame={selectedGame}
+            setSelectedGame={setSelectedGame}
+            activeMenuLeft={activeMenuLeft}
+          />
         )}
       </div>
     </React.Fragment>
