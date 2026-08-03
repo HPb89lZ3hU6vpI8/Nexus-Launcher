@@ -9323,7 +9323,7 @@ const IntegrateContent = () => {
     try { api = window.pywebview && window.pywebview.api; } catch (e) {}
     
     setEasyInstallState('activating');
-    setEasyInstallNote('Đang kiểm tra & kích hoạt AppID...');
+    setEasyInstallNote('');
 
     if (!api || !api.activate_easy_install_game) {
       // Dev mode / web browser fallback
