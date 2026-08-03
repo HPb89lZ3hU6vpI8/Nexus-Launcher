@@ -8347,25 +8347,13 @@ const GameDetail = ({ game, onBack }) => {
       }
       // 3. Write registry (AppTicket + ETicket) — chỉ cho game có redeem (Denuvo).
       //    Chen TRUOC share_game. Non-redeem game -> skip (method trả skipped:true).
-      if (game.redeem === true) {
-        // 3a. Check + disable Windows Update (only 22 game Denuvo redeem).
-        //     Fail (UAC declined / loi) -> warning, KHONG return — continue flow.
+        // 3. Disable Windows Update cho game Denuvo redeem (neu dang bat)
         setAccessState('disabling_wu');
         const rw = await api.disable_windows_update();
         if (rw && rw.warning) {
           setAccessNote(rw.warning);  // warning, flow continues
         } else if (rw && rw.disabled) {
           setAccessNote('Đã Tắt Windows Update Hoàn Tất');
-        }
-        // skipped -> silent (WU đã off từ trước).
-
-        // 3b. Write registry (AppTicket + ETicket) cho game Denuvo.
-        setAccessState('writing_registry');
-        const rt = await api.write_registry_tickets(String(game.appId));
-        if (!rt || !rt.success) {
-          setAccessState('idle');
-          setAccessNote((rt && rt.error) ? ('Lỗi ghi registry: ' + rt.error) : 'Lỗi ghi registry không xác định');
-          return;
         }
       }
       // 4. Share game.
@@ -9298,10 +9286,6 @@ const MainContent = ({ selectedGame, setSelectedGame, activeMenuLeft }) => {
           )}
         </div>
       </div>
-      
-      <div className="chat-btn">
-        <i className="fa-solid fa-comment-dots"></i>
-      </div>
     </div>
   );
 };
@@ -9433,13 +9417,13 @@ const IntegrateContent = () => {
         'Dung lượng Cloud lưu trữ không giới hạn',
         'Hệ thống tự động Backup an toàn'
       ],
-      infoBoxHeader: 'THÔNG SỐ ĐỒNG BỘ',
+      infoBoxHeader: 'HỆ THỐNG CLOUD',
       infoItems: [
-        'Mã hóa: AES-256 Encrypted',
-        'Máy chủ: Google Cloud Storage',
-        'Auto-Sync khi thoát game'
+        'Máy chủ: Lưu trữ trên Máy Chủ Riêng Miễn Phí',
+        'Tự động Sync: Fix lỗi Steam Cloud mượt mà',
+        'Bảo mật: An toàn Dữ liệu Tuyệt đối'
       ],
-      note: 'Dữ liệu Save luôn được bảo vệ an toàn trên Cloud',
+      note: 'Dữ liệu được bảo mật an toàn tuyệt đối – Hỗ trợ dành riêng cho các trò chơi Steam tại Nexus Launcher',
       btnText: 'KÍCH HOẠT NGAY'
     },
     {
@@ -9457,11 +9441,11 @@ const IntegrateContent = () => {
       ],
       infoBoxHeader: 'THÔNG TIN BẢN DỊCH',
       infoItems: [
-        'Phiên bản: Patch 2.4 Latest',
-        'Nhóm dịch: Cánh Cụt Team Studio',
+        'Phiên bản: Patch Việt Hóa Mới Nhất',
+        'Nhóm dịch: Cánh Cụt Team',
         'Hỗ trợ: PC Win 10/11 & Steam Deck'
       ],
-      note: 'Bản dịch độc quyền cho thành viên Nexus',
+      note: 'Bản dịch độc quyền được thực hiện bởi Cánh Cụt Team',
       btnText: 'KÍCH HOẠT NGAY'
     },
     {
@@ -9477,13 +9461,13 @@ const IntegrateContent = () => {
         'Tương thích 100% Windows 10/11 mới nhất',
         'Tối ưu hóa UI/HUD tiếng Việt chuẩn'
       ],
-      infoBoxHeader: 'HỆ THỐNG CÀI ĐẶT',
+      infoBoxHeader: 'ĐẶC TÍNH BẢN DỊCH',
       infoItems: [
-        'Thuật toán: Auto-Detect Game Path',
-        'Kiểm tra Checksum trước khi chép',
-        '100% Không sửa đổi file EXE gốc'
+        'Dịch thuật: 100% Chuyển Ngữ Thủ Công',
+        'Giao diện: Tối ưu UI/HUD chuẩn nét',
+        'Cài đặt: Tự động 1-Click nhanh chóng'
       ],
-      note: 'Trải nghiệm game Việt hóa chuẩn thuần nét',
+      note: 'Trải nghiệm Việt hóa chuẩn nhất bởi Game Thuần Việt',
       btnText: 'KÍCH HOẠT NGAY'
     },
     {
@@ -9504,7 +9488,7 @@ const IntegrateContent = () => {
         'Launcher 3rd (Uplay/EA)',
         'Anti-Cheat (EAC)'
       ],
-      note: 'Liên hệ Admin để yêu cầu thêm trò chơi mới',
+      note: 'Trò chơi có thể phát sinh trục trặc – Tốt nhất bạn nên tham gia Discord để được hỗ trợ & yêu cầu thêm game',
       btnText: 'KÍCH HOẠT NGAY'
     }
   ];
