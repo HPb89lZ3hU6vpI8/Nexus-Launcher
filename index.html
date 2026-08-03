@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://shared.akamai.steamstatic.com" crossorigin>
     <link rel="preconnect" href="https://video.akamai.steamstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://nexus-launcher-zeta.vercel.app">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Saira:wght@400;500;600;700;800;900&family=Saira+Condensed:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=Saira:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
@@ -9427,43 +9427,69 @@ const IntegrateContent = () => {
       themeColor: '#b45309',
       borderColor: '#f59e0b',
       features: [
-        'Sync Save Data Game',
-        'Sync Achievements',
-        'Sync Playtime',
-        'Sync Added Steam Games',
-        'Keep Data When Switching Devices',
-        'High Storage Capacity'
+        'Sync Save Data Game tự động',
+        'Đồng bộ Thành tích & Tiến trình chơi',
+        'Lưu trữ thời gian chơi (Playtime)',
+        'Đồng bộ danh sách game đã thêm',
+        'Bảo toàn dữ liệu khi đổi thiết bị',
+        'Dung lượng Cloud lưu trữ không giới hạn',
+        'Hệ thống tự động Backup an toàn'
       ],
+      infoBoxHeader: 'THÔNG SỐ ĐỒNG BỘ',
+      infoItems: [
+        'Mã hóa: AES-256 Encrypted',
+        'Máy chủ: Google Cloud Storage',
+        'Auto-Backup mỗi khi thoát game'
+      ],
+      note: 'Dữ liệu Save game luôn được bảo vệ an toàn trên Cloud',
       btnText: 'KÍCH HOẠT NGAY'
     },
     {
       id: 'canhcut',
-      title: 'CÁNH CỤT VIỆT HÓA',
+      title: 'CÁNH CỤT TEAM',
       badge: 'DỊCH THUẬT CAO CẤP',
       themeColor: '#0e7490',
       borderColor: '#06b6d4',
       features: [
         'Việt hóa game AAA & Indie chất lượng cao',
-        'Hơn 100 dự án: Elden Ring, Black Myth Wukong, MGS V',
-        'Từng câu thoại dịch tỉ mỉ, bắt tai, hợp văn hóa Việt',
-        'Launcher riêng tải và cài đặt bản dịch',
-        'Cập nhật patch mới nhất từ team'
+        'Hơn 100 dự án: Elden Ring, Wukong, MGS V...',
+        'Từng câu thoại dịch tỉ mỉ, hợp văn hóa Việt',
+        'Tích hợp Launcher tự động tải & cài đặt',
+        'Cập nhật bản vá & Patch mới nhất liên tục',
+        'Font chữ Việt hóa độc quyền, sắc nét',
+        'Hỗ trợ cộng đồng & sửa lỗi siêu tốc'
       ],
+      infoBoxHeader: 'THÔNG TIN BẢN DỊCH',
+      infoItems: [
+        'Phiên bản: Patch 2.4 Latest',
+        'Nhóm dịch: Cánh Cụt Team Studio',
+        'Hỗ trợ: PC Win 10/11 & Steam Deck'
+      ],
+      note: 'Bản dịch độc quyền dành riêng cho thành viên Nexus',
       btnText: 'KÍCH HOẠT NGAY'
     },
     {
       id: 'thuanviet',
-      title: 'GAME THUẦN VIỆT HÓA',
+      title: 'GAME THUẦN VIỆT',
       badge: 'VIỆT HÓA TOÀN DIỆN',
       themeColor: '#047857',
       borderColor: '#10b981',
       features: [
         'Chuyển ngữ thủ công tỉ mỉ, giữ tinh thần gốc',
         'Chất Lượng Thật – Cảm Xúc Thật',
-        'Thành lập 2019, tập trung chất lượng không chạy đua',
-        'Cài đặt nhanh chóng, không cần điều chỉnh thủ công',
-        'Bản Việt hóa game chất lượng nhất'
+        'Thành lập từ 2019, tập trung chất lượng',
+        'Cài đặt 1-Click nhanh chóng, tự động nhận Path',
+        'Tương thích 100% Windows 10/11 mới nhất',
+        'Tối ưu hóa UI/HUD tiếng Việt chuẩn nét',
+        'Tự động sao lưu file gốc trước khi cài'
       ],
+      infoBoxHeader: 'HỆ THỐNG CÀI ĐẶT',
+      infoItems: [
+        'Thuật toán: Auto-Detect Game Path',
+        'Kiểm tra Checksum trước khi chép',
+        '100% Không sửa đổi file EXE gốc'
+      ],
+      note: 'Trải nghiệm game Việt hóa chuẩn thuần nét nhất',
       btnText: 'KÍCH HOẠT NGAY'
     },
     {
@@ -9473,18 +9499,18 @@ const IntegrateContent = () => {
       themeColor: '#9f1239',
       borderColor: '#f43f5e',
       features: [
-        'Tự động chia sẻ các game qua Steam',
-        'Có thể thêm các trò chơi cần thiết chơi ngay lập tức',
-        'Giới Hạn Rất Cao Có Thể Gây Lỗi'
+        'Tự động thêm & mở khóa game qua Steam',
+        'Chơi ngay lập tức chỉ với AppID',
+        'Tự động tải & cập nhật file Manifest Lua'
       ],
       unsupportedHeader: 'CÁC TRÒ CHƠI KHÔNG HỖ TRỢ',
       unsupported: [
         'Denuvo Anti-Tamper',
         'Game Online',
-        'Launcher thứ 3 (Uplay/EA...)',
-        'Anti-Cheat (EAC...)'
+        'Launcher 3rd (Uplay/EA)',
+        'Anti-Cheat (EAC)'
       ],
-      note: 'Để Có Thể Sử Dụng Tốt Nhất Hãy Liên Hệ Admin Để Thêm Trò Chơi',
+      note: 'Liên hệ Admin để yêu cầu thêm trò chơi mới',
       btnText: 'KÍCH HOẠT NGAY'
     }
   ];
@@ -9575,6 +9601,23 @@ const IntegrateContent = () => {
                         </li>
                       ))}
                     </ul>
+
+                    {card.infoBoxHeader && card.infoItems && card.infoItems.length > 0 && (
+                      <div className="card-info-box" style={{ borderColor: isCurrent ? `${card.borderColor}44` : 'rgba(255,255,255,0.08)' }}>
+                        <div className="card-info-box-header" style={{ color: isCurrent ? card.borderColor : '#94a3b8' }}>
+                          <i className="ph-bold ph-cpu"></i>
+                          <span>{card.infoBoxHeader}</span>
+                        </div>
+                        <div className="card-info-items">
+                          {card.infoItems.map((item, iIdx) => (
+                            <div className="card-info-item-pill" key={iIdx}>
+                              <i className="ph-bold ph-caret-right" style={{ color: isCurrent ? card.borderColor : '#64748b' }}></i>
+                              <span>{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {card.unsupportedHeader && card.unsupported && card.unsupported.length > 0 && (
                       <div className="unsupported-box">
