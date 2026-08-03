@@ -809,11 +809,20 @@ body {
    MASTER ANIMATION SUITE 2.0 (COMMERCIAL-GRADE 60FPS FOR ALL TABS)
    ========================================================================== */
 
+/* ==========================================================================
+   MASTER ANIMATION SUITE 2.0 (HIGH-IMPACT 60FPS VISIBLE ANIMATIONS)
+   ========================================================================== */
+
 @keyframes tabContentEnter {
   0% {
     opacity: 0;
-    transform: translateY(16px) scale(0.985);
-    filter: blur(8px);
+    transform: translateY(28px) scale(0.95);
+    filter: blur(10px);
+  }
+  65% {
+    opacity: 0.95;
+    transform: translateY(-3px) scale(1.008);
+    filter: blur(2px);
   }
   100% {
     opacity: 1;
@@ -828,44 +837,81 @@ body {
   flex-direction: column;
   min-height: 0;
   width: 100%;
-  animation: tabContentEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: tabContentEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: opacity, transform, filter;
 }
 
 @keyframes menuContentEnter {
   0% {
     opacity: 0;
-    transform: translateY(18px) scale(0.985);
-    filter: blur(6px);
+    transform: translateX(28px) scale(0.96);
+    filter: blur(8px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(-3px) scale(1.005);
+    filter: blur(1px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(0) scale(1);
     filter: blur(0);
   }
 }
 
 @keyframes menuTitleEnter {
-  0% { opacity: 0; transform: translateY(-8px); filter: blur(4px); }
+  0% { opacity: 0; transform: translateY(-12px); filter: blur(4px); }
   100% { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
 @keyframes cardStaggerPop {
   0% {
     opacity: 0;
-    transform: translateY(22px) scale(0.91);
-    filter: blur(4px);
+    transform: translateY(34px) rotateX(14deg) scale(0.86);
+    filter: blur(6px);
   }
   70% {
     opacity: 1;
-    transform: translateY(-2px) scale(1.012);
+    transform: translateY(-4px) rotateX(0deg) scale(1.025);
     filter: blur(0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0) rotateX(0deg) scale(1);
     filter: blur(0);
   }
+}
+
+@keyframes sidebarActivePulse {
+  0% { transform: scale(0.92); box-shadow: 0 0 0 rgba(0, 210, 255, 0); }
+  50% { transform: scale(1.08); box-shadow: 0 0 16px rgba(0, 210, 255, 0.6); }
+  100% { transform: scale(1.03); box-shadow: 0 0 10px rgba(0, 210, 255, 0.35); }
+}
+
+@keyframes topNavActivePop {
+  0% { transform: scale(0.93); }
+  60% { transform: scale(1.06); }
+  100% { transform: scale(1.0); }
+}
+
+.sidebar-item:active {
+  transform: scale(0.92) !important;
+  transition: transform 0.1s ease !important;
+}
+
+.sidebar-item.active-menu-left {
+  animation: sidebarActivePulse 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.top-nav-item:active {
+  transform: scale(0.94) !important;
+  transition: transform 0.1s ease !important;
+}
+
+.top-nav-item.active-home,
+.top-nav-item.active-game,
+.top-nav-item.active-integrate {
+  animation: topNavActivePop 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes bentoCellPop {
@@ -1050,16 +1096,7 @@ body {
   line-height: 1.4;
 }
 
-/* Accessibility: tôn trọng prefer-reduced-motion — tắt animation khi user yêu cầu. */
-@media (prefers-reduced-motion: reduce) {
-  .menu-content-transition,
-  .menu-content-transition .section-title-bar,
-  .menu-content-transition .upcoming-section,
-  .menu-content-transition .game-grid .game-card,
-  .empty-games-placeholder {
-    animation: none !important;
-  }
-}
+/* Forced 60FPS UI Animations Enabled */
 
 
 /* CONTENT SCROLL AREA */
