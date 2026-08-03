@@ -9314,6 +9314,55 @@ const IntegrateContent = () => {
   const [cloudState, setCloudState] = React.useState('checking');
   const [cloudNote, setCloudNote] = React.useState('');
 
+  // === EASY-INSTALL GAMES (AppID input & LUA download) ===
+  const [appIdInput, setAppIdInput] = React.useState('');
+  // 'idle' | 'activating' | 'success' | 'already' | 'error'
+  const [easyInstallState, setEasyInstallState] = React.useState('idle');
+  const [easyInstallNote, setEasyInstallNote] = React.useState('');
+
+  const handleEasyInstallClick = async () => {
+    const cleanAppId = (appIdInput || '').replace(/[^0-9]/g, '').trim();
+    if (!cleanAppId) {
+      setEasyInstallState('error');
+      setEasyInstallNote('Vui lòng nhập AppID hợp lệ (chỉ gồm các chữ số).');
+      return;
+    }
+
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    
+    setEasyInstallState('activating');
+    setEasyInstallNote('Đang kiểm tra & kích hoạt AppID...');
+
+    if (!api || !api.activate_easy_install_game) {
+      // Dev mode / web browser fallback
+      setTimeout(() => {
+        setEasyInstallState('already');
+        setEasyInstallNote('Bạn Đã Thêm Game Này');
+      }, 1000);
+      return;
+    }
+
+    try {
+      const r = await api.activate_easy_install_game(cleanAppId);
+      if (r && r.success) {
+        if (r.already_exists) {
+          setEasyInstallState('already');
+          setEasyInstallNote('Bạn Đã Thêm Game Này');
+        } else {
+          setEasyInstallState('success');
+          setEasyInstallNote(r.message || `Kích hoạt thành công AppID ${cleanAppId}!`);
+        }
+      } else {
+        setEasyInstallState('error');
+        setEasyInstallNote((r && r.error) || 'Kích hoạt thất bại');
+      }
+    } catch (e) {
+      setEasyInstallState('error');
+      setEasyInstallNote('Lỗi kích hoạt: ' + ((e && e.message) ? e.message : String(e)));
+    }
+  };
+
   // Luc mount: doc precheck tu api (Python main() set api.cloud_save_precheck truoc khi mo UI).
   // Neu precheck chua co -> fallback goi check_cloud_save truc tiep.
   React.useEffect(() => {
@@ -9544,6 +9593,53 @@ const IntegrateContent = () => {
                       </div>
                     )}
 
+                    {card.id === 'vip' && (
+                      <div className="easy-install-input-box" onClick={(e) => e.stopPropagation()}>
+                        <div className="easy-install-input-label">
+                          <i className="ph-bold ph-key"></i>
+                          <span>NHẬP APPID:</span>
+                        </div>
+                        <div className="easy-install-input-field-wrapper">
+                          <input
+                            type="text"
+                            className="easy-install-appid-input"
+                            placeholder="Ví dụ: 123, 5213214..."
+                            value={appIdInput}
+                            onChange={(e) => {
+                              const digits = e.target.value.replace(/[^0-9]/g, '');
+                              setAppIdInput(digits);
+                              if (easyInstallState !== 'idle') setEasyInstallState('idle');
+                            }}
+                            onPaste={(e) => {
+                              e.preventDefault();
+                              const pastedText = (e.clipboardData || window.clipboardData).getData('text') || '';
+                              const digits = pastedText.replace(/[^0-9]/g, '');
+                              setAppIdInput(prev => (prev + digits));
+                              if (easyInstallState !== 'idle') setEasyInstallState('idle');
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleEasyInstallClick();
+                              }
+                            }}
+                          />
+                          {appIdInput && (
+                            <button 
+                              className="easy-install-clear-btn" 
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                setAppIdInput(''); 
+                                setEasyInstallState('idle'); 
+                                setEasyInstallNote('');
+                              }}
+                            >
+                              <i className="ph-bold ph-x"></i>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {card.note && (
                       <div className="card-note" style={{ color: 'var(--text-muted)', fontSize: 10.5, fontStyle: 'italic', marginTop: 10, paddingLeft: 8, borderLeft: `2px solid ${isCurrent ? card.borderColor : 'rgba(255,255,255,0.12)'}`, lineHeight: 1.35, opacity: isCurrent ? 0.9 : 0.6 }}>
                         <i className="ph-bold ph-info" style={{ marginRight: 4, fontSize: 11 }}></i>
@@ -9559,10 +9655,10 @@ const IntegrateContent = () => {
                         background: isCurrent ? card.borderColor : '#19222c',
                         color: isCurrent ? '#ffffff' : '#6b7c8d',
                         boxShadow: isCurrent ? `0 4px 14px ${card.borderColor}66` : 'none',
-                        cursor: (card.id === 'cloud' && cloudState === 'idle') || card.id !== 'cloud' ? 'pointer' : 'default'
+                        cursor: (card.id === 'cloud' && cloudState !== 'idle') || (card.id === 'vip' && easyInstallState === 'activating') ? 'default' : 'pointer'
                       }}
-                      disabled={card.id === 'cloud' && cloudState !== 'idle'}
-                      onClick={card.id === 'cloud' ? handleCloudClick : undefined}
+                      disabled={(card.id === 'cloud' && cloudState !== 'idle') || (card.id === 'vip' && easyInstallState === 'activating')}
+                      onClick={card.id === 'cloud' ? handleCloudClick : card.id === 'vip' ? handleEasyInstallClick : undefined}
                     >
                       {card.id === 'cloud'
                         ? (cloudState === 'checking' ? 'ĐANG KIỂM TRA...'
@@ -9570,10 +9666,18 @@ const IntegrateContent = () => {
                            : cloudState === 'installing' ? 'ĐANG CÀI ĐẶT...'
                            : cloudState === 'just_installed' ? 'ĐÃ CÀI ĐẶT'
                            : 'KÍCH HOẠT NGAY')
+                        : card.id === 'vip'
+                        ? (easyInstallState === 'activating' ? 'ĐANG KÍCH HOẠT...' : 'KÍCH HOẠT NGAY')
                         : card.btnText}
                     </button>
                     {card.id === 'cloud' && cloudNote && (
                       <div style={{ color: '#ff6b6b', fontSize: 11, marginTop: 6, textAlign: 'center' }}>{cloudNote}</div>
+                    )}
+                    {card.id === 'vip' && easyInstallNote && (
+                      <div className={`easy-install-note-badge ${easyInstallState}`}>
+                        <i className={`ph-bold ${easyInstallState === 'already' ? 'ph-info' : easyInstallState === 'success' ? 'ph-check-circle' : easyInstallState === 'activating' ? 'ph-spinner spinner-spin' : 'ph-warning-circle'}`}></i>
+                        <span>{easyInstallNote}</span>
+                      </div>
                     )}
                   </div>
                 </div>
