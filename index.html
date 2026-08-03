@@ -8152,6 +8152,7 @@ const GameCard = ({ game, onClick }) => {
 };
 
 const GameDetail = ({ game, onBack }) => {
+  const isUpcomingGame = !!(game.upcoming || game.isUpcoming || game.targetDate || (game.id && String(game.id).startsWith('up_')));
   const [activeMediaIndex, setActiveMediaIndex] = React.useState(0);
   const [activeRightTab, setActiveRightTab] = React.useState('info');
   const [isImageModalOpen, setIsImageModalOpen] = React.useState(false);
@@ -8856,8 +8857,8 @@ const GameDetail = ({ game, onBack }) => {
                 </div>
               </div>
 
-              {/* ====== NÚT "Click Vào Đây Để Truy Cập" — bridge Python (check Steam -> cai/share NexusT) ====== */}
-              {game.appId ? (
+              {/* ====== NÚT TRUY CẬP / BÁO SẮP RA MẮT (Chỉ game sắp ra mắt mới hiện nút bị khóa RevoltG 1:1) ====== */}
+              {(!isUpcomingGame && game.appId) ? (
                 <div>
                   <button
                     className="gd-play-btn"
@@ -8950,12 +8951,12 @@ const GameDetail = ({ game, onBack }) => {
 
                 </div>
               ) : (
-                                <button className="gd-play-btn" disabled style={{opacity: 0.5, cursor: 'not-allowed'}}>
+                <button className="gd-play-btn" disabled style={{opacity: 0.6, cursor: 'not-allowed', pointerEvents: 'none', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.08)'}}>
                   <div className="gd-play-left">
-                    <i className="ph-fill ph-clock" style={{fontSize: '28px', color: 'var(--text-muted)'}}></i>
+                    <i className="ph-fill ph-clock" style={{fontSize: '28px', color: '#8c92a0'}}></i>
                     <div>
-                      <div style={{fontSize: '10px', color: 'var(--text-muted)'}}>CHƯA CÓ</div>
-                      <div style={{fontSize: '16px', fontWeight: '900', letterSpacing: '0.5px'}}>SẮP RA MẮT</div>
+                      <div style={{fontSize: '10px', color: '#8c92a0', fontWeight: '700', letterSpacing: '0.5px'}}>CHƯA CÓ</div>
+                      <div style={{fontSize: '16px', fontWeight: '900', letterSpacing: '0.5px', color: '#ffffff', fontFamily: "'Saira', sans-serif"}}>SẮP RA MẮT ⏳</div>
                     </div>
                   </div>
                 </button>
