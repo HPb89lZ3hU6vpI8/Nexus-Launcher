@@ -9302,6 +9302,15 @@ const IntegrateContent = () => {
   // 'idle' | 'activating' | 'success' | 'already' | 'error'
   const [easyInstallState, setEasyInstallState] = React.useState('idle');
   const [easyInstallNote, setEasyInstallNote] = React.useState('');
+  const [toastClosing, setToastClosing] = React.useState(false);
+
+  const closeToast = React.useCallback(() => {
+    setToastClosing(true);
+    setTimeout(() => {
+      setEasyInstallNote('');
+      setToastClosing(false);
+    }, 320);
+  }, []);
 
   const handleEasyInstallClick = async () => {
     const cleanAppId = (appIdInput || '').replace(/[^0-9]/g, '').trim();
@@ -9347,10 +9356,16 @@ const IntegrateContent = () => {
   };
 
   React.useEffect(() => {
-    if (!easyInstallNote) return;
-    const t = setTimeout(() => setEasyInstallNote(''), 4500);
+    if (!easyInstallNote) {
+      setToastClosing(false);
+      return;
+    }
+    setToastClosing(false);
+    const t = setTimeout(() => {
+      closeToast();
+    }, 4500);
     return () => clearTimeout(t);
-  }, [easyInstallNote]);
+  }, [easyInstallNote, closeToast]);
 
   // Luc mount: doc precheck tu api (Python main() set api.cloud_save_precheck truoc khi mo UI).
   // Neu precheck chua co -> fallback goi check_cloud_save truc tiep.
@@ -9714,17 +9729,18 @@ const IntegrateContent = () => {
         ))}
       </div>
 
-      {/* FLOATING SYSTEM TOAST NOTIFICATION */}
+      {/* FLOATING SYSTEM TOAST NOTIFICATION WITH SPRING ENTRANCE & CRISP EXIT */}
       {easyInstallNote && (
-        <div className={`nexus-toast-notification ${easyInstallState}`}>
+        <div className={`nexus-toast-notification ${easyInstallState} ${toastClosing ? 'closing' : ''}`}>
           <i className={`toast-icon ph-bold ${easyInstallState === 'already' ? 'ph-info' : easyInstallState === 'success' ? 'ph-check-circle' : 'ph-warning-circle'}`}></i>
           <div className="toast-content">
             <div className="toast-title">THÔNG BÁO HỆ THỐNG</div>
             <div className="toast-message">{easyInstallNote}</div>
           </div>
-          <button className="toast-close-btn" onClick={() => setEasyInstallNote('')}>
+          <button className="toast-close-btn" onClick={closeToast}>
             <i className="ph-bold ph-x"></i>
           </button>
+          <div className="toast-progress-bar" style={{ background: easyInstallState === 'already' ? '#06b6d4' : easyInstallState === 'success' ? '#10b981' : '#f43f5e' }}></div>
         </div>
       )}
     </div>
