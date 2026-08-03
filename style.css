@@ -2925,23 +2925,19 @@ body {
 
 .integrate-card .card-body {
   flex: 1;
-  padding: 14px 18px 75px 18px;
+  padding: 16px 20px 20px 20px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 10px;
+  justify-content: space-between;
   background: rgba(10, 16, 23, 0.95);
   position: relative;
   overflow: hidden;
 }
 
 .integrate-card .card-action-wrapper {
-  position: absolute;
-  bottom: 20px;
-  left: 18px;
-  right: 18px;
-  width: calc(100% - 36px);
-  z-index: 10;
+  position: relative;
+  width: 100%;
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2953,7 +2949,7 @@ body {
   border: none;
   border-radius: 9px;
   color: #ffffff;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
