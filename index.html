@@ -9329,7 +9329,7 @@ const IntegrateContent = () => {
       // Dev mode / web browser fallback
       setTimeout(() => {
         setEasyInstallState('already');
-        setEasyInstallNote('Bạn Đã Thêm Game Này');
+        setEasyInstallNote('Bạn Đã Có Game Này');
       }, 1000);
       return;
     }
@@ -9339,18 +9339,23 @@ const IntegrateContent = () => {
       if (r && r.success) {
         if (r.already_exists) {
           setEasyInstallState('already');
-          setEasyInstallNote('Bạn Đã Thêm Game Này');
+          setEasyInstallNote('Bạn Đã Có Game Này');
         } else {
           setEasyInstallState('success');
-          setEasyInstallNote(r.message || `Kích hoạt thành công AppID ${cleanAppId}!`);
+          setEasyInstallNote(r.message || `Đã Kích Hoạt Thành Công Game Có AppID Là: ${cleanAppId}`);
         }
       } else {
         setEasyInstallState('error');
-        setEasyInstallNote((r && r.error) || 'Kích hoạt thất bại');
+        const errStr = (r && r.error) ? String(r.error) : '';
+        if (errStr.includes('404') || errStr.includes('Không tìm thấy') || errStr.includes('file Lua') || errStr.includes('Server')) {
+          setEasyInstallNote(`Trên Server Hiện Giờ Không Có Game Nào Có AppID Là: ${cleanAppId}`);
+        } else {
+          setEasyInstallNote(errStr || `Trên Server Hiện Giờ Không Có Game Nào Có AppID Là: ${cleanAppId}`);
+        }
       }
     } catch (e) {
       setEasyInstallState('error');
-      setEasyInstallNote('Lỗi kích hoạt: ' + ((e && e.message) ? e.message : String(e)));
+      setEasyInstallNote(`Trên Server Hiện Giờ Không Có Game Nào Có AppID Là: ${cleanAppId}`);
     }
   };
 
@@ -9652,9 +9657,14 @@ const IntegrateContent = () => {
                             }}
                             onPaste={(e) => {
                               e.preventDefault();
+                              const input = e.target;
+                              const start = input.selectionStart !== undefined ? input.selectionStart : 0;
+                              const end = input.selectionEnd !== undefined ? input.selectionEnd : 0;
+                              const currentVal = appIdInput || '';
                               const pastedText = (e.clipboardData || window.clipboardData).getData('text') || '';
-                              const digits = pastedText.replace(/[^0-9]/g, '');
-                              setAppIdInput(prev => (prev + digits));
+                              const cleanDigits = pastedText.replace(/[^0-9]/g, '');
+                              const newVal = currentVal.slice(0, start) + cleanDigits + currentVal.slice(end);
+                              setAppIdInput(newVal);
                               if (easyInstallState !== 'idle') setEasyInstallState('idle');
                             }}
                             onKeyDown={(e) => {
