@@ -2617,7 +2617,7 @@ body {
 .integrate-slider-wrapper {
   position: relative;
   width: 100%;
-  max-width: 1000px;
+  max-width: 1150px;
   height: 550px;
   display: flex;
   align-items: center;
@@ -2627,7 +2627,7 @@ body {
 
 .integrate-cards-track {
   position: relative;
-  width: 330px;
+  width: 360px;
   height: 520px;
   display: flex;
   align-items: center;
@@ -4939,7 +4939,7 @@ body {
 .integrate-slider-wrapper {
   position: relative;
   width: 100%;
-  max-width: 1000px;
+  max-width: 1150px;
   height: 550px;
   display: flex;
   align-items: center;
@@ -4949,7 +4949,7 @@ body {
 
 .integrate-cards-track {
   position: relative;
-  width: 330px;
+  width: 360px;
   height: 520px;
   display: flex;
   align-items: center;
