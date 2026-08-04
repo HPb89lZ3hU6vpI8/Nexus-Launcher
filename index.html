@@ -9304,6 +9304,17 @@ const IntegrateContent = () => {
   const [easyInstallNote, setEasyInstallNote] = React.useState('');
   const [toastClosing, setToastClosing] = React.useState(false);
 
+  // === TÍCH HỢP VIỆT HÓA (CanhCutTeam + GameThuầnViệt) ===
+  // State machine cho từng tool: 'checking' | 'idle' | 'installing' | 'installed'
+  // 'checking' → ĐANG KIỂM TRA... (disabled, mount-time check)
+  // 'idle' → KÍCH HOẠT NGAY (click → activate_integration: download+extract+del zip)
+  // 'installing' → ĐANG CÀI ĐẶT... (disabled, đang download+extract)
+  // 'installed' → KHỞI CHẠY (click → launch_integration: startfile exe)
+  const [integrateStates, setIntegrateStates] = React.useState({
+    canhcut: 'checking',
+    thuanviet: 'checking',
+  });
+
   const closeToast = React.useCallback(() => {
     setToastClosing(true);
     setTimeout(() => {
@@ -9425,6 +9436,84 @@ const IntegrateContent = () => {
     } catch (e) {
       setCloudState('idle');
       setCloudNote('Lỗi: ' + ((e && e.message) ? e.message : String(e)));
+    }
+  };
+
+  // === TÍCH HỢP: mount-time check installed status (canhcut + thuanviet) ===
+  // Gọi api.check_integration(tool_id) → nếu exe tồn tại → 'installed' (KHỞI CHẠY),
+  // không → 'idle' (KÍCH HOẠT NGAY). Mỗi tool check folder riêng.
+  React.useEffect(() => {
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    if (!api || !api.check_integration) {
+      // Dev mode / browser fallback → cho phép click (sẽ báo lỗi nếu không có api).
+      setIntegrateStates({ canhcut: 'idle', thuanviet: 'idle' });
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      for (const tid of ['canhcut', 'thuanviet']) {
+        try {
+          const r = await api.check_integration(tid);
+          if (!cancelled) {
+            setIntegrateStates(prev => ({
+              ...prev,
+              [tid]: (r && r.installed) ? 'installed' : 'idle',
+            }));
+          }
+        } catch (e) {
+          if (!cancelled) {
+            setIntegrateStates(prev => ({ ...prev, [tid]: 'idle' }));
+          }
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // === TÍCH HỢP: click handler — activate (download+extract) hoặc launch exe ===
+  const handleIntegrateClick = async (cardId) => {
+    const cur = integrateStates[cardId];
+    if (cur === 'checking' || cur === 'installing') return;  // disabled states
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    if (!api || !api.activate_integration) {
+      setEasyInstallNote('Vui lòng mở qua ứng dụng NexusGames.');
+      return;
+    }
+    // Đã cài → KHỞI CHẠY → launch exe.
+    if (cur === 'installed') {
+      try {
+        const r = await api.launch_integration(cardId);
+        if (!r || !r.success) {
+          setEasyInstallState('error');
+          setEasyInstallNote((r && r.error) || 'Không thể khởi chạy.');
+        }
+      } catch (e) {
+        setEasyInstallState('error');
+        setEasyInstallNote('Lỗi khởi chạy: ' + ((e && e.message) ? e.message : String(e)));
+      }
+      return;
+    }
+    // Chưa cài → KÍCH HOẠT NGAY → download zip + extract + xóa zip.
+    setIntegrateStates(prev => ({ ...prev, [cardId]: 'installing' }));
+    try {
+      const r = await api.activate_integration(cardId);
+      if (r && r.success) {
+        setIntegrateStates(prev => ({ ...prev, [cardId]: 'installed' }));
+        if (!r.already_installed) {
+          setEasyInstallState('success');
+          setEasyInstallNote('Đã cài đặt thành công. Bấm KHỞI CHẠY để mở.');
+        }
+      } else {
+        setIntegrateStates(prev => ({ ...prev, [cardId]: 'idle' }));
+        setEasyInstallState('error');
+        setEasyInstallNote((r && r.error) || 'Lỗi không xác định.');
+      }
+    } catch (e) {
+      setIntegrateStates(prev => ({ ...prev, [cardId]: 'idle' }));
+      setEasyInstallState('error');
+      setEasyInstallNote('Lỗi: ' + ((e && e.message) ? e.message : String(e)));
     }
   };
 
@@ -9706,10 +9795,23 @@ const IntegrateContent = () => {
                         background: isCurrent ? card.borderColor : '#19222c',
                         color: isCurrent ? '#ffffff' : '#6b7c8d',
                         boxShadow: isCurrent ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
-                        cursor: (card.id === 'cloud' && cloudState !== 'idle') || (card.id === 'vip' && easyInstallState === 'activating') ? 'default' : 'pointer'
+                        cursor: (card.id === 'cloud' && cloudState !== 'idle')
+                             || (card.id === 'vip' && easyInstallState === 'activating')
+                             || ((card.id === 'canhcut' || card.id === 'thuanviet')
+                                 && (integrateStates[card.id] === 'checking'
+                                     || integrateStates[card.id] === 'installing'))
+                           ? 'default' : 'pointer'
                       }}
-                      disabled={(card.id === 'cloud' && cloudState !== 'idle') || (card.id === 'vip' && easyInstallState === 'activating')}
-                      onClick={card.id === 'cloud' ? handleCloudClick : card.id === 'vip' ? handleEasyInstallClick : undefined}
+                      disabled={(card.id === 'cloud' && cloudState !== 'idle')
+                             || (card.id === 'vip' && easyInstallState === 'activating')
+                             || ((card.id === 'canhcut' || card.id === 'thuanviet')
+                                 && (integrateStates[card.id] === 'checking'
+                                     || integrateStates[card.id] === 'installing'))}
+                      onClick={card.id === 'cloud' ? handleCloudClick
+                            : card.id === 'vip' ? handleEasyInstallClick
+                            : (card.id === 'canhcut' || card.id === 'thuanviet')
+                              ? () => handleIntegrateClick(card.id)
+                            : undefined}
                     >
                       {card.id === 'cloud'
                         ? (cloudState === 'checking' ? 'ĐANG KIỂM TRA...'
@@ -9719,6 +9821,11 @@ const IntegrateContent = () => {
                            : 'KÍCH HOẠT NGAY')
                         : card.id === 'vip'
                         ? (easyInstallState === 'activating' ? 'ĐANG KÍCH HOẠT...' : 'KÍCH HOẠT NGAY')
+                        : (card.id === 'canhcut' || card.id === 'thuanviet')
+                        ? (integrateStates[card.id] === 'checking' ? 'ĐANG KIỂM TRA...'
+                           : integrateStates[card.id] === 'installing' ? 'ĐANG CÀI ĐẶT...'
+                           : integrateStates[card.id] === 'installed' ? 'KHỞI CHẠY'
+                           : 'KÍCH HOẠT NGAY')
                         : card.btnText}
                     </button>
                   </div>
