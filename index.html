@@ -9189,8 +9189,8 @@ const GameDetail = ({ game, onBack }) => {
                         {revState === 'idle' && <i className="ph-bold ph-arrow-right"></i>}
                       </button>
 
-                      {/* Progress bar download */}
-                      {(revState === 'downloading' && revProgress.total > 0) && (
+                      {/* Progress bar download — hiện cả downloading (progress%) + installing (indeterminate) */}
+                      {revState === 'downloading' && revProgress.total > 0 && (
                         <div style={{marginTop: '12px'}}>
                           <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '6px'}}>
                             <span>{revProgress.percent.toFixed(1)}%</span>
@@ -9198,6 +9198,16 @@ const GameDetail = ({ game, onBack }) => {
                           </div>
                           <div style={{width: '100%', height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden'}}>
                             <div style={{width: revProgress.percent + '%', height: '100%', background: 'linear-gradient(90deg, #06b6d4, #0891b2)', borderRadius: '3px', transition: 'width 0.3s ease'}}></div>
+                          </div>
+                        </div>
+                      )}
+                      {revState === 'installing' && (
+                        <div style={{marginTop: '12px'}}>
+                          <div style={{fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '6px'}}>
+                            Đang giải nén + cài đặt...
+                          </div>
+                          <div style={{width: '100%', height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden', position: 'relative'}}>
+                            <div style={{position: 'absolute', height: '100%', width: '40%', background: 'linear-gradient(90deg, transparent, #06b6d4, transparent)', borderRadius: '3px', animation: 'revProgressIndeterminate 1.2s ease-in-out infinite'}}></div>
                           </div>
                         </div>
                       )}
@@ -9399,7 +9409,7 @@ const GameDetail = ({ game, onBack }) => {
             <div className="rev-modal-body">
               <div className="rev-modal-info">
                 <i className="ph ph-info" style={{fontSize: '16px', color: 'var(--text-muted)'}}></i>
-                <span>Chọn thư mục để tải và giải nén game. Dung lượng cần: <strong>{revFileSize ? revFileSize.size_gb + ' GB' : '...'}</strong> (yêu cầu trống gấp 2 lần)</span>
+                <span>Chọn Thư Mục Để Tải Xuống Và Cài Đặt Game, Dung Lượng Tối Thiểu: <strong>{revFileSize ? (revFileSize.size_gb * 2).toFixed(2) + ' GB' : '...'}</strong></span>
               </div>
               <label className="rev-input-label">Đường dẫn cài đặt</label>
               <div className="rev-input-row">

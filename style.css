@@ -6308,6 +6308,12 @@ body {
 }
 .rev-uninstall-confirm-btn i { font-size: 16px; }
 
+/* ---- Progress bar indeterminate (khi state=installing/đang giải nén) ---- */
+@keyframes revProgressIndeterminate {
+  0%   { left: -40%; }
+  100%  { left: 100%; }
+}
+
 /* ---- 3 action buttons (Khởi Chạy / Gỡ Cài Đặt / Mở Thư Mục Game) ----
    Layout = flex row gap 10px. Style trực tiếp trong .gd-action-btn family (line 2154).
    KHÔNG override flex/padding ở đây — để .gd-action-play flex:2 / .gd-action-folder flex:1
