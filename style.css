@@ -2157,86 +2157,78 @@ body {
   align-items: stretch;
 }
 
+/* 3 button (Khởi Chạy / Gỡ Cài Đặt / Mở Thư Mục Game) — pro flat pattern.
+   Ref: shadcn/ui Button + Radix Themes solid/outline + GitHub Primer.
+   KHÔNG transform translateY, KHÔNG glow shadow, KHÔNG gradient.
+   Hover = đổi background 1 bước. 80ms transition trên color props. */
 .gd-action-btn {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  height: 64px;
+  padding: 0 16px;
+  font-family: 'Saira', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border: 1px solid transparent;
   border-radius: 10px;
   cursor: pointer;
-  font-family: 'Saira', sans-serif;
-  font-weight: 900;
-  letter-spacing: 0.5px;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-  border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.04);
+  user-select: none;
+  white-space: nowrap;
+  outline: none;
+  transition: background-color 80ms cubic-bezier(0.33, 1, 0.68, 1),
+              border-color 80ms cubic-bezier(0.33, 1, 0.68, 1),
+              color 80ms cubic-bezier(0.33, 1, 0.68, 1);
 }
-.gd-action-btn:hover {
-  transform: translateY(-2px);
+.gd-action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.gd-action-btn:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
 }
-.gd-action-btn:active {
-  transform: translateY(0);
-}
-.gd-action-btn i {
-  transition: transform 0.15s ease;
-}
-.gd-action-btn:hover i {
-  transform: scale(1.08);
-}
+.gd-action-btn i { transition: none; }
 
-/* Nut chinh: CHOI - to, noi bat, chiem nhieu khong gian nhat */
+/* Khởi Chạy: solid green (primary) — fill đầy, nút chính */
 .gd-action-play {
   flex: 2;
   flex-direction: row;
   gap: 12px;
-  padding: 18px 20px;
-  background: linear-gradient(135deg, rgba(0, 255, 128, 0.18), rgba(0, 255, 128, 0.06));
-  border-color: var(--accent-green);
-  color: var(--accent-green);
-  font-size: 16px;
+  background-color: #16a34a;
+  color: #04210f;
+  border-color: #16a34a;
+  font-size: 15px;
+  /* Primer sheen: 1px inset highlight, KHÔNG glow */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
-.gd-action-play:hover {
-  background: linear-gradient(135deg, rgba(0, 255, 128, 0.28), rgba(0, 255, 128, 0.12));
-  box-shadow: 0 6px 18px rgba(0, 255, 128, 0.25);
-}
-.gd-action-play i {
-  font-size: 20px;
-}
+.gd-action-play:hover { background-color: #15803d; border-color: #15803d; }
+.gd-action-play:active { background-color: #166534; border-color: #166534; }
+.gd-action-play i { font-size: 20px; }
 
-/* Nut phu: MO THU MUC */
+/* Mở Thư Mục: outline cyan (secondary) — transparent bg + cyan border */
 .gd-action-folder {
   flex: 1;
-  padding: 14px 12px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--accent-cyan);
-  border-color: rgba(0, 216, 230, 0.4);
+  background-color: transparent;
+  border-color: rgba(0, 216, 230, 0.45);
 }
-.gd-action-folder:hover {
-  background: rgba(0, 216, 230, 0.12);
-  border-color: var(--accent-cyan);
-  box-shadow: 0 6px 18px rgba(0, 216, 230, 0.18);
-}
-.gd-action-folder i {
-  font-size: 18px;
-}
+.gd-action-folder:hover { background-color: rgba(0, 216, 230, 0.10); }
+.gd-action-folder:active { background-color: rgba(0, 216, 230, 0.18); }
+.gd-action-folder i { font-size: 18px; }
 
-/* Nut phu: GO CAI DAT - mau do canh bao */
+/* Gỡ Cài Đặt: solid red (danger) */
 .gd-action-uninstall {
   flex: 1;
-  padding: 14px 12px;
-  font-size: 12px;
-  color: #ff5c5c;
-  border-color: rgba(255, 92, 92, 0.35);
+  font-size: 13px;
+  color: #fff;
+  background-color: #dc2626;
+  border-color: #dc2626;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
-.gd-action-uninstall:hover {
-  background: rgba(255, 92, 92, 0.12);
-  border-color: #ff5c5c;
-  box-shadow: 0 6px 18px rgba(255, 92, 92, 0.18);
-}
-.gd-action-uninstall i {
-  font-size: 18px;
-}
+.gd-action-uninstall:hover { background-color: #b91c1c; border-color: #b91c1c; }
+.gd-action-uninstall:active { background-color: #991b1b; border-color: #991b1b; }
+.gd-action-uninstall i { font-size: 18px; }
 
 /* SYSTEM REQUIREMENTS PANEL */
 .sysreq-list {
@@ -4799,86 +4791,78 @@ body {
   align-items: stretch;
 }
 
+/* 3 button (Khởi Chạy / Gỡ Cài Đặt / Mở Thư Mục Game) — pro flat pattern.
+   Ref: shadcn/ui Button + Radix Themes solid/outline + GitHub Primer.
+   KHÔNG transform translateY, KHÔNG glow shadow, KHÔNG gradient.
+   Hover = đổi background 1 bước. 80ms transition trên color props. */
 .gd-action-btn {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  height: 64px;
+  padding: 0 16px;
+  font-family: 'Saira', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border: 1px solid transparent;
   border-radius: 10px;
   cursor: pointer;
-  font-family: 'Saira', sans-serif;
-  font-weight: 900;
-  letter-spacing: 0.5px;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-  border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.04);
+  user-select: none;
+  white-space: nowrap;
+  outline: none;
+  transition: background-color 80ms cubic-bezier(0.33, 1, 0.68, 1),
+              border-color 80ms cubic-bezier(0.33, 1, 0.68, 1),
+              color 80ms cubic-bezier(0.33, 1, 0.68, 1);
 }
-.gd-action-btn:hover {
-  transform: translateY(-2px);
+.gd-action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.gd-action-btn:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
 }
-.gd-action-btn:active {
-  transform: translateY(0);
-}
-.gd-action-btn i {
-  transition: transform 0.15s ease;
-}
-.gd-action-btn:hover i {
-  transform: scale(1.08);
-}
+.gd-action-btn i { transition: none; }
 
-/* Nut chinh: CHOI - to, noi bat, chiem nhieu khong gian nhat */
+/* Khởi Chạy: solid green (primary) — fill đầy, nút chính */
 .gd-action-play {
   flex: 2;
   flex-direction: row;
   gap: 12px;
-  padding: 18px 20px;
-  background: linear-gradient(135deg, rgba(0, 255, 128, 0.18), rgba(0, 255, 128, 0.06));
-  border-color: var(--accent-green);
-  color: var(--accent-green);
-  font-size: 16px;
+  background-color: #16a34a;
+  color: #04210f;
+  border-color: #16a34a;
+  font-size: 15px;
+  /* Primer sheen: 1px inset highlight, KHÔNG glow */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
-.gd-action-play:hover {
-  background: linear-gradient(135deg, rgba(0, 255, 128, 0.28), rgba(0, 255, 128, 0.12));
-  box-shadow: 0 6px 18px rgba(0, 255, 128, 0.25);
-}
-.gd-action-play i {
-  font-size: 20px;
-}
+.gd-action-play:hover { background-color: #15803d; border-color: #15803d; }
+.gd-action-play:active { background-color: #166534; border-color: #166534; }
+.gd-action-play i { font-size: 20px; }
 
-/* Nut phu: MO THU MUC */
+/* Mở Thư Mục: outline cyan (secondary) — transparent bg + cyan border */
 .gd-action-folder {
   flex: 1;
-  padding: 14px 12px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--accent-cyan);
-  border-color: rgba(0, 216, 230, 0.4);
+  background-color: transparent;
+  border-color: rgba(0, 216, 230, 0.45);
 }
-.gd-action-folder:hover {
-  background: rgba(0, 216, 230, 0.12);
-  border-color: var(--accent-cyan);
-  box-shadow: 0 6px 18px rgba(0, 216, 230, 0.18);
-}
-.gd-action-folder i {
-  font-size: 18px;
-}
+.gd-action-folder:hover { background-color: rgba(0, 216, 230, 0.10); }
+.gd-action-folder:active { background-color: rgba(0, 216, 230, 0.18); }
+.gd-action-folder i { font-size: 18px; }
 
-/* Nut phu: GO CAI DAT - mau do canh bao */
+/* Gỡ Cài Đặt: solid red (danger) */
 .gd-action-uninstall {
   flex: 1;
-  padding: 14px 12px;
-  font-size: 12px;
-  color: #ff5c5c;
-  border-color: rgba(255, 92, 92, 0.35);
+  font-size: 13px;
+  color: #fff;
+  background-color: #dc2626;
+  border-color: #dc2626;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
-.gd-action-uninstall:hover {
-  background: rgba(255, 92, 92, 0.12);
-  border-color: #ff5c5c;
-  box-shadow: 0 6px 18px rgba(255, 92, 92, 0.18);
-}
-.gd-action-uninstall i {
-  font-size: 18px;
-}
+.gd-action-uninstall:hover { background-color: #b91c1c; border-color: #b91c1c; }
+.gd-action-uninstall:active { background-color: #991b1b; border-color: #991b1b; }
+.gd-action-uninstall i { font-size: 18px; }
 
 /* SYSTEM REQUIREMENTS PANEL */
 .sysreq-list {
@@ -6108,40 +6092,44 @@ body {
    .gd-actions buttons (already defined above, line ~2153).
    ============================================================ */
 
-/* ---- Backdrop overlay (blur + darken) ---- */
+/* ---- Backdrop overlay — solid 50% black, KHÔNG blur (shadcn/Radix/Geist) ---- */
 .rev-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  animation: revFadeIn 0.18s ease;
+  animation: revFadeIn 150ms ease-out;
 }
 @keyframes revFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-/* ---- Modal card (dark theme, cyan accent) ---- */
+/* ---- Modal card — solid surface, 1px alpha-white border, 1 shadow-lg (shadcn) ---- */
 .rev-modal-card {
-  background: linear-gradient(180deg, #1a1d23 0%, #14171c 100%);
-  border: 1px solid rgba(6, 182, 212, 0.25);
-  border-radius: 14px;
+  background: #1a1d23;
+  color: #e6e8eb;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
   padding: 0;
   width: 520px;
   max-width: 90vw;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.03) inset;
-  animation: revSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.35),
+              0 4px 6px -4px rgba(0, 0, 0, 0.35);
+  animation: revDialogIn 150ms cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 .rev-modal-card.rev-modal-small { width: 420px; }
-@keyframes revSlideUp {
-  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+@keyframes revDialogIn {
+  /* fade + tiny scale, KHÔNG slide-up translateY (Radix: max 5px) */
+  from { opacity: 0; transform: translateY(5px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rev-modal-backdrop, .rev-modal-card { animation: none; }
 }
 
 /* ---- Modal header (icon + title) ---- */
@@ -6149,40 +6137,41 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 22px 24px 14px;
+  padding: 20px 24px 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 .rev-modal-title {
   font-size: 16px;
-  font-weight: 800;
-  color: #e5e7eb;
-  letter-spacing: 0.2px;
+  font-weight: 700;
+  color: #e6e8eb;
+  letter-spacing: 0.1px;
+  margin: 0;
 }
 
 /* ---- Modal body ---- */
 .rev-modal-body {
-  padding: 18px 24px 8px;
+  padding: 16px 24px 8px;
 }
 .rev-modal-info {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  padding: 12px 14px;
-  background: rgba(6, 182, 212, 0.06);
-  border: 1px solid rgba(6, 182, 212, 0.15);
-  border-radius: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
   font-size: 12.5px;
   color: #9ca3af;
   line-height: 1.5;
   margin-bottom: 16px;
 }
-.rev-modal-info strong { color: #06b6d4; font-weight: 700; }
+.rev-modal-info strong { color: #e6e8eb; font-weight: 700; }
 
 .rev-input-label {
   display: block;
   font-size: 11px;
-  font-weight: 700;
-  color: #6b7280;
+  font-weight: 600;
+  color: #8b919a;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 8px;
@@ -6195,80 +6184,97 @@ body {
 }
 .rev-path-input {
   flex: 1;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 11px 14px;
+  min-width: 0;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 6px;
+  padding: 0 14px;
   font-size: 13px;
-  color: #e5e7eb;
+  color: #e6e8eb;
   font-family: 'Consolas', monospace;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 80ms cubic-bezier(0.33, 1, 0.68, 1),
+              box-shadow 80ms cubic-bezier(0.33, 1, 0.68, 1);
 }
-.rev-path-input:hover { border-color: rgba(6, 182, 212, 0.3); }
-.rev-path-input:focus { border-color: rgba(6, 182, 212, 0.5); }
+.rev-path-input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.25);
+}
 .rev-path-input::placeholder { color: #4b5563; }
 
 .rev-browse-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  background: rgba(6, 182, 212, 0.1);
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  border-radius: 8px;
+  height: 40px;
   padding: 0 16px;
+  background: transparent;
+  border: 1px solid rgba(6, 182, 212, 0.45);
+  border-radius: 6px;
   font-size: 13px;
-  font-weight: 700;
-  color: #06b6d4;
+  font-weight: 600;
+  color: var(--accent-cyan);
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s;
+  font-family: 'Saira', sans-serif;
+  transition: background-color 80ms cubic-bezier(0.33, 1, 0.68, 1),
+              border-color 80ms cubic-bezier(0.33, 1, 0.68, 1);
 }
-.rev-browse-btn:hover {
-  background: rgba(6, 182, 212, 0.18);
-  border-color: rgba(6, 182, 212, 0.5);
-}
+.rev-browse-btn:hover { background-color: rgba(6, 182, 212, 0.10); }
+.rev-browse-btn:active { background-color: rgba(6, 182, 212, 0.18); }
 .rev-browse-btn i { font-size: 16px; }
 
-/* ---- Modal action buttons (bottom) ---- */
+/* ---- Modal action buttons (bottom) — shadcn footer pattern ---- */
 .rev-modal-actions {
   display: flex;
   gap: 10px;
-  padding: 16px 24px 22px;
+  padding: 14px 24px 20px;
   justify-content: flex-end;
 }
 .rev-cancel-btn {
-  padding: 10px 22px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
   background: transparent;
   color: #9ca3af;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
+  font-family: 'Saira', sans-serif;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 80ms cubic-bezier(0.33, 1, 0.68, 1),
+              border-color 80ms cubic-bezier(0.33, 1, 0.68, 1),
+              color 80ms cubic-bezier(0.33, 1, 0.68, 1);
 }
 .rev-cancel-btn:hover {
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #e5e7eb;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.20);
+  color: #e6e8eb;
 }
 .rev-save-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 24px;
-  border-radius: 8px;
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
+  height: 40px;
+  padding: 0 22px;
+  border-radius: 6px;
+  border: 1px solid #16a34a;
+  background: #16a34a;
+  color: #04210f;
   font-size: 13px;
   font-weight: 700;
+  font-family: 'Saira', sans-serif;
   cursor: pointer;
-  transition: all 0.2s;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: background-color 80ms cubic-bezier(0.33, 1, 0.68, 1),
+              border-color 80ms cubic-bezier(0.33, 1, 0.68, 1);
 }
 .rev-save-btn:hover:not(:disabled) {
-  background: rgba(16, 185, 129, 0.25);
-  border-color: rgba(16, 185, 129, 0.6);
+  background-color: #15803d;
+  border-color: #15803d;
 }
 .rev-save-btn:disabled {
   opacity: 0.4;
@@ -6276,35 +6282,34 @@ body {
 }
 .rev-save-btn i { font-size: 16px; }
 
-/* ---- Uninstall confirm button (red) ---- */
+/* ---- Uninstall confirm button — solid red (Radix destructive) ---- */
 .rev-uninstall-confirm-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 22px;
-  border-radius: 8px;
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 6px;
+  border: 1px solid #dc2626;
+  background: #dc2626;
+  color: #fff;
   font-size: 13px;
   font-weight: 700;
+  font-family: 'Saira', sans-serif;
   cursor: pointer;
-  transition: all 0.2s;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: background-color 80ms cubic-bezier(0.33, 1, 0.68, 1),
+              border-color 80ms cubic-bezier(0.33, 1, 0.68, 1);
 }
 .rev-uninstall-confirm-btn:hover {
-  background: rgba(239, 68, 68, 0.25);
-  border-color: rgba(239, 68, 68, 0.6);
+  background-color: #b91c1c;
+  border-color: #b91c1c;
 }
 .rev-uninstall-confirm-btn i { font-size: 16px; }
 
-/* ---- 3 action buttons (Khởi Chạy / Gỡ Cài Đặt / Mở Thư Mục Game) ---- */
-/* Reuse .gd-actions / .gd-action-btn / .gd-action-play / .gd-action-uninstall / .gd-action-folder
-   (already defined around line 2153). Layout: flex row gap 10px. */
-.gd-actions .gd-action-btn {
-  flex: 1;
-  justify-content: center;
-  padding: 12px 8px;
-  font-size: 13px;
-}
-.gd-actions .gd-action-btn i { font-size: 18px; }
+/* ---- 3 action buttons (Khởi Chạy / Gỡ Cài Đặt / Mở Thư Mục Game) ----
+   Layout = flex row gap 10px. Style trực tiếp trong .gd-action-btn family (line 2154).
+   KHÔNG override flex/padding ở đây — để .gd-action-play flex:2 / .gd-action-folder flex:1
+   / .gd-action-uninstall flex:1 có hiệu lực (Launch to hơn 2 button phụ). */
 
