@@ -2196,7 +2196,7 @@ body {
    Ref: Steam PLAY button (gradient #5c9e1c→#4a7d17, inset highlight, drop shadow).
    KHÔNG flat color — gradient + shadow = 3D depth, giống Steam/GOG. */
 .gd-action-play {
-  flex: 2;
+  flex: 1;
   height: 48px;
   font-size: 14px;
   font-weight: 700;
@@ -4842,7 +4842,7 @@ body {
    Ref: Steam PLAY button (gradient #5c9e1c→#4a7d17, inset highlight, drop shadow).
    KHÔNG flat color — gradient + shadow = 3D depth, giống Steam/GOG. */
 .gd-action-play {
-  flex: 2;
+  flex: 1;
   height: 48px;
   font-size: 14px;
   font-weight: 700;
@@ -6339,7 +6339,230 @@ body {
 }
 
 /* ---- 3 action buttons (Khởi Chạy / Gỡ Cài Đặt / Mở Thư Mục Game) ----
-   Layout = flex row gap 10px. Style trực tiếp trong .gd-action-btn family (line 2154).
-   KHÔNG override flex/padding ở đây — để .gd-action-play flex:2 / .gd-action-folder flex:1
-   / .gd-action-uninstall flex:1 có hiệu lực (Launch to hơn 2 button phụ). */
+   Namespace rieng cho Assassin's Creed Revelations (AppID 201870).
+   Khong dung .gd-action-* de tranh anh huong cac game khac. */
+.rev-installed-actions {
+  --rev-gold: #c7a35a;
+  --rev-gold-bright: #e1c278;
+  --rev-gold-deep: #8f6b2f;
+  --rev-ink: #0c0d0f;
+  --rev-surface: #15171a;
+  --rev-surface-hover: #1c1e22;
+  position: relative;
+  padding: 13px;
+  border: 1px solid rgba(199, 163, 90, 0.23);
+  border-radius: 12px;
+  background:
+    linear-gradient(90deg, rgba(199, 163, 90, 0.05) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(rgba(199, 163, 90, 0.035) 1px, transparent 1px) 0 0 / 28px 28px,
+    #101114;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 12px 28px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+.rev-installed-actions::before,
+.rev-installed-actions::after {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  pointer-events: none;
+}
+.rev-installed-actions::before {
+  top: 7px;
+  left: 7px;
+  border-top: 1px solid rgba(225, 194, 120, 0.55);
+  border-left: 1px solid rgba(225, 194, 120, 0.55);
+}
+.rev-installed-actions::after {
+  right: 7px;
+  bottom: 7px;
+  border-right: 1px solid rgba(143, 107, 47, 0.45);
+  border-bottom: 1px solid rgba(143, 107, 47, 0.45);
+}
+.rev-actions-heading {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 4px 11px;
+  color: #b9a47a;
+  font-family: 'Saira', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.25px;
+  text-transform: uppercase;
+}
+.rev-actions-line {
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, rgba(199, 163, 90, 0.38), transparent);
+}
+.rev-actions-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.rev-actions-status i {
+  color: var(--rev-gold-bright);
+  font-size: 13px;
+}
+.rev-actions-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(190px, 1.35fr) minmax(160px, 1fr) minmax(145px, 0.9fr);
+  gap: 9px;
+}
+.rev-action-btn {
+  min-width: 0;
+  min-height: 58px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: var(--rev-surface);
+  color: #e7e4dc;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  font-family: 'Saira', sans-serif;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+}
+.rev-action-btn:hover {
+  background: var(--rev-surface-hover);
+  border-color: rgba(199, 163, 90, 0.32);
+  transform: translateY(-1px);
+}
+.rev-action-btn:active { transform: translateY(0); }
+.rev-action-btn:focus-visible {
+  outline: 2px solid var(--rev-gold-bright);
+  outline-offset: 2px;
+}
+.rev-action-btn:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+  transform: none;
+}
+.rev-action-icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border: 1px solid rgba(199, 163, 90, 0.20);
+  border-radius: 7px;
+  background: rgba(199, 163, 90, 0.07);
+  color: var(--rev-gold-bright);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.rev-action-icon i { font-size: 18px; }
+.rev-action-copy {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+}
+.rev-action-label {
+  color: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rev-action-hint {
+  color: #85878c;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rev-action-launch {
+  border-color: rgba(225, 194, 120, 0.52);
+  background: linear-gradient(135deg, #c7a35a 0%, #a47b35 100%);
+  color: #16120a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 6px 18px rgba(126, 91, 35, 0.24);
+}
+.rev-action-launch:hover {
+  border-color: #ead08c;
+  background: linear-gradient(135deg, #d8b86d 0%, #b88a3b 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.30), 0 8px 22px rgba(126, 91, 35, 0.32);
+}
+.rev-action-launch .rev-action-icon {
+  border-color: rgba(22, 18, 10, 0.20);
+  background: rgba(22, 18, 10, 0.12);
+  color: #17130b;
+}
+.rev-action-launch .rev-action-hint { color: rgba(22, 18, 10, 0.67); }
+.rev-action-arrow {
+  flex: 0 0 auto;
+  font-size: 15px;
+  opacity: 0.65;
+  transition: transform 140ms ease, opacity 140ms ease;
+}
+.rev-action-launch:hover .rev-action-arrow {
+  opacity: 1;
+  transform: translateX(2px);
+}
+.rev-action-folder:hover .rev-action-icon {
+  border-color: rgba(225, 194, 120, 0.42);
+  background: rgba(199, 163, 90, 0.12);
+}
+.rev-action-uninstall {
+  color: #a5a7ac;
+}
+.rev-action-uninstall .rev-action-icon {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.025);
+  color: #8f9298;
+}
+.rev-action-uninstall:hover {
+  color: #f0b2b2;
+  border-color: rgba(210, 76, 76, 0.42);
+  background: rgba(116, 31, 31, 0.18);
+}
+.rev-action-uninstall:hover .rev-action-icon {
+  color: #ef8f8f;
+  border-color: rgba(210, 76, 76, 0.34);
+  background: rgba(210, 76, 76, 0.09);
+}
+.rev-action-uninstall:hover .rev-action-hint { color: #c88989; }
+
+@media (max-width: 1180px) {
+  .rev-actions-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .rev-action-launch {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 720px) {
+  .rev-installed-actions { padding: 11px; }
+  .rev-actions-grid { grid-template-columns: 1fr; }
+  .rev-action-launch { grid-column: auto; }
+  .rev-action-btn { min-height: 54px; }
+  .rev-action-label,
+  .rev-action-hint { white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rev-action-btn,
+  .rev-action-arrow {
+    transition: none;
+  }
+  .rev-action-btn:hover,
+  .rev-action-btn:active,
+  .rev-action-launch:hover .rev-action-arrow {
+    transform: none;
+  }
+}
 

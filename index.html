@@ -17,7 +17,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
-    <link rel="stylesheet" href="./style.css?v=38">
+    <link rel="stylesheet" href="./style.css?v=39">
     <style>
       /* Spinner animation cho nut "VUI LONG CHO..." */
       @keyframes spin {
@@ -9219,22 +9219,39 @@ const GameDetail = ({ game, onBack }) => {
                     </div>
                   )}
 
-                  {/* 3 NUT — da cai: Khởi Chạy / Gỡ Cài Đặt / Mở Thư Mục Game */}
+                  {/* 3 NUT — da cai: rieng Assassin's Creed Revelations */}
                   {revState === 'installed' && (
-                    <div className="gd-actions" style={{display: 'flex', gap: '10px', marginTop: '0'}}>
-                      <button className="gd-action-btn gd-action-play" onClick={handleRevLaunch}>
-                        <i className="ph-fill ph-play"></i>
-                        <span>Khởi Chạy</span>
-                      </button>
-                      <button className="gd-action-btn gd-action-uninstall" onClick={handleRevUninstallClick}>
-                        <i className="ph-fill ph-trash"></i>
-                        <span>Gỡ Cài Đặt</span>
-                      </button>
-                      <button className="gd-action-btn gd-action-folder" onClick={handleRevOpenFolder}>
-                        <i className="ph-fill ph-folder-open"></i>
-                        <span>Mở Thư Mục Game</span>
-                      </button>
-                    </div>
+                    <section className="rev-installed-actions" aria-label="Điều khiển Assassin's Creed Revelations">
+                      <div className="rev-actions-heading" aria-hidden="true">
+                        <span className="rev-actions-line"></span>
+                        <span className="rev-actions-status"><i className="ph-fill ph-check-circle"></i> Sẵn sàng khởi chạy</span>
+                        <span className="rev-actions-line"></span>
+                      </div>
+                      <div className="rev-actions-grid">
+                        <button type="button" className="rev-action-btn rev-action-launch" onClick={handleRevLaunch}>
+                          <span className="rev-action-icon"><i className="ph-fill ph-play"></i></span>
+                          <span className="rev-action-copy">
+                            <span className="rev-action-label">Khởi Chạy</span>
+                            <span className="rev-action-hint">Vào Animus</span>
+                          </span>
+                          <i className="ph-bold ph-caret-right rev-action-arrow" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" className="rev-action-btn rev-action-folder" onClick={handleRevOpenFolder}>
+                          <span className="rev-action-icon"><i className="ph-fill ph-folder-open"></i></span>
+                          <span className="rev-action-copy">
+                            <span className="rev-action-label">Mở Thư Mục Game</span>
+                            <span className="rev-action-hint">Xem tệp đã cài đặt</span>
+                          </span>
+                        </button>
+                        <button type="button" className="rev-action-btn rev-action-uninstall" onClick={handleRevUninstallClick}>
+                          <span className="rev-action-icon"><i className="ph-fill ph-trash"></i></span>
+                          <span className="rev-action-copy">
+                            <span className="rev-action-label">Gỡ Cài Đặt</span>
+                            <span className="rev-action-hint">Xóa game khỏi máy</span>
+                          </span>
+                        </button>
+                      </div>
+                    </section>
                   )}
                 </div>
               )}
