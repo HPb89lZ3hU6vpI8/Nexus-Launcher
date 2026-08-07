@@ -6101,3 +6101,210 @@ body {
 .upcoming-card:hover .upcoming-img-wrapper img {
   transform: scale(1.05);
 }
+
+/* ============================================================
+   REVELATIONS (AppID 201870) — custom install flow CSS
+   Folder picker modal + uninstall confirm + reuse existing
+   .gd-actions buttons (already defined above, line ~2153).
+   ============================================================ */
+
+/* ---- Backdrop overlay (blur + darken) ---- */
+.rev-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: revFadeIn 0.18s ease;
+}
+@keyframes revFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---- Modal card (dark theme, cyan accent) ---- */
+.rev-modal-card {
+  background: linear-gradient(180deg, #1a1d23 0%, #14171c 100%);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  border-radius: 14px;
+  padding: 0;
+  width: 520px;
+  max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.03) inset;
+  animation: revSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.rev-modal-card.rev-modal-small { width: 420px; }
+@keyframes revSlideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---- Modal header (icon + title) ---- */
+.rev-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 24px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.rev-modal-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #e5e7eb;
+  letter-spacing: 0.2px;
+}
+
+/* ---- Modal body ---- */
+.rev-modal-body {
+  padding: 18px 24px 8px;
+}
+.rev-modal-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(6, 182, 212, 0.06);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+.rev-modal-info strong { color: #06b6d4; font-weight: 700; }
+
+.rev-input-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+/* ---- Path input + browse button row ---- */
+.rev-input-row {
+  display: flex;
+  gap: 10px;
+}
+.rev-path-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 13px;
+  color: #e5e7eb;
+  font-family: 'Consolas', monospace;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.rev-path-input:hover { border-color: rgba(6, 182, 212, 0.3); }
+.rev-path-input:focus { border-color: rgba(6, 182, 212, 0.5); }
+.rev-path-input::placeholder { color: #4b5563; }
+
+.rev-browse-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 8px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #06b6d4;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.rev-browse-btn:hover {
+  background: rgba(6, 182, 212, 0.18);
+  border-color: rgba(6, 182, 212, 0.5);
+}
+.rev-browse-btn i { font-size: 16px; }
+
+/* ---- Modal action buttons (bottom) ---- */
+.rev-modal-actions {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px 22px;
+  justify-content: flex-end;
+}
+.rev-cancel-btn {
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.rev-cancel-btn:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #e5e7eb;
+}
+.rev-save-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.rev-save-btn:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: rgba(16, 185, 129, 0.6);
+}
+.rev-save-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.rev-save-btn i { font-size: 16px; }
+
+/* ---- Uninstall confirm button (red) ---- */
+.rev-uninstall-confirm-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.rev-uninstall-confirm-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.6);
+}
+.rev-uninstall-confirm-btn i { font-size: 16px; }
+
+/* ---- 3 action buttons (Khởi Chạy / Gỡ Cài Đặt / Mở Thư Mục Game) ---- */
+/* Reuse .gd-actions / .gd-action-btn / .gd-action-play / .gd-action-uninstall / .gd-action-folder
+   (already defined around line 2153). Layout: flex row gap 10px. */
+.gd-actions .gd-action-btn {
+  flex: 1;
+  justify-content: center;
+  padding: 12px 8px;
+  font-size: 13px;
+}
+.gd-actions .gd-action-btn i { font-size: 18px; }
+

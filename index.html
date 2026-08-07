@@ -8192,6 +8192,43 @@ const GameDetail = ({ game, onBack }) => {
   const [accessNote, setAccessNote] = React.useState('');
   const accessApiRef = React.useRef(null);  // cache window.pywebview.api ref
 
+  // ====== REVELATIONS (AppID 201870) — custom install flow ======
+  // Game này KHONG dung steam/nexust/lua flow. Flow riêng:
+  // idle → checking (file size) → selecting (folder picker) → checking_space →
+  // downloading (aria2c + progress) → installing (7z) → installed (3 nut).
+  // Path luu registry HKCU, ton tai den khi user Go Cai Dat.
+  const isRevelations = !!(game.appId && String(game.appId) === '201870');
+  const [revState, setRevState] = React.useState('idle');  // idle|checking|selecting|checking_space|downloading|installing|installed
+  const [revNote, setRevNote] = React.useState('');
+  const [revProgress, setRevProgress] = React.useState({percent: 0, downloaded: 0, total: 0});
+  const [revFileSize, setRevFileSize] = React.useState(null);  // {size_bytes, size_gb}
+  const [revInstallPath, setRevInstallPath] = React.useState('');  // path trong folder picker input
+  const [revShowFolderPicker, setRevShowFolderPicker] = React.useState(false);
+  const [revShowUninstall, setRevShowUninstall] = React.useState(false);
+  const [revInstallSavedPath, setRevInstallSavedPath] = React.useState(null);  // path da cai (tu registry)
+  // Toast riêng cho Revelations (state + auto-dismiss) — Đang Khởi Chạy Game...
+  const [revToastMsg, setRevToastMsg] = React.useState('');
+  const [revToastState, setRevToastState] = React.useState('success');  // success|error|info
+  const [revToastClosing, setRevToastClosing] = React.useState(false);
+  const revToastTimer = React.useRef(null);
+  const showRevToast = (msg, st = 'success') => {
+    setRevToastMsg(msg);
+    setRevToastState(st);
+    setRevToastClosing(false);
+    if (revToastTimer.current) clearTimeout(revToastTimer.current);
+    revToastTimer.current = setTimeout(() => {
+      setRevToastClosing(true);
+      setTimeout(() => { setRevToastMsg(''); setRevToastClosing(false); }, 320);
+    }, 4500);
+  };
+
+  // Global callback cho Python push progress download (aria2c).
+  React.useEffect(() => {
+    window.__revProgress = (data) => setRevProgress(data);
+    return () => { delete window.__revProgress; };
+  }, []);
+
+
   // ====== NÚT "Fix Game" — chỉ vài game online có (game.fix). Fix online crack. ======
   // fixState: 'idle' | 'fixing'
   // fixNote: note dưới nút Fix Game (lỗi/thông báo). Trống = không hiện.
@@ -8378,6 +8415,167 @@ const GameDetail = ({ game, onBack }) => {
     }
   };
 
+  // ====== REVELATIONS handlers ======
+  // Bấm "Click Vào Đây Để Truy Cập" → checking → show folder picker.
+  const handleRevClick = async () => {
+    if (revState !== 'idle') return;
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    if (!api) {
+      setRevNote('Vui lòng mở qua ứng dụng NexusGames để truy cập game');
+      return;
+    }
+    setRevNote('');
+    setRevState('checking');
+    try {
+      // Lay dung luong file tu Google Drive.
+      const sizeInfo = await api.get_revelations_file_size();
+      if (!sizeInfo || !sizeInfo.success) {
+        setRevState('idle');
+        setRevNote('Lỗi: Không lấy được dung lượng file từ Google Drive');
+        return;
+      }
+      setRevFileSize(sizeInfo);
+      // Hien folder picker modal.
+      setRevInstallPath('');
+      setRevShowFolderPicker(true);
+      setRevState('selecting');
+    } catch (e) {
+      setRevState('idle');
+      setRevNote('Lỗi: ' + (e && e.message ? e.message : String(e)));
+    }
+  };
+
+  // Bấm "Duyệt..." trong folder picker → mo folder dialog native.
+  const handleRevBrowse = async () => {
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    if (!api) return;
+    try {
+      const path = await api.open_folder_dialog();
+      if (path) setRevInstallPath(path);
+    } catch (e) {}
+  };
+
+  // Bấm "Save" trong folder picker → check disk space → download → install.
+  const handleRevSave = async () => {
+    if (!revInstallPath) {
+      setRevNote('Vui lòng chọn folder cài đặt');
+      return;
+    }
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    if (!api) {
+      setRevNote('Vui lòng mở qua ứng dụng NexusGames');
+      return;
+    }
+    setRevShowFolderPicker(false);
+    setRevNote('');
+    setRevState('checking_space');
+    try {
+      // Check disk space (gấp 2 lần file size).
+      const space = await api.check_revelations_disk_space(
+        revInstallPath, revFileSize.size_bytes);
+      if (!space || !space.success) {
+        setRevState('idle');
+        setRevNote(space && space.error ? space.error : 'Lỗi check disk space');
+        return;
+      }
+      if (!space.enough) {
+        setRevState('idle');
+        showRevToast('Không Đủ Dung Lượng Hệ Thống', 'error');
+        return;
+      }
+      // Download + extract.
+      setRevProgress({percent: 0, downloaded: 0, total: revFileSize.size_bytes});
+      setRevState('downloading');
+      const result = await api.install_revelations(revInstallPath);
+      if (!result || !result.success) {
+        setRevState('idle');
+        setRevNote(result && result.error ? result.error : 'Lỗi cài đặt không xác định');
+        return;
+      }
+      // Cài xong → 3 nut.
+      setRevInstallSavedPath(revInstallPath);
+      setRevProgress({percent: 0, downloaded: 0, total: 0});
+      setRevState('installed');
+      setRevNote('');
+    } catch (e) {
+      setRevState('idle');
+      setRevNote('Lỗi: ' + (e && e.message ? e.message : String(e)));
+    }
+  };
+
+  // Bấm "Cancel" trong folder picker → quay lai idle.
+  const handleRevCancel = () => {
+    setRevShowFolderPicker(false);
+    setRevState('idle');
+    setRevNote('');
+    setRevInstallPath('');
+  };
+
+  // Bấm "Khởi Chạy" → launch ACRSP.exe + toast.
+  const handleRevLaunch = async () => {
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    if (!api) return;
+    try {
+      const r = await api.launch_revelations();
+      if (r && r.success) {
+        // Toast: Đang Khởi Chạy Game, Vui Lòng Đợi...
+        showRevToast('Đang Khởi Chạy Game, Vui Lòng Đợi...', 'success');
+      } else {
+        setRevNote(r && r.error ? r.error : 'Lỗi khởi chạy game');
+      }
+    } catch (e) {
+      setRevNote('Lỗi: ' + (e && e.message ? e.message : String(e)));
+    }
+  };
+
+  // Bấm "Gỡ Cài Đặt" → show confirm dialog.
+  const handleRevUninstallClick = () => {
+    setRevShowUninstall(true);
+  };
+
+  // Confirm gỡ cài đặt → xoa folder + clear registry.
+  const handleRevUninstallConfirm = async () => {
+    setRevShowUninstall(false);
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    if (!api) return;
+    try {
+      const r = await api.uninstall_revelations();
+      if (r && r.success) {
+        setRevState('idle');
+        setRevInstallSavedPath(null);
+        setRevNote('');
+        setRevProgress({percent: 0, downloaded: 0, total: 0});
+      } else {
+        setRevNote(r && r.error ? r.error : 'Lỗi gỡ cài đặt');
+      }
+    } catch (e) {
+      setRevNote('Lỗi: ' + (e && e.message ? e.message : String(e)));
+    }
+  };
+
+  // Hủy gỡ cài đặt → đóng dialog.
+  const handleRevUninstallCancel = () => {
+    setRevShowUninstall(false);
+  };
+
+  // Bấm "Mở Thư Mục Game" → explorer.
+  const handleRevOpenFolder = async () => {
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    if (!api) return;
+    try {
+      const r = await api.open_revelations_folder();
+      if (!r || !r.success) {
+        setRevNote(r && r.error ? r.error : 'Lỗi mở thư mục');
+      }
+    } catch (e) {}
+  };
+
   const mediaRefs = React.useRef([]);
   const wasPlayingRef = React.useRef(false);
 
@@ -8522,7 +8720,36 @@ const GameDetail = ({ game, onBack }) => {
     setRedeemCode('');
     setRedeemState('idle');
     setRedeemNote('');
+    // Reset Revelations state khi đổi game.
+    setRevState('idle');
+    setRevNote('');
+    setRevProgress({percent: 0, downloaded: 0, total: 0});
+    setRevFileSize(null);
+    setRevInstallPath('');
+    setRevShowFolderPicker(false);
+    setRevShowUninstall(false);
+    setRevInstallSavedPath(null);
   }, [game]);
+
+  // REVELATIONS mount-time check: check registry xem game da cai chua.
+  // Neu da cai → 3 nut (installed). Neu chua → 1 nut "Click Vào Đây...".
+  React.useEffect(() => {
+    if (!isRevelations) return;
+    let cancelled = false;
+    (async () => {
+      let api;
+      try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+      if (!api) return;
+      try {
+        const r = await api.check_revelations_install();
+        if (!cancelled && r && r.installed) {
+          setRevState('installed');
+          setRevInstallSavedPath(r.install_path);
+        }
+      } catch (e) {}
+    })();
+    return () => { cancelled = true; };
+  }, [game, isRevelations]);
 
   React.useEffect(() => {
     const handleLeave = () => {
@@ -8857,8 +9084,82 @@ const GameDetail = ({ game, onBack }) => {
                 </div>
               </div>
 
-              {/* ====== NÚT TRUY CẬP / BÁO SẮP RA MẮT (Chỉ game sắp ra mắt mới hiện nút bị khóa RevoltG 1:1) ====== */}
-              {(!isUpcomingGame && game.appId) ? (
+              {/* ====== REVELATIONS (AppID 201870) — custom install flow ====== */}
+              {/* Game này KHONG dung steam/nexust/lua. Flow riêng: check size → folder picker → disk check → download (aria2c) → extract (7z) → 3 nut. */}
+              {isRevelations && !isUpcomingGame && (
+                <div>
+                  {/* 1 NUT — chua cai: "Click Vào Đây Để Truy Cập" */}
+                  {revState !== 'installed' && (
+                    <div>
+                      <button
+                        className="gd-play-btn"
+                        onClick={handleRevClick}
+                        disabled={revState !== 'idle'}
+                        style={{textDecoration: 'none', display: 'flex', cursor: revState !== 'idle' ? 'wait' : 'pointer', opacity: revState !== 'idle' ? 0.7 : 1}}
+                      >
+                        <div className="gd-play-left">
+                          {revState === 'idle' ? (
+                            <i className="ph-bold ph-key" style={{fontSize: '28px', color: 'var(--accent-cyan)'}}></i>
+                          ) : (
+                            <i className="ph ph-spinner" style={{fontSize: '28px', color: 'var(--accent-cyan)', animation: 'spin 1s linear infinite'}}></i>
+                          )}
+                          <div>
+                            <div style={{fontSize: '10px', color: 'var(--text-muted)'}}>TRUY CẬP GAME</div>
+                            <div style={{fontSize: '15px', fontWeight: '900', letterSpacing: '0.3px'}}>
+                              {revState === 'idle' && 'Click Vào Đây Để Truy Cập'}
+                              {revState === 'checking' && 'Đang Kiểm Tra...'}
+                              {revState === 'selecting' && 'Đang Kiểm Tra...'}
+                              {revState === 'checking_space' && 'Đang Kiểm Tra...'}
+                              {revState === 'downloading' && 'Đang Tải Game...'}
+                              {revState === 'installing' && 'Đang Cài Đặt Game...'}
+                            </div>
+                          </div>
+                        </div>
+                        {revState === 'idle' && <i className="ph-bold ph-arrow-right"></i>}
+                      </button>
+
+                      {/* Progress bar download */}
+                      {(revState === 'downloading' && revProgress.total > 0) && (
+                        <div style={{marginTop: '12px'}}>
+                          <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '6px'}}>
+                            <span>{revProgress.percent.toFixed(1)}%</span>
+                            <span>{(revProgress.downloaded / 1073741824).toFixed(2)} GB / {(revProgress.total / 1073741824).toFixed(2)} GB</span>
+                          </div>
+                          <div style={{width: '100%', height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden'}}>
+                            <div style={{width: revProgress.percent + '%', height: '100%', background: 'linear-gradient(90deg, #06b6d4, #0891b2)', borderRadius: '3px', transition: 'width 0.3s ease'}}></div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Inline note */}
+                      {revNote && (
+                        <div style={{marginTop: '10px', padding: '10px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700', lineHeight: '1.5', background: (revNote.indexOf('Lỗi') >= 0 || revNote.indexOf('Không Đủ') >= 0 || revNote.indexOf('Vui lòng') >= 0) ? 'rgba(239, 68, 68, 0.12)' : 'rgba(245, 158, 11, 0.12)', color: (revNote.indexOf('Lỗi') >= 0 || revNote.indexOf('Không Đủ') >= 0 || revNote.indexOf('Vui lòng') >= 0) ? '#ef4444' : '#f59e0b', border: '1px solid ' + ((revNote.indexOf('Lỗi') >= 0 || revNote.indexOf('Không Đủ') >= 0 || revNote.indexOf('Vui lòng') >= 0) ? 'rgba(239, 68, 68, 0.3)' : 'rgba(245, 158, 11, 0.3)')}}>{revNote}</div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 3 NUT — da cai: Khởi Chạy / Gỡ Cài Đặt / Mở Thư Mục Game */}
+                  {revState === 'installed' && (
+                    <div className="gd-actions" style={{display: 'flex', gap: '10px', marginTop: '0'}}>
+                      <button className="gd-action-btn gd-action-play" onClick={handleRevLaunch}>
+                        <i className="ph-fill ph-play"></i>
+                        <span>Khởi Chạy</span>
+                      </button>
+                      <button className="gd-action-btn gd-action-uninstall" onClick={handleRevUninstallClick}>
+                        <i className="ph-fill ph-trash"></i>
+                        <span>Gỡ Cài Đặt</span>
+                      </button>
+                      <button className="gd-action-btn gd-action-folder" onClick={handleRevOpenFolder}>
+                        <i className="ph-fill ph-folder-open"></i>
+                        <span>Mở Thư Mục Game</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ====== NÚT TRUY CẬP / BÁO SẮP RA MẮT (game khác — KHÔNG phải Revelations) ====== */}
+              {(!isUpcomingGame && game.appId && !isRevelations) ? (
                 <div>
                   <button
                     className="gd-play-btn"
@@ -9013,6 +9314,85 @@ const GameDetail = ({ game, onBack }) => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ====== REVELATIONS: Folder Picker Modal (beautiful) ====== */}
+      {revShowFolderPicker && (
+        <div className="rev-modal-backdrop" onClick={handleRevCancel}>
+          <div className="rev-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="rev-modal-header">
+              <i className="ph-fill ph-folder-plus" style={{fontSize: '24px', color: 'var(--accent-cyan)'}}></i>
+              <div className="rev-modal-title">Chọn Vị Trí Cài Đặt Game</div>
+            </div>
+            <div className="rev-modal-body">
+              <div className="rev-modal-info">
+                <i className="ph ph-info" style={{fontSize: '16px', color: 'var(--text-muted)'}}></i>
+                <span>Chọn thư mục để tải và giải nén game. Dung lượng cần: <strong>{revFileSize ? revFileSize.size_gb + ' GB' : '...'}</strong> (yêu cầu trống gấp 2 lần)</span>
+              </div>
+              <label className="rev-input-label">Đường dẫn cài đặt</label>
+              <div className="rev-input-row">
+                <input
+                  type="text"
+                  className="rev-path-input"
+                  placeholder="VD: C:\Program Files (x86)"
+                  value={revInstallPath}
+                  onChange={(e) => setRevInstallPath(e.target.value)}
+                  readOnly
+                />
+                <button className="rev-browse-btn" onClick={handleRevBrowse}>
+                  <i className="ph-bold ph-folder-open"></i>
+                  <span>Duyệt...</span>
+                </button>
+              </div>
+            </div>
+            <div className="rev-modal-actions">
+              <button className="rev-cancel-btn" onClick={handleRevCancel}>Hủy</button>
+              <button className="rev-save-btn" onClick={handleRevSave} disabled={!revInstallPath}>
+                <i className="ph-bold ph-floppy-disk"></i>
+                <span>Save</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ====== REVELATIONS: Uninstall Confirm Modal ====== */}
+      {revShowUninstall && (
+        <div className="rev-modal-backdrop" onClick={handleRevUninstallCancel}>
+          <div className="rev-modal-card rev-modal-small" onClick={(e) => e.stopPropagation()}>
+            <div className="rev-modal-header">
+              <i className="ph-fill ph-warning" style={{fontSize: '24px', color: '#ef4444'}}></i>
+              <div className="rev-modal-title">Bạn Chắc Chắn Gỡ Cài Đặt Game Chứ?</div>
+            </div>
+            <div className="rev-modal-body">
+              <div className="rev-modal-info">
+                <span>Toàn bộ folder game sẽ bị xóa. Hành động này không thể hoàn tác.</span>
+              </div>
+            </div>
+            <div className="rev-modal-actions">
+              <button className="rev-cancel-btn" onClick={handleRevUninstallCancel}>Hủy</button>
+              <button className="rev-uninstall-confirm-btn" onClick={handleRevUninstallConfirm}>
+                <i className="ph-bold ph-trash"></i>
+                <span>Gỡ Cài Đặt</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ====== REVELATIONS: Toast (Đang Khởi Chạy Game...) ====== */}
+      {revToastMsg && (
+        <div className={`nexus-toast-notification ${revToastState} ${revToastClosing ? 'closing' : ''}`}>
+          <i className={`toast-icon ph-bold ${revToastState === 'error' ? 'ph-warning-circle' : 'ph-check-circle'}`}></i>
+          <div className="toast-content">
+            <div className="toast-title">THÔNG BÁO HỆ THỐNG</div>
+            <div className="toast-message">{revToastMsg}</div>
+          </div>
+          <button className="toast-close-btn" onClick={() => { setRevToastMsg(''); setRevToastClosing(false); }}>
+            <i className="ph-bold ph-x"></i>
+          </button>
+          <div className="toast-progress-bar" style={{ background: revToastState === 'error' ? '#f43f5e' : '#10b981' }}></div>
         </div>
       )}
     </div>
