@@ -6456,7 +6456,10 @@ body {
   align-items: center;
   justify-content: center;
 }
-.rev-action-icon i { font-size: 15px; }
+.rev-action-icon i {
+  font-size: 13px;
+  line-height: 1;
+}
 .rev-action-copy {
   min-width: 0;
   display: flex;
@@ -6477,9 +6480,9 @@ body {
 .rev-action-hint { display: none; }
 .rev-action-launch {
   justify-content: center;
-  border-color: rgba(0, 216, 230, 0.62);
-  background: #087f8a;
-  color: #e9feff;
+  border-color: rgba(0, 216, 230, 0.30);
+  background: #181b20;
+  color: #f0f4f5;
 }
 .rev-action-launch .rev-action-copy {
   flex: 0 1 auto;
@@ -6491,18 +6494,24 @@ body {
   text-overflow: clip;
 }
 .rev-action-launch:hover {
-  border-color: var(--rev-cyan-bright);
-  background: #0b96a2;
+  border-color: rgba(0, 216, 230, 0.52);
+  background: #20242a;
 }
 .rev-action-launch .rev-action-icon {
-  border-color: rgba(233, 254, 255, 0.22);
-  background: rgba(0, 20, 24, 0.20);
-  color: #e9feff;
+  border-color: rgba(0, 216, 230, 0.30);
+  background: rgba(0, 216, 230, 0.09);
+  color: #4bdce5;
 }
 .rev-action-launch .rev-action-hint { color: rgba(233, 254, 255, 0.67); }
+.rev-action-folder .rev-action-icon {
+  color: #7f8a93;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.025);
+}
 .rev-action-folder:hover .rev-action-icon {
-  border-color: rgba(0, 216, 230, 0.48);
-  background: rgba(0, 216, 230, 0.13);
+  color: #aeb9c0;
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.055);
 }
 .rev-action-uninstall {
   color: #a5a7ac;
@@ -6523,6 +6532,12 @@ body {
   background: rgba(210, 76, 76, 0.09);
 }
 .rev-action-uninstall:hover .rev-action-hint { color: #c88989; }
+.rev-action-uninstall .rev-action-icon i,
+.rev-action-folder .rev-action-icon i,
+.rev-action-launch .rev-action-icon i {
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+}
 
 @media (max-width: 1180px) {
   .rev-actions-grid {
