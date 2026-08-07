@@ -6479,34 +6479,34 @@ body {
 }
 .rev-action-hint { display: none; }
 .rev-action-launch {
-  justify-content: center;
-  border-color: rgba(0, 216, 230, 0.30);
-  background: #181b20;
-  color: #f0f4f5;
+  justify-content: flex-start;
+  border-color: rgba(255, 255, 255, 0.075);
+  background: var(--rev-surface);
+  color: #e7e4dc;
 }
 .rev-action-launch .rev-action-copy {
-  flex: 0 1 auto;
+  flex: 1;
 }
 .rev-action-launch .rev-action-label {
-  font-size: 13px;
-  letter-spacing: 0.35px;
-  overflow: visible;
-  text-overflow: clip;
+  font-size: 12px;
+  letter-spacing: 0.1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .rev-action-launch:hover {
-  border-color: rgba(0, 216, 230, 0.52);
-  background: #20242a;
+  border-color: rgba(255, 255, 255, 0.15);
+  background: var(--rev-surface-hover);
 }
-.rev-action-launch .rev-action-icon {
-  border-color: rgba(0, 216, 230, 0.30);
-  background: rgba(0, 216, 230, 0.09);
-  color: #4bdce5;
-}
-.rev-action-launch .rev-action-hint { color: rgba(233, 254, 255, 0.67); }
+.rev-action-launch .rev-action-icon,
 .rev-action-folder .rev-action-icon {
   color: #7f8a93;
   border-color: rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.025);
+}
+.rev-action-launch:hover .rev-action-icon {
+  color: #aeb9c0;
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.055);
 }
 .rev-action-folder:hover .rev-action-icon {
   color: #aeb9c0;
