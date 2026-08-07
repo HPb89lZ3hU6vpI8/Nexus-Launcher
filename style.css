@@ -6476,9 +6476,19 @@ body {
 }
 .rev-action-hint { display: none; }
 .rev-action-launch {
+  justify-content: center;
   border-color: rgba(0, 216, 230, 0.62);
   background: #087f8a;
   color: #e9feff;
+}
+.rev-action-launch .rev-action-copy {
+  flex: 0 1 auto;
+}
+.rev-action-launch .rev-action-label {
+  font-size: 13px;
+  letter-spacing: 0.35px;
+  overflow: visible;
+  text-overflow: clip;
 }
 .rev-action-launch:hover {
   border-color: var(--rev-cyan-bright);
@@ -6490,16 +6500,6 @@ body {
   color: #e9feff;
 }
 .rev-action-launch .rev-action-hint { color: rgba(233, 254, 255, 0.67); }
-.rev-action-arrow {
-  flex: 0 0 auto;
-  font-size: 15px;
-  opacity: 0.65;
-  transition: transform 140ms ease, opacity 140ms ease;
-}
-.rev-action-launch:hover .rev-action-arrow {
-  opacity: 1;
-  transform: translateX(2px);
-}
 .rev-action-folder:hover .rev-action-icon {
   border-color: rgba(0, 216, 230, 0.48);
   background: rgba(0, 216, 230, 0.13);
@@ -6539,13 +6539,9 @@ body {
   .rev-action-btn { min-height: 48px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .rev-action-btn,
-  .rev-action-arrow {
-    transition: none;
-  }
+  .rev-action-btn { transition: none; }
   .rev-action-btn:hover,
-  .rev-action-btn:active,
-  .rev-action-launch:hover .rev-action-arrow {
+  .rev-action-btn:active {
     transform: none;
   }
 }
