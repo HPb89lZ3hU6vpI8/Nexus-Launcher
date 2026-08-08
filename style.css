@@ -6348,33 +6348,16 @@ body {
   --rev-surface: var(--card-bg, #1a1c22);
   --rev-surface-hover: #20232a;
   position: relative;
-  padding: 11px;
-  border: 1px solid rgba(0, 216, 230, 0.54);
-  border-radius: 9px;
-  background:
-    linear-gradient(90deg, rgba(0, 216, 230, 0.075) 1px, transparent 1px) 0 0 / 28px 28px,
-    linear-gradient(rgba(0, 216, 230, 0.055) 1px, transparent 1px) 0 0 / 28px 28px,
-    var(--card-bg, #1a1c22);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 7px 18px rgba(0, 0, 0, 0.16);
-  overflow: hidden;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
 }
 .rev-installed-actions::before,
 .rev-installed-actions::after {
-  content: "";
-  position: absolute;
-  height: 1px;
-  width: 72px;
-  background: rgba(0, 216, 230, 0.68);
-  pointer-events: none;
-}
-.rev-installed-actions::before {
-  top: 0;
-  left: 20px;
-}
-.rev-installed-actions::after {
-  right: 20px;
-  bottom: 0;
-  background: rgba(0, 216, 230, 0.68);
+  display: none;
 }
 .rev-actions-heading {
   position: relative;
