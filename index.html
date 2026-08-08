@@ -11204,8 +11204,8 @@ const IntegrateContent = () => {
     }
     // Đã cài → GỠ CÀI ĐẶT → uninstall_fluenty.
     if (cur === 'installed') {
-      setFluentyState('installing');  // reuse installing state (disabled)
-      setFluentyNote('');
+      setFluentyState('uninstalling');
+      setFluentyNote('Đang tắt Steam và gỡ cài đặt...');
       try {
         const r = await api.uninstall_fluenty();
         if (r && r.success) {
@@ -11223,7 +11223,7 @@ const IntegrateContent = () => {
     }
     // Chưa cài → KÍCH HOẠT NGAY → install_fluenty.
     setFluentyState('installing');
-    setFluentyNote('');
+    setFluentyNote('Đang tắt Steam và cài đặt...');
     try {
       const r = await api.install_fluenty();
       if (r && r.success) {
@@ -11589,7 +11589,8 @@ const IntegrateContent = () => {
                                      || integrateStates[card.id] === 'installing'))
                              || (card.id === 'fluenty'
                                  && (fluentyState === 'checking'
-                                     || fluentyState === 'installing'))
+                                     || fluentyState === 'installing'
+                                     || fluentyState === 'uninstalling'))
                            ? 'default' : 'pointer'
                       }}
                       disabled={(card.id === 'cloud' && cloudState !== 'idle')
@@ -11599,7 +11600,8 @@ const IntegrateContent = () => {
                                      || integrateStates[card.id] === 'installing'))
                              || (card.id === 'fluenty'
                                  && (fluentyState === 'checking'
-                                     || fluentyState === 'installing'))}
+                                     || fluentyState === 'installing'
+                                     || fluentyState === 'uninstalling'))}
                       onClick={card.id === 'cloud' ? handleCloudClick
                             : card.id === 'vip' ? handleEasyInstallClick
                             : card.id === 'fluenty' ? handleFluentyClick
@@ -11623,6 +11625,7 @@ const IntegrateContent = () => {
                         : card.id === 'fluenty'
                         ? (fluentyState === 'checking' ? 'ĐANG KIỂM TRA...'
                            : fluentyState === 'installing' ? 'ĐANG CÀI ĐẶT...'
+                           : fluentyState === 'uninstalling' ? 'ĐANG GỠ CÀI ĐẶT...'
                            : fluentyState === 'installed' ? 'GỠ CÀI ĐẶT'
                            : 'KÍCH HOẠT NGAY')
                         : card.btnText}
