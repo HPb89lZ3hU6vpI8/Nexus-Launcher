@@ -2957,7 +2957,7 @@ const GAME_DATA = [
     },
     fix: {
       driveId: '1oK2_EFrVLL9Br9sO0Xbfwmuou4fFmQs0',
-      password: '1kd1jqPFlFbi9B3bLLowuvJU3qS8wHtIf8mg8mDHZX3IOVLexd',
+      password: '1xN6Znb6Ta0PGOF17dNEP7AeHpM9RdDBsuSUAKVKQ5tw2NyNbZ',
       zipName: 'Palworld.zip',
       gameExe: 'Palworld.exe',
       gameFolder: 'Palworld',
@@ -3850,7 +3850,7 @@ const GAME_DATA = [
     reviewCount: "35.305 đánh giá",
     tags: ['HÀNH ĐỘNG', 'PHIÊU LƯU', 'ĐỘC LẬP', 'CHƠI ĐƠN', 'CHƠI NHIỀU NGƯỜI', 'HỢP TÁC'],
     viethoa: false,
-    cloudSave: false,
+    cloudSave: true,
     baseName: "RVThereYet",
     addedAt: '2026-07-12',
     steamAccount: '',
@@ -3865,6 +3865,13 @@ const GAME_DATA = [
       storage: '3200 MB available space',
       audio: 'No Recommendation',
       note: 'Friends to play with'
+    },
+    fix: {
+      driveId: '1NtNqc-f3qKvJ0Ro_Q90q0f57L44yvaIV',
+      password: '7Lzn8pDENEkvNaS3xoypkJhdNwbxmRxYmf0bVUB4qE1MOi8j39',
+      zipName: 'RVThereYet.zip',
+      gameExe: 'Ride.exe',
+      gameFolder: 'Ride',
     }
   },
   {
@@ -10226,7 +10233,7 @@ const GameDetail = ({ game, onBack }) => {
               <div className="gd-box gd-specs-box">
                 <div className="gd-spec-item" style={{borderRight: '1px solid rgba(255,255,255,0.05)'}}>
                   <div className="gd-spec-label"><i className="ph-bold ph-mask-happy"></i> Chế độ</div>
-                  {['the forest', '7 days to die', 'stardew valley', 'among us', 'sons of the forest', 'palworld', 'escape the backrooms', 'inside the backrooms', 'backrooms: escape together', 'climb the backrooms', 'meccha chameleon', 'raft'].includes((game.title || '').toLowerCase()) ? (
+                  {['the forest', '7 days to die', 'stardew valley', 'among us', 'sons of the forest', 'palworld', 'escape the backrooms', 'inside the backrooms', 'backrooms: escape together', 'climb the backrooms', 'meccha chameleon', 'raft', 'rv there yet?'].includes((game.title || '').toLowerCase()) ? (
                     <div className="gd-spec-value" style={{background: 'rgba(0, 212, 255, 0.05)', color: 'var(--accent-cyan)', border: '1px solid rgba(0, 212, 255, 0.3)', padding: '2px 12px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '900'}}>
                       <div style={{width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-cyan)', boxShadow: '0 0 6px var(--accent-cyan)'}}></div>
                       ONLINE
@@ -10975,6 +10982,15 @@ const IntegrateContent = () => {
     thuanviet: 'checking',
   });
 
+  // === FLUENTY UI (Millennium Steam skin) ===
+  // State machine: 'checking' | 'idle' | 'installing' | 'installed'
+  // 'checking' → ĐANG KIỂM TRA... (mount-time check via fluenty_precheck)
+  // 'idle' → KÍCH HOẠT NGAY (click → install_fluenty: kill steam + download + extract + merge + relaunch)
+  // 'installing' → ĐANG CÀI ĐẶT... (disabled)
+  // 'installed' → GỠ CÀI ĐẶT (click → uninstall_fluenty: kill steam + delete Millennium/ + wsock32.dll + relaunch)
+  const [fluentyState, setFluentyState] = React.useState('checking');
+  const [fluentyNote, setFluentyNote] = React.useState('');
+
   const closeToast = React.useCallback(() => {
     setToastClosing(true);
     setTimeout(() => {
@@ -11131,7 +11147,97 @@ const IntegrateContent = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // === TÍCH HỢP: click handler — activate (download+extract) hoặc launch exe ===
+  // === FLUENTY UI: mount-time check (read fluenty_precheck tu Python API) ===
+  // Frontend doc api.fluenty_precheck (dict) -> set 'installed' (GỠ CÀI ĐẶT)
+  // hoac 'idle' (KÍCH HOẠT NGAY) ngay khi render, khong can goi API them.
+  // Fallback: goi api.check_fluenty_installed() neu khong co precheck.
+  React.useEffect(() => {
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    if (!api) {
+      setFluentyState('idle');  // Dev mode / browser fallback
+      return;
+    }
+    // Fast path: doc precheck (da chay trong main() truoc khi mo UI).
+    if (api.fluenty_precheck) {
+      const pre = api.fluenty_precheck;
+      setFluentyState(pre && pre.installed ? 'installed' : 'idle');
+      return;
+    }
+    // Fallback: goi API check truc tiep.
+    if (!api.check_fluenty_installed) {
+      setFluentyState('idle');
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await api.check_fluenty_installed();
+        if (!cancelled) {
+          setFluentyState(r && r.installed ? 'installed' : 'idle');
+        }
+      } catch (e) {
+        if (!cancelled) setFluentyState('idle');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Auto-dismiss fluentyNote sau 3.5s (success) / 6s (error).
+  React.useEffect(() => {
+    if (!fluentyNote) return;
+    const isErr = fluentyNote.indexOf('Lỗi') >= 0 || fluentyNote.indexOf('Cần') >= 0
+      || fluentyNote.indexOf('Không') >= 0;
+    const t = setTimeout(() => setFluentyNote(''), isErr ? 6000 : 3500);
+    return () => clearTimeout(t);
+  }, [fluentyNote]);
+
+  // === FLUENTY UI: click handler — install (KÍCH HOẠT NGAY) hoặc uninstall (GỠ CÀI ĐẶT) ===
+  const handleFluentyClick = async () => {
+    const cur = fluentyState;
+    if (cur === 'checking' || cur === 'installing') return;  // disabled states
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+    if (!api || !api.install_fluenty) {
+      setFluentyNote('Vui lòng mở qua ứng dụng NexusGames.');
+      return;
+    }
+    // Đã cài → GỠ CÀI ĐẶT → uninstall_fluenty.
+    if (cur === 'installed') {
+      setFluentyState('installing');  // reuse installing state (disabled)
+      setFluentyNote('');
+      try {
+        const r = await api.uninstall_fluenty();
+        if (r && r.success) {
+          setFluentyState('idle');
+          setFluentyNote('Đã gỡ Fluenty UI. Steam sẽ tự khởi động lại.');
+        } else {
+          setFluentyState('installed');  // revert
+          setFluentyNote((r && r.error) ? ('Lỗi gỡ cài đặt: ' + r.error) : 'Lỗi gỡ cài đặt không xác định');
+        }
+      } catch (e) {
+        setFluentyState('installed');  // revert
+        setFluentyNote('Lỗi: ' + ((e && e.message) ? e.message : String(e)));
+      }
+      return;
+    }
+    // Chưa cài → KÍCH HOẠT NGAY → install_fluenty.
+    setFluentyState('installing');
+    setFluentyNote('');
+    try {
+      const r = await api.install_fluenty();
+      if (r && r.success) {
+        setFluentyState('installed');
+        setFluentyNote(r.already ? 'Fluenty UI đã được cài đặt.' : 'Đã cài Fluenty UI. Steam sẽ tự khởi động lại.');
+      } else {
+        setFluentyState('idle');  // revert
+        setFluentyNote((r && r.error) ? ('Lỗi cài đặt: ' + r.error) : 'Lỗi cài đặt không xác định');
+      }
+    } catch (e) {
+      setFluentyState('idle');  // revert
+      setFluentyNote('Lỗi: ' + ((e && e.message) ? e.message : String(e)));
+    }
+  };
   const handleIntegrateClick = async (cardId) => {
     const cur = integrateStates[cardId];
     if (cur === 'checking' || cur === 'installing') return;  // disabled states
@@ -11263,6 +11369,28 @@ const IntegrateContent = () => {
         'Anti-Cheat (EAC)'
       ],
       note: 'Trò chơi có thể phát sinh trục trặc – Tốt nhất bạn nên tham gia Discord để được hỗ trợ & yêu cầu thêm game',
+      btnText: 'KÍCH HOẠT NGAY'
+    },
+    {
+      id: 'fluenty',
+      title: 'FLUENTY UI',
+      badge: 'GIAO DIỆN STEAM PREMIUM',
+      themeColor: '#4338ca',
+      borderColor: '#6366f1',
+      features: [
+        'Giao diện Steam Premium: Phong cách Windows 11, thiết kế tối giản, bo góc mượt mà, kính mờ sang trọng',
+        'Tùy biến màu sắc: Tự do thay đổi bảng màu Accent & Font chữ theo sở thích',
+        'Bố cục gọn gàng: Tối ưu không gian, ẩn chi tiết thừa, hiển thị thư viện cực đẹp',
+        'Widget thông minh: Lối tắt nhanh cho Bạn bè, Thông báo & Game yêu thích',
+        'Cập nhật liên tục: Tương thích hoàn hảo với mọi bản nâng cấp của Steam'
+      ],
+      infoBoxHeader: '⚙️ THÔNG TIN GÓI',
+      infoItems: [
+        'Phiên bản: Fluenty UI Premium ($5 Nhưng Hiện Giờ Miễn Phí)',
+        'Tác giả: Fluenty / Millennium',
+        'Hỗ trợ: PC Win 10/11'
+      ],
+      note: 'Giao diện độc quyền bởi Fluenty / Millennium — Tương thích hoàn hảo với mọi bản nâng cấp của Steam',
       btnText: 'KÍCH HOẠT NGAY'
     }
   ];
@@ -11460,15 +11588,22 @@ const IntegrateContent = () => {
                              || ((card.id === 'canhcut' || card.id === 'thuanviet')
                                  && (integrateStates[card.id] === 'checking'
                                      || integrateStates[card.id] === 'installing'))
+                             || (card.id === 'fluenty'
+                                 && (fluentyState === 'checking'
+                                     || fluentyState === 'installing'))
                            ? 'default' : 'pointer'
                       }}
                       disabled={(card.id === 'cloud' && cloudState !== 'idle')
                              || (card.id === 'vip' && easyInstallState === 'activating')
                              || ((card.id === 'canhcut' || card.id === 'thuanviet')
                                  && (integrateStates[card.id] === 'checking'
-                                     || integrateStates[card.id] === 'installing'))}
+                                     || integrateStates[card.id] === 'installing'))
+                             || (card.id === 'fluenty'
+                                 && (fluentyState === 'checking'
+                                     || fluentyState === 'installing'))}
                       onClick={card.id === 'cloud' ? handleCloudClick
                             : card.id === 'vip' ? handleEasyInstallClick
+                            : card.id === 'fluenty' ? handleFluentyClick
                             : (card.id === 'canhcut' || card.id === 'thuanviet')
                               ? () => handleIntegrateClick(card.id)
                             : undefined}
@@ -11485,6 +11620,11 @@ const IntegrateContent = () => {
                         ? (integrateStates[card.id] === 'checking' ? 'ĐANG KIỂM TRA...'
                            : integrateStates[card.id] === 'installing' ? 'ĐANG CÀI ĐẶT...'
                            : integrateStates[card.id] === 'installed' ? 'KHỞI CHẠY'
+                           : 'KÍCH HOẠT NGAY')
+                        : card.id === 'fluenty'
+                        ? (fluentyState === 'checking' ? 'ĐANG KIỂM TRA...'
+                           : fluentyState === 'installing' ? 'ĐANG CÀI ĐẶT...'
+                           : fluentyState === 'installed' ? 'GỠ CÀI ĐẶT'
                            : 'KÍCH HOẠT NGAY')
                         : card.btnText}
                     </button>
@@ -11518,6 +11658,20 @@ const IntegrateContent = () => {
             <i className="ph-bold ph-x"></i>
           </button>
           <div className="toast-progress-bar" style={{ background: easyInstallState === 'already' ? '#06b6d4' : easyInstallState === 'success' ? '#10b981' : '#f43f5e' }}></div>
+        </div>
+      )}
+      {/* FLUENTY UI TOAST — riêng biệt (note hiển thị lỗi/thành công khi cài/gỡ Fluenty) */}
+      {fluentyNote && (
+        <div className={`nexus-toast-notification ${fluentyNote.indexOf('Lỗi') >= 0 || fluentyNote.indexOf('Cần') >= 0 || fluentyNote.indexOf('Không') >= 0 ? 'error' : 'success'}`}>
+          <i className={`toast-icon ph-bold ${fluentyNote.indexOf('Lỗi') >= 0 || fluentyNote.indexOf('Cần') >= 0 || fluentyNote.indexOf('Không') >= 0 ? 'ph-warning-circle' : 'ph-check-circle'}`}></i>
+          <div className="toast-content">
+            <div className="toast-title">FLUENTY UI</div>
+            <div className="toast-message">{fluentyNote}</div>
+          </div>
+          <button className="toast-close-btn" onClick={() => setFluentyNote('')}>
+            <i className="ph-bold ph-x"></i>
+          </button>
+          <div className="toast-progress-bar" style={{ background: fluentyNote.indexOf('Lỗi') >= 0 || fluentyNote.indexOf('Cần') >= 0 || fluentyNote.indexOf('Không') >= 0 ? '#f43f5e' : '#6366f1' }}></div>
         </div>
       )}
     </div>
