@@ -1757,6 +1757,7 @@ body {
   flex-direction: column;
   padding: 32px 48px; /* Khôi phục lại padding để không bị dính viền */
   animation: fadeInUp 0.4s ease-out;
+  overflow: hidden; /* Desktop app: KHÔNG cuộn trang. .gd-left/.gd-right cuộn nội bộ. */
 }
 
 .gd-header {
@@ -1933,10 +1934,14 @@ body {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px; 
+  gap: 16px;
   padding-bottom: 40px; /* Khoảng trống ở đáy để tránh nút Steam Store chạm sát taskbar */
   box-sizing: border-box;
+  align-self: stretch; /* Kéo đầy chiều cao hàng grid (như .gd-left) → overflow nằm trong */
+  overflow-y: auto; /* Cuộn nội bộ nếu nội dung dài → KHÔNG tràn ra .content-area (no page scrollbar) */
+  scrollbar-width: none; /* Firefox: ẩn thanh cuộn (desktop app feel, vẫn cuộn bằng wheel) */
 }
+.gd-right::-webkit-scrollbar { display: none; } /* Chrome/pywebview: ẩn thanh cuộn */
 
 .gd-actions-top {
   display: flex;
@@ -4403,6 +4408,7 @@ body {
   flex-direction: column;
   padding: 32px 48px; /* Khôi phục lại padding để không bị dính viền */
   animation: fadeInUp 0.4s ease-out;
+  overflow: hidden; /* Desktop app: KHÔNG cuộn trang. .gd-left/.gd-right cuộn nội bộ. */
 }
 
 .gd-header {
@@ -4579,10 +4585,14 @@ body {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px; 
+  gap: 16px;
   padding-bottom: 40px; /* Khoảng trống ở đáy để tránh nút Steam Store chạm sát taskbar */
   box-sizing: border-box;
+  align-self: stretch; /* Kéo đầy chiều cao hàng grid (như .gd-left) → overflow nằm trong */
+  overflow-y: auto; /* Cuộn nội bộ nếu nội dung dài → KHÔNG tràn ra .content-area (no page scrollbar) */
+  scrollbar-width: none; /* Firefox: ẩn thanh cuộn (desktop app feel, vẫn cuộn bằng wheel) */
 }
+.gd-right::-webkit-scrollbar { display: none; } /* Chrome/pywebview: ẩn thanh cuộn */
 
 .gd-actions-top {
   display: flex;
