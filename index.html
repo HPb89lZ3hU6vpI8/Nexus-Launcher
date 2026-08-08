@@ -10019,7 +10019,7 @@ const GameDetail = ({ game, onBack }) => {
               <div className="gd-box gd-specs-box">
                 <div className="gd-spec-item" style={{borderRight: '1px solid rgba(255,255,255,0.05)'}}>
                   <div className="gd-spec-label"><i className="ph-bold ph-mask-happy"></i> Chế độ</div>
-                  {game.id === 193 ? (
+                  {['the forest', '7 days to die', 'stardew valley', 'among us', 'sons of the forest', 'palworld', 'escape the backrooms', 'inside the backrooms', 'backrooms: escape together', 'climb the backrooms', 'meccha chameleon', 'raft'].includes((game.title || '').toLowerCase()) ? (
                     <div className="gd-spec-value" style={{background: 'rgba(0, 212, 255, 0.05)', color: 'var(--accent-cyan)', border: '1px solid rgba(0, 212, 255, 0.3)', padding: '2px 12px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '900'}}>
                       <div style={{width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-cyan)', boxShadow: '0 0 6px var(--accent-cyan)'}}></div>
                       ONLINE
@@ -10040,7 +10040,7 @@ const GameDetail = ({ game, onBack }) => {
                 <div className="gd-spec-item" style={{borderRight: '1px solid rgba(255,255,255,0.05)'}}>
                   <div className="gd-spec-label"><i className="ph-fill ph-cloud"></i> Cloud Save</div>
                   <div className="gd-spec-value">
-                    {game.cloudSave ? (
+                    {(!['assassin\'s creed 2', 'assassin\'s creed ii', 'assassin\'s creed revelations', 'assassin\'s creed® revelations'].includes((game.title || '').toLowerCase()) && !['33230', '201870'].includes(game.appId)) ? (
                       <i className="ph-fill ph-check-circle" style={{color: 'var(--accent-green)', fontSize: '24px', filter: 'drop-shadow(0 0 8px rgba(34,197,94,0.6))'}}></i>
                     ) : (
                       <i className="ph-fill ph-x-circle" style={{color: 'var(--accent-red)', fontSize: '24px', filter: 'drop-shadow(0 0 8px rgba(239,68,68,0.6))'}}></i>
