@@ -2938,9 +2938,9 @@ const GAME_DATA = [
     reviewText: "CỰC KỲ TÍCH CỰC",
     reviewCount: "185.552 đánh giá",
     tags: ['HÀNH ĐỘNG', 'PHIÊU LƯU', 'ĐỘC LẬP', 'NHẬP VAI', 'CHƠI ĐƠN', 'CHƠI NHIỀU NGƯỜI'],
-    viethoa: true,
-    viethoaLink: "https://theredteam.vn/palworld-viet-hoa",
-    cloudSave: false,
+    viethoa: false,
+    viethoaLink: "",
+    cloudSave: true,
     baseName: "Palworld",
     addedAt: '2026-07-12',
     steamAccount: '',
@@ -10019,11 +10019,15 @@ const GameDetail = ({ game, onBack }) => {
               <div className="gd-box gd-specs-box">
                 <div className="gd-spec-item">
                   <div className="gd-spec-label"><i className="ph-bold ph-link"></i> Chế độ</div>
-                  <div className="gd-spec-value gd-tag-orange"><i className="ph-fill ph-wifi-slash"></i> OFFLINE</div>
+                  {game.id === 193 ? (
+                    <div className="gd-spec-value gd-tag-blue" style={{background: 'rgba(0, 212, 255, 0.15)', color: 'var(--accent-cyan)'}}><i className="ph-fill ph-wifi-high"></i> ONLINE</div>
+                  ) : (
+                    <div className="gd-spec-value gd-tag-orange"><i className="ph-fill ph-wifi-slash"></i> OFFLINE</div>
+                  )}
                 </div>
                 <div className="gd-spec-item">
                   <div className="gd-spec-label"><i className="ph-bold ph-user"></i> Yêu cầu</div>
-                  <div className="gd-spec-value gd-tag-green">MIỄN PHÍ</div>
+                  <div className="gd-spec-value gd-tag-green">MIỄN PHÍ 🎁</div>
                 </div>
                 <div className="gd-spec-item">
                   <div className="gd-spec-label"><i className="ph-fill ph-cloud"></i> Cloud Save</div>
@@ -10191,7 +10195,9 @@ const GameDetail = ({ game, onBack }) => {
                               <i className="ph-bold ph-translate" style={{fontSize: '28px', color: 'var(--accent-cyan)'}}></i>
                             )}
                             <div>
-                              <div style={{fontSize: '10px', color: 'var(--text-muted)'}}>THAY ĐỔI NGÔN NGỮ</div>
+                              <div style={{fontSize: '10px', color: 'var(--text-muted)'}}>
+                                {palworldLang ? `ĐANG DÙNG: ${(PALWORLD_LANGUAGES.find(l => l.code === palworldLang)?.native || palworldLang).toUpperCase()}` : 'THAY ĐỔI NGÔN NGỮ'}
+                              </div>
                               <div style={{fontSize: '15px', fontWeight: '900', letterSpacing: '0.3px'}}>
                                 {langLoading ? 'Đang đổi...' : 'Thay Đổi Ngôn Ngữ'}
                               </div>
@@ -10398,12 +10404,12 @@ const GameDetail = ({ game, onBack }) => {
           <div className="rev-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="rev-modal-header">
               <i className="ph-fill ph-translate" style={{fontSize: '24px', color: 'var(--accent-cyan)'}}></i>
-              <div className="rev-modal-title">Chọn Ngôn Ngữ Palworld</div>
+              <div className="rev-modal-title">Chọn Ngôn Ngữ Cho Palworld</div>
             </div>
             <div className="rev-modal-body">
               <div className="rev-modal-info">
                 <i className="ph ph-info" style={{fontSize: '16px', color: 'var(--text-muted)'}}></i>
-                <span>Chọn ngôn ngữ cho Palworld. Thay đổi sẽ áp dụng ở lần chơi tiếp theo.</span>
+                <span>Thay đổi chỉ được áp dụng khi khởi động lại Palworld</span>
               </div>
               <style>{`
                 .palworld-lang-scroll::-webkit-scrollbar { display: none; }
