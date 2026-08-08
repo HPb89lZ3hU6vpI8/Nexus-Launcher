@@ -10017,31 +10017,39 @@ const GameDetail = ({ game, onBack }) => {
               )}
 
               <div className="gd-box gd-specs-box">
-                <div className="gd-spec-item">
-                  <div className="gd-spec-label"><i className="ph-bold ph-link"></i> Chế độ</div>
+                <div className="gd-spec-item" style={{borderRight: '1px solid rgba(255,255,255,0.05)'}}>
+                  <div className="gd-spec-label"><i className="ph-bold ph-mask-happy"></i> Chế độ</div>
                   {game.id === 193 ? (
-                    <div className="gd-spec-value gd-tag-blue" style={{background: 'rgba(0, 212, 255, 0.15)', color: 'var(--accent-cyan)'}}><i className="ph-fill ph-wifi-high"></i> ONLINE</div>
+                    <div className="gd-spec-value" style={{background: 'rgba(0, 212, 255, 0.05)', color: 'var(--accent-cyan)', border: '1px solid rgba(0, 212, 255, 0.3)', padding: '2px 12px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '900'}}>
+                      <div style={{width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-cyan)', boxShadow: '0 0 6px var(--accent-cyan)'}}></div>
+                      ONLINE
+                    </div>
                   ) : (
-                    <div className="gd-spec-value gd-tag-orange"><i className="ph-fill ph-wifi-slash"></i> OFFLINE</div>
+                    <div className="gd-spec-value" style={{background: 'rgba(255, 165, 0, 0.05)', color: 'orange', border: '1px solid rgba(255, 165, 0, 0.3)', padding: '2px 12px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '900'}}>
+                      <div style={{width: '6px', height: '6px', borderRadius: '50%', background: 'orange', boxShadow: '0 0 6px orange'}}></div>
+                      OFFLINE
+                    </div>
                   )}
                 </div>
-                <div className="gd-spec-item">
-                  <div className="gd-spec-label"><i className="ph-bold ph-user"></i> Yêu cầu</div>
-                  <div className="gd-spec-value gd-tag-green">MIỄN PHÍ 🎁</div>
+                <div className="gd-spec-item" style={{borderRight: '1px solid rgba(255,255,255,0.05)'}}>
+                  <div className="gd-spec-label"><i className="ph-bold ph-user-plus"></i> Yêu cầu</div>
+                  <div className="gd-spec-value" style={{background: 'rgba(251, 191, 36, 0.05)', color: '#fbbf24', border: '1px solid rgba(251, 191, 36, 0.3)', padding: '2px 12px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '900'}}>
+                    MIỄN PHÍ <i className="ph-fill ph-gift" style={{fontSize: '14px'}}></i>
+                  </div>
                 </div>
-                <div className="gd-spec-item">
+                <div className="gd-spec-item" style={{borderRight: '1px solid rgba(255,255,255,0.05)'}}>
                   <div className="gd-spec-label"><i className="ph-fill ph-cloud"></i> Cloud Save</div>
                   <div className="gd-spec-value">
                     {game.cloudSave ? (
-                      <i className="ph-fill ph-check-circle" style={{color: 'var(--accent-green)', fontSize: '18px'}}></i>
+                      <i className="ph-fill ph-check-circle" style={{color: 'var(--accent-green)', fontSize: '24px', filter: 'drop-shadow(0 0 8px rgba(34,197,94,0.6))'}}></i>
                     ) : (
-                      <i className="ph-fill ph-x-circle" style={{color: 'var(--accent-red)', fontSize: '18px'}}></i>
+                      <i className="ph-fill ph-x-circle" style={{color: 'var(--accent-red)', fontSize: '24px', filter: 'drop-shadow(0 0 8px rgba(239,68,68,0.6))'}}></i>
                     )}
                   </div>
                 </div>
                 <div className="gd-spec-item">
                   <div className="gd-spec-label"><i className="ph-fill ph-floppy-disk"></i> Local Save</div>
-                  <div className="gd-spec-value"><i className="ph-fill ph-check-circle" style={{color: 'var(--accent-green)', fontSize: '18px'}}></i></div>
+                  <div className="gd-spec-value"><i className="ph-fill ph-check-circle" style={{color: 'var(--accent-green)', fontSize: '24px', filter: 'drop-shadow(0 0 8px rgba(34,197,94,0.6))'}}></i></div>
                 </div>
               </div>
 
