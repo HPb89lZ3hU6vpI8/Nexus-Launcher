@@ -8077,20 +8077,22 @@ const AuthPage = () => {
 // Cache header_image theo appId (tranh refetch khi scroll lai). Module-level, song toan app.
 const HEADER_CACHE = new Map();
 
-// REVELATIONS state cache (survive GameDetail unmount — backend aria2c chạy ngầm).
+// Custom game state cache (survive GameDetail unmount — backend aria2c chạy ngầm).
+// Multi-game: key = AppID string ('201870' Revelations, '33230' AC2, ...).
 // Khi user back+quay lại game, GameDetail remount → đọc cache + poll backend
-// get_revelations_status() → GUI hiện lại progress ("GUI chạy theo").
-const REV_STATE_CACHE = new Map();  // key='201870' → {state,progress,fileSize,installPath,note}
+// get_custom_status(appId) → GUI hiện lại progress ("GUI chạy theo").
+const REV_STATE_CACHE = new Map();  // key=appId → {state,progress,fileSize,installPath,note}
 let _revListener = null;  // callback hiện tại (set bởi GameDetail mount, clear khi unmount)
-// Python push progress qua window.__revProgress (lift ra module-level, KHÔNG bị xóa khi unmount).
-window.__revProgress = (data) => {
-  const cur = REV_STATE_CACHE.get('201870') || {};
-  REV_STATE_CACHE.set('201870', {
+// Python push progress qua window.__customProgress(appId, data) (lift ra module-level,
+// KHÔNG bị xóa khi unmount). Dispatch theo appId + _revListener (chỉ fire cho game đang mở).
+window.__customProgress = (appId, data) => {
+  const cur = REV_STATE_CACHE.get(appId) || {};
+  REV_STATE_CACHE.set(appId, {
     ...cur,
     state: cur.state || 'downloading',
     progress: data,
   });
-  if (_revListener && _revListener.progress) _revListener.progress(data);
+  if (_revListener && _revListener.appId === appId && _revListener.progress) _revListener.progress(data);
 };
 
 const GameCard = ({ game, onClick }) => {
@@ -8208,12 +8210,14 @@ const GameDetail = ({ game, onBack }) => {
   const [accessNote, setAccessNote] = React.useState('');
   const accessApiRef = React.useRef(null);  // cache window.pywebview.api ref
 
-  // ====== REVELATIONS (AppID 201870) — custom install flow ======
+  // ====== CUSTOM INSTALL FLOW (AppID 201870 Revelations, 33230 AC2, ...) ======
   // Game này KHONG dung steam/nexust/lua flow. Flow riêng:
   // idle → checking (file size) → selecting (folder picker) → checking_space →
   // downloading (aria2c + progress) → installing (7z) → installed (3 nut).
   // Path luu registry HKCU, ton tai den khi user Go Cai Dat.
-  const isRevelations = !!(game.appId && String(game.appId) === '201870');
+  // Multi-game: customAppId = AppID string neu game co trong CUSTOM_GAMES, else null.
+  const customAppId = game.appId && ['201870', '33230'].includes(String(game.appId))
+    ? String(game.appId) : null;
   const [revState, setRevState] = React.useState('idle');  // idle|checking|selecting|checking_space|downloading|installing|installed
   const [revNote, setRevNote] = React.useState('');
   const [revProgress, setRevProgress] = React.useState({percent: 0, downloaded: 0, total: 0});
@@ -8241,8 +8245,8 @@ const GameDetail = ({ game, onBack }) => {
   // Helper: ghi cache + notify listener (khi state/progress đổi trong handlers).
   // Mirror module-level REV_STATE_CACHE pattern (survive GameDetail unmount).
   const updateRevCache = (patch) => {
-    const cur = REV_STATE_CACHE.get('201870') || {};
-    REV_STATE_CACHE.set('201870', { ...cur, ...patch });
+    const cur = REV_STATE_CACHE.get(customAppId) || {};
+    REV_STATE_CACHE.set(customAppId, { ...cur, ...patch });
   };
   // Gói setRevState + cache: gọi trong handlers khi state đổi.
   const persistRevState = (newState, patch = {}) => {
@@ -8250,12 +8254,13 @@ const GameDetail = ({ game, onBack }) => {
     updateRevCache({ state: newState, ...patch });
   };
 
-  // Subscribe Python progress push (window.__revProgress giờ ở module-level,
+  // Subscribe Python progress push (window.__customProgress giờ ở module-level,
   // KHÔNG bị xóa khi GameDetail unmount → backend aria2c vẫn push khi user back).
+  // _revListener.appId để __customProgress chỉ fire cho game đang mở (tránh clobber khi 2 game).
   React.useEffect(() => {
-    _revListener = { progress: (data) => setRevProgress(data) };
+    _revListener = { appId: customAppId, progress: (data) => setRevProgress(data) };
     return () => { _revListener = null; };
-  }, []);
+  }, [customAppId]);
 
 
   // ====== NÚT "Fix Game" — chỉ vài game online có (game.fix). Fix online crack. ======
@@ -8444,7 +8449,7 @@ const GameDetail = ({ game, onBack }) => {
     }
   };
 
-  // ====== REVELATIONS handlers ======
+  // ====== CUSTOM GAME handlers (Revelations 201870, AC2 33230, ...) ======
   // Bấm "Click Vào Đây Để Truy Cập" → checking → show folder picker.
   const handleRevClick = async () => {
     if (revState !== 'idle') return;
@@ -8457,11 +8462,11 @@ const GameDetail = ({ game, onBack }) => {
     setRevNote('');
     persistRevState('checking');
     try {
-      // Lay dung luong file tu Google Drive.
-      const sizeInfo = await api.get_revelations_file_size();
+      // Lay dung luong file tu Buzzheavier (multi-game: truyen customAppId).
+      const sizeInfo = await api.get_custom_file_size(customAppId);
       if (!sizeInfo || !sizeInfo.success) {
-        persistRevState('idle'); REV_STATE_CACHE.delete('201870');
-        setRevNote('Lỗi: Không lấy được dung lượng file từ Google Drive');
+        persistRevState('idle'); REV_STATE_CACHE.delete(customAppId);
+        setRevNote('Lỗi: Không lấy được dung lượng file từ Buzzheavier');
         return;
       }
       setRevFileSize(sizeInfo);
@@ -8470,7 +8475,7 @@ const GameDetail = ({ game, onBack }) => {
       setRevShowFolderPicker(true);
       persistRevState('selecting', { fileSize: sizeInfo });
     } catch (e) {
-      persistRevState('idle'); REV_STATE_CACHE.delete('201870');
+      persistRevState('idle'); REV_STATE_CACHE.delete(customAppId);
       setRevNote('Lỗi: ' + (e && e.message ? e.message : String(e)));
     }
   };
@@ -8503,15 +8508,15 @@ const GameDetail = ({ game, onBack }) => {
     persistRevState('checking_space', { installPath: revInstallPath });
     try {
       // Check disk space (gấp 2 lần file size).
-      const space = await api.check_revelations_disk_space(
+      const space = await api.check_custom_disk_space(
         revInstallPath, revFileSize.size_bytes);
       if (!space || !space.success) {
-        persistRevState('idle'); REV_STATE_CACHE.delete('201870');
+        persistRevState('idle'); REV_STATE_CACHE.delete(customAppId);
         setRevNote(space && space.error ? space.error : 'Lỗi check disk space');
         return;
       }
       if (!space.enough) {
-        persistRevState('idle'); REV_STATE_CACHE.delete('201870');
+        persistRevState('idle'); REV_STATE_CACHE.delete(customAppId);
         showRevToast('Không Đủ Dung Lượng Hệ Thống', 'error');
         return;
       }
@@ -8519,9 +8524,9 @@ const GameDetail = ({ game, onBack }) => {
       const initProgress = {percent: 0, downloaded: 0, total: revFileSize.size_bytes};
       setRevProgress(initProgress);
       persistRevState('downloading', { progress: initProgress, installPath: revInstallPath });
-      const result = await api.install_revelations(revInstallPath);
+      const result = await api.install_custom_game(customAppId, revInstallPath);
       if (!result || !result.success) {
-        persistRevState('idle'); REV_STATE_CACHE.delete('201870');
+        persistRevState('idle'); REV_STATE_CACHE.delete(customAppId);
         setRevNote(result && result.error ? result.error : 'Lỗi cài đặt không xác định');
         return;
       }
@@ -8529,10 +8534,10 @@ const GameDetail = ({ game, onBack }) => {
       setRevInstallSavedPath(revInstallPath);
       setRevProgress({percent: 0, downloaded: 0, total: 0});
       persistRevState('installed');
-      REV_STATE_CACHE.delete('201870');
+      REV_STATE_CACHE.delete(customAppId);
       setRevNote('');
     } catch (e) {
-      persistRevState('idle'); REV_STATE_CACHE.delete('201870');
+      persistRevState('idle'); REV_STATE_CACHE.delete(customAppId);
       setRevNote('Lỗi: ' + (e && e.message ? e.message : String(e)));
     }
   };
@@ -8541,18 +8546,18 @@ const GameDetail = ({ game, onBack }) => {
   const handleRevCancel = () => {
     setRevShowFolderPicker(false);
     persistRevState('idle');
-    REV_STATE_CACHE.delete('201870');
+    REV_STATE_CACHE.delete(customAppId);
     setRevNote('');
     setRevInstallPath('');
   };
 
-  // Bấm "Khởi Chạy" → launch ACRSP.exe + toast.
+  // Bấm "Khởi Chạy" → launch exe + toast.
   const handleRevLaunch = async () => {
     let api;
     try { api = window.pywebview && window.pywebview.api; } catch (e) {}
     if (!api) return;
     try {
-      const r = await api.launch_revelations();
+      const r = await api.launch_custom_game(customAppId);
       if (r && r.success) {
         // Toast: Đang Khởi Chạy Game, Vui Lòng Đợi...
         showRevToast('Đang Khởi Chạy Game, Vui Lòng Đợi...', 'success');
@@ -8576,10 +8581,10 @@ const GameDetail = ({ game, onBack }) => {
     try { api = window.pywebview && window.pywebview.api; } catch (e) {}
     if (!api) return;
     try {
-      const r = await api.uninstall_revelations();
+      const r = await api.uninstall_custom_game(customAppId);
       if (r && r.success) {
         persistRevState('idle');
-        REV_STATE_CACHE.delete('201870');
+        REV_STATE_CACHE.delete(customAppId);
         setRevInstallSavedPath(null);
         setRevNote('');
         setRevProgress({percent: 0, downloaded: 0, total: 0});
@@ -8602,7 +8607,7 @@ const GameDetail = ({ game, onBack }) => {
     try { api = window.pywebview && window.pywebview.api; } catch (e) {}
     if (!api) return;
     try {
-      const r = await api.open_revelations_folder();
+      const r = await api.open_custom_folder(customAppId);
       if (!r || !r.success) {
         setRevNote(r && r.error ? r.error : 'Lỗi mở thư mục');
       }
@@ -8758,14 +8763,14 @@ const GameDetail = ({ game, onBack }) => {
     // Nếu reset ở đây → clobber progress → "button mất" khi quay lại.
   }, [game]);
 
-  // REVELATIONS mount-time: restore state từ cache + poll backend.
+  // CUSTOM GAME mount-time: restore state từ cache + poll backend.
   // Khi user back+quay lại game: GameDetail remount → đọc REV_STATE_CACHE →
-  // poll get_revelations_status() → re-sync progress với backend đang chạy ngầm.
+  // poll get_custom_status(appId) → re-sync progress với backend đang chạy ngầm.
   // "GUI chạy theo" = GUI hiện lại "Đang Tải... 45%" khi quay lại.
   React.useEffect(() => {
-    if (!isRevelations) return;
+    if (!customAppId) return;
     // 1. Restore từ cache (instant, không chờ network).
-    const cached = REV_STATE_CACHE.get('201870');
+    const cached = REV_STATE_CACHE.get(customAppId);
     if (cached) {
       if (cached.state) setRevState(cached.state);
       if (cached.progress) setRevProgress(cached.progress);
@@ -8779,18 +8784,18 @@ const GameDetail = ({ game, onBack }) => {
       try { api = window.pywebview && window.pywebview.api; } catch (e) {}
       if (!api) return;
       try {
-        const status = await api.get_revelations_status();
+        const status = await api.get_custom_status(customAppId);
         if (cancelled || !status) return;
         if (status.state === 'installed') {
-          // Backend báo installed → confirm registry + ACRSP.exe.
-          const r = await api.check_revelations_install();
+          // Backend báo installed → confirm registry + exe.
+          const r = await api.check_custom_install(customAppId);
           if (!cancelled && r && r.installed) {
             setRevState('installed');
             setRevInstallSavedPath(r.install_path);
-            REV_STATE_CACHE.delete('201870');
+            REV_STATE_CACHE.delete(customAppId);
           } else if (!cancelled) {
             setRevState('idle');
-            REV_STATE_CACHE.delete('201870');
+            REV_STATE_CACHE.delete(customAppId);
           }
         } else if (status.state === 'downloading' || status.state === 'installing') {
           // Backend vẫn chạy ngầm → restore state + progress.
@@ -8807,11 +8812,11 @@ const GameDetail = ({ game, onBack }) => {
           if (!cancelled) {
             setRevState('idle');
             if (status.error) setRevNote(status.error);
-            REV_STATE_CACHE.delete('201870');
+            REV_STATE_CACHE.delete(customAppId);
           }
         } else {
           // Backend idle → check registry (game có thể đã cài từ trước).
-          const r = await api.check_revelations_install();
+          const r = await api.check_custom_install(customAppId);
           if (!cancelled && r && r.installed) {
             setRevState('installed');
             setRevInstallSavedPath(r.install_path);
@@ -8820,7 +8825,7 @@ const GameDetail = ({ game, onBack }) => {
       } catch (e) {}
     })();
     return () => { cancelled = true; };
-  }, [game, isRevelations]);
+  }, [game, customAppId]);
 
   React.useEffect(() => {
     const handleLeave = () => {
@@ -9155,9 +9160,9 @@ const GameDetail = ({ game, onBack }) => {
                 </div>
               </div>
 
-              {/* ====== REVELATIONS (AppID 201870) — custom install flow ====== */}
+              {/* ====== CUSTOM INSTALL FLOW (AppID 201870 Revelations, 33230 AC2, ...) ====== */}
               {/* Game này KHONG dung steam/nexust/lua. Flow riêng: check size → folder picker → disk check → download (aria2c) → extract (7z) → 3 nut. */}
-              {isRevelations && !isUpcomingGame && (
+              {customAppId && !isUpcomingGame && (
                 <div>
                   {/* 1 NUT — chua cai: "Click Vào Đây Để Truy Cập" */}
                   {revState !== 'installed' && (
@@ -9219,9 +9224,9 @@ const GameDetail = ({ game, onBack }) => {
                     </div>
                   )}
 
-                  {/* 3 NUT — da cai: rieng Assassin's Creed Revelations */}
+                  {/* 3 NUT — da cai: rieng custom game (Revelations, AC2, ...) */}
                   {revState === 'installed' && (
-                    <section className="rev-installed-actions" aria-label="Điều khiển Assassin's Creed Revelations">
+                    <section className="rev-installed-actions" aria-label={"Điều khiển " + game.title}>
                       <div className="rev-actions-heading" aria-hidden="true">
                         <span className="rev-actions-line"></span>
                         <span className="rev-actions-status"><i className="ph-fill ph-check-circle"></i> Sẵn sàng khởi chạy</span>
@@ -9252,8 +9257,8 @@ const GameDetail = ({ game, onBack }) => {
                 </div>
               )}
 
-              {/* ====== NÚT TRUY CẬP / BÁO SẮP RA MẮT (game khác — KHÔNG phải Revelations) ====== */}
-              {(!isUpcomingGame && game.appId && !isRevelations) ? (
+              {/* ====== NÚT TRUY CẬP / BÁO SẮP RA MẮT (game khác — KHÔNG phải custom game) ====== */}
+              {(!isUpcomingGame && game.appId && !customAppId) ? (
                 <div>
                   <button
                     className="gd-play-btn"
