@@ -6405,20 +6405,20 @@ body {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(150px, 1.25fr) minmax(145px, 1fr) minmax(130px, 0.88fr);
-  gap: 9px;
+  grid-template-columns: minmax(140px, 1.15fr) minmax(135px, 1fr) minmax(140px, 1fr);
+  gap: 8px;
 }
 .rev-action-btn {
   min-width: 0;
-  min-height: 64px;
-  padding: 14px 16px;
+  min-height: 56px;
+  padding: 10px 12px;
   border: 1px solid rgba(255, 255, 255, 0.075);
   border-radius: 8px;
   background: var(--rev-surface);
   color: #e7e4dc;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 11px;
   text-align: left;
   font-family: 'Saira', sans-serif;
   cursor: pointer;
@@ -6441,9 +6441,9 @@ body {
   transform: none;
 }
 .rev-action-icon {
-  width: 36px;
-  height: 36px;
-  flex: 0 0 36px;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
   border: 1px solid rgba(0, 216, 230, 0.54);
   border-radius: 8px;
   background: rgba(0, 216, 230, 0.075);
@@ -6453,7 +6453,7 @@ body {
   justify-content: center;
 }
 .rev-action-icon i {
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1;
 }
 .rev-action-copy {
@@ -6465,7 +6465,7 @@ body {
 }
 .rev-action-label {
   color: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0.1px;
@@ -6484,7 +6484,7 @@ body {
   flex: 1;
 }
 .rev-action-launch .rev-action-label {
-  font-size: 14px;
+  font-size: 13px;
   letter-spacing: 0.1px;
   overflow: hidden;
   text-overflow: ellipsis;
