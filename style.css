@@ -1303,6 +1303,14 @@ body {
   color: #4ca5ff;
 }
 
+/* Negative/mixed reviews: vàng, không emoji thumbs-up, dấu trừ */
+.meta-rate-badge-negative {
+  background: #3a2c08;
+  border: 1px solid #7a5c14;
+  color: #f5b73d;
+}
+.meta-rate-badge-negative i { display: none; }
+
 .lang-tag-yellow {
   background: var(--accent-yellow);
   color: #000;
@@ -1992,6 +2000,11 @@ body {
 .gd-review-text {
   display: flex;
   flex-direction: column;
+}
+
+/* Negative/mixed reviews: vàng, không emoji, dấu trừ */
+.gd-review-percent-negative {
+  color: var(--accent-yellow);
 }
 
 .gd-rt-title {
@@ -3954,6 +3967,14 @@ body {
   color: #4ca5ff;
 }
 
+/* Negative/mixed reviews: vàng, không emoji thumbs-up, dấu trừ */
+.meta-rate-badge-negative {
+  background: #3a2c08;
+  border: 1px solid #7a5c14;
+  color: #f5b73d;
+}
+.meta-rate-badge-negative i { display: none; }
+
 .lang-tag-yellow {
   background: var(--accent-yellow);
   color: #000;
@@ -4643,6 +4664,11 @@ body {
 .gd-review-text {
   display: flex;
   flex-direction: column;
+}
+
+/* Negative/mixed reviews: vàng, không emoji, dấu trừ */
+.gd-review-percent-negative {
+  color: var(--accent-yellow);
 }
 
 .gd-rt-title {
