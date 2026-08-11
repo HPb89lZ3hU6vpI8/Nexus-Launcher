@@ -10786,30 +10786,6 @@ const UpcomingGameCard = ({ game, onClick }) => {
   const [fluentyState, setFluentyState] = React.useState('checking');
   const [fluentyNote, setFluentyNote] = React.useState('');
 
-  // === MEMORY CLEANER (Tối ưu bộ nhớ RAM 24/24 khi Launcher mở) ===
-  const [memCleanerState, setMemCleanerState] = React.useState('checking');
-  const [memCleanerNote, setMemCleanerNote] = React.useState('');
-
-  React.useEffect(() => {
-    let cancelled = false;
-    async function checkMemCleaner() {
-      let api;
-      try { api = window.pywebview && window.pywebview.api; } catch (e) {}
-      if (api && api.check_mem_cleaner) {
-        try {
-          const r = await api.check_mem_cleaner();
-          if (!cancelled) setMemCleanerState(r && r.active ? 'active' : 'disabled');
-        } catch (e) {
-          if (!cancelled) setMemCleanerState('disabled');
-        }
-      } else {
-        if (!cancelled) setMemCleanerState('disabled');
-      }
-    }
-    checkMemCleaner();
-    return () => { cancelled = true; };
-  }, []);
-
 
 
   // Cover LANDSCAPE (header.jpg 460x215) — khớp khung ngang mới.
@@ -11083,50 +11059,6 @@ const IntegrateContent = () => {
   const [fluentyState, setFluentyState] = React.useState('checking');
   const [fluentyNote, setFluentyNote] = React.useState('');
 
-  // === MEMORY CLEANER (Tối ưu bộ nhớ RAM 24/24 khi Launcher mở) ===
-  const [memCleanerState, setMemCleanerState] = React.useState('checking');
-  const [memCleanerNote, setMemCleanerNote] = React.useState('');
-
-  React.useEffect(() => {
-    let cancelled = false;
-    async function checkMemCleaner() {
-      let api;
-      try { api = window.pywebview && window.pywebview.api; } catch (e) {}
-      if (api && api.check_mem_cleaner) {
-        try {
-          const r = await api.check_mem_cleaner();
-          if (!cancelled) setMemCleanerState(r && r.active ? 'active' : 'disabled');
-        } catch (e) {
-          if (!cancelled) setMemCleanerState('disabled');
-        }
-      } else {
-        if (!cancelled) setMemCleanerState('disabled');
-      }
-    }
-    checkMemCleaner();
-    return () => { cancelled = true; };
-  }, []);
-
-  const handleMemCleanerClick = async () => {
-    let api;
-    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
-    if (!api || !api.toggle_mem_cleaner) {
-      setEasyInstallNote('Vui lòng mở qua ứng dụng NexusGames.');
-      return;
-    }
-    const targetState = memCleanerState === 'active' ? 'disabled' : 'active';
-    setMemCleanerState(targetState);
-    try {
-      const r = await api.toggle_mem_cleaner();
-      if (r && typeof r.active === 'boolean') {
-        setMemCleanerState(r.active ? 'active' : 'disabled');
-      }
-    } catch (e) {
-      console.error(e);
-      setMemCleanerState(memCleanerState);
-    }
-  };
-
   const handleEasyInstallClick = async () => {
     if (easyInstallState === 'activating') return;
     const cleanAppId = (appIdInput || '').trim();
@@ -11381,27 +11313,6 @@ const IntegrateContent = () => {
   };
 
     const cards = [
-    {
-      id: 'memcleaner',
-      title: 'MEMORY CLEANER',
-      badge: 'TỐI ƯU RAM BỘ NHỚ',
-      themeColor: '#a21caf',
-      borderColor: '#f0abfc',
-      features: [
-        'Clean Working Set & Standby List rác tự động',
-        'Tự động dọn RAM khi vượt ngưỡng trên 80%',
-        'Bảo vệ 100% tiến trình Game & Steam đang chơi',
-        'Tự dừng hoàn toàn khi tắt Nexus Launcher'
-      ],
-      infoBoxHeader: 'CƠ CHẾ DỌN RAM SÂU',
-      infoItems: [
-        'Win32 API: EmptyWorkingSet & NtSetSystemInformation',
-        'Cơ chế: Tự động dọn khi RAM > 80%',
-        'An toàn: 0% hao mòn SSD, không giật lag Game'
-      ],
-      note: 'Tự động dọn RAM khi > 80%. Tự hủy luồng khi đóng Launcher.',
-      btnText: 'KÍCH HOẠT NGAY'
-    },
     {
       id: 'cloud',
       title: 'CLOUD SAVE',
@@ -11697,7 +11608,7 @@ const IntegrateContent = () => {
                     <button
                       className="card-action-btn"
                       style={{
-                        background: isCurrent ? (card.id === 'memcleaner' && memCleanerState === 'active' ? '#dc2626' : card.borderColor) : '#19222c',
+                        background: isCurrent ? card.borderColor : '#19222c',
                         color: isCurrent ? '#ffffff' : '#6b7c8d',
                         boxShadow: isCurrent ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
                         cursor: (card.id === 'cloud' && cloudState !== 'idle')
@@ -11711,8 +11622,7 @@ const IntegrateContent = () => {
                                      || fluentyState === 'uninstalling'))
                            ? 'default' : 'pointer'
                       }}
-                      disabled={(card.id === 'memcleaner' && memCleanerState === 'checking')
-                             || (card.id === 'cloud' && cloudState !== 'idle')
+                      disabled={(card.id === 'cloud' && cloudState !== 'idle')
                              || (card.id === 'vip' && easyInstallState === 'activating')
                              || ((card.id === 'canhcut' || card.id === 'thuanviet')
                                  && (integrateStates[card.id] === 'checking'
@@ -11721,19 +11631,14 @@ const IntegrateContent = () => {
                                  && (fluentyState === 'checking'
                                      || fluentyState === 'installing'
                                      || fluentyState === 'uninstalling'))}
-                      onClick={card.id === 'memcleaner' ? handleMemCleanerClick
-                            : card.id === 'cloud' ? handleCloudClick
+                      onClick={card.id === 'cloud' ? handleCloudClick
                             : card.id === 'vip' ? handleEasyInstallClick
                             : card.id === 'fluenty' ? handleFluentyClick
                             : (card.id === 'canhcut' || card.id === 'thuanviet')
                               ? () => handleIntegrateClick(card.id)
                             : undefined}
                     >
-                      {card.id === 'memcleaner'
-                        ? (memCleanerState === 'checking' ? 'ĐANG KIỂM TRA...'
-                           : memCleanerState === 'active' ? 'VÔ HIỆU HÓA'
-                           : 'KÍCH HOẠT NGAY')
-                        : card.id === 'cloud'
+                      {card.id === 'cloud'
                         ? (cloudState === 'checking' ? 'ĐANG KIỂM TRA...'
                            : cloudState === 'installed' ? 'ĐÃ KÍCH HOẠT'
                            : cloudState === 'installing' ? 'ĐANG CÀI ĐẶT...'
