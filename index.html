@@ -11863,23 +11863,22 @@ const IntegrateContent = () => {
     {
       id: 'memcleaner',
       title: 'MEMORY CLEANER',
-      badge: 'TỐI ƯU BỘ NHỚ RAM',
-      themeColor: '#7c3aed',
-      borderColor: '#c084fc',
+      badge: 'TỐI ƯU RAM BỘ NHỚ',
+      themeColor: '#a21caf',
+      borderColor: '#f0abfc',
       features: [
-        'Dọn dẹp RAM Working Set & Bộ nhớ rác tự động',
-        'Tự động kích hoạt khi RAM vượt ngưỡng trên 80%',
-        'Thu hồi RAM ngầm từ các ứng dụng rảnh rỗi',
-        'Tối ưu 100% tài nguyên RAM cho Game chiến mượt',
-        'Chỉ chạy khi Nexus Launcher đang mở (An toàn 100%)'
+        'Clean Working Set & Standby List rác tự động',
+        'Tự động dọn RAM khi vượt ngưỡng trên 80%',
+        'Bảo vệ 100% tiến trình Game & Steam đang chơi',
+        'Tự dừng hoàn toàn khi tắt Nexus Launcher'
       ],
-      infoBoxHeader: 'HỆ THỐNG TỐI ƯU MEMORY',
+      infoBoxHeader: 'CƠ CHẾ DỌN RAM SÂU',
       infoItems: [
-        'Cơ chế: EmptyWorkingSet API Win32 chính thức',
-        'Ngưỡng kích hoạt: Tự động dọn khi RAM > 80%',
-        'An toàn: 0% hao mòn SSD, không ảnh hưởng hệ thống'
+        'Win32 API: EmptyWorkingSet & NtSetSystemInformation',
+        'Cơ chế: Tự động dọn khi RAM > 80%',
+        'An toàn: 0% hao mòn SSD, không giật lag Game'
       ],
-      note: 'Tính năng chạy tự động ngầm khi bật Nexus Launcher. Khi tắt Nexus Launcher, tiến trình sẽ tự động dừng hoàn toàn.',
+      note: 'Tự động dọn RAM khi > 80%. Tự hủy luồng khi đóng Launcher.',
       btnText: 'KÍCH HOẠT NGAY'
     },
     {
