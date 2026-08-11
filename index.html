@@ -5814,7 +5814,7 @@ const GAME_DATA = [
     tags: ['HÀNH ĐỘNG', 'PHIÊU LƯU', 'CHƠI ĐƠN'],
     viethoa: false,
     cloudSave: false,
-    platform: 'steam',  // Override Assassin's → uplay auto-derive: game nay la Steam, KHONG uplay
+    platform: 'steam',  // Override Assassins → uplay auto-derive: game nay la Steam, KHONG uplay
     baseName: "AssassinsCreedDirectorsCut",
     addedAt: '2026-08-08',
     steamAccount: '',
@@ -11290,6 +11290,8 @@ const UpcomingGameCard = ({ game, onClick }) => {
     return () => { cancelled = true; };
   }, []);
 
+
+
   // Cover LANDSCAPE (header.jpg 460x215) — khớp khung ngang mới.
   // game.cover đã là header.jpg (từ UPCOMING_GAMES, sync Steam API). Fallback header.jpg CDN.
   const initialImg = game.cover || `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/header.jpg`;
@@ -11589,51 +11591,16 @@ const IntegrateContent = () => {
     }
   };
 
-  const cards = [
-    {
-      id: 'cloud',
-      title: 'CLOUD SAVE',
-      badge: 'ĐỒNG BỘ DỮ LIỆU',
-      themeColor: '#b45309',
-      borderColor: '#f59e0b',
-      features: [
-        'Sync Save Data Game & Tiến trình tự động',
-        'Đồng bộ Thành tích & Thời gian chơi',
-        'Bảo toàn dữ liệu khi đổi thiết bị',
-        'Dung lượng Cloud lưu trữ không giới hạn',
-        'Hệ thống tự động Backup an toàn'
-      ],
-      infoBoxHeader: 'HỆ THỐNG CLOUD',
-      infoItems: [
-        'Máy chủ: Lưu trữ trên Máy Chủ Riêng Miễn Phí',
-        'Tự động Sync: Fix lỗi Steam Cloud mượt mà',
-        'Bảo mật: An toàn Dữ liệu Tuyệt đối'
-      ],
-      note: 'Dữ liệu được bảo mật an toàn tuyệt đối — Hỗ trợ dành riêng cho các trò chơi Steam tại Nexus Launcher',
-      btnText: 'KÍCH HOẠT NGAY'
-    },
-    {
-      id: 'memcleaner',
-      title: 'MEMORY CLEANER',
-      badge: 'TỐI ƯU BỘ NHỚ RAM',
-      themeColor: '#7c3aed',
-      borderColor: '#c084fc',
-      features: [
-        'Dọn dẹp RAM Working Set & Bộ nhớ rác tự động',
-        'Tự động kích hoạt khi RAM vượt ngưỡng trên 80%',
-        'Thu hồi RAM ngầm từ các ứng dụng rảnh rỗi',
-        'Tối ưu 100% tài nguyên RAM cho Game chiến mượt',
-        'Chỉ chạy khi Nexus Launcher đang mở (An toàn 100%)'
-      ],
-      infoBoxHeader: 'HỆ THỐNG TỐI ƯU MEMORY',
-      infoItems: [
-        'Cơ chế: EmptyWorkingSet API Win32 chính thức',
-        'Ngưỡng kích hoạt: Tự động dọn khi RAM > 80%',
-        'An toàn: 0% hao mòn SSD, không ảnh hưởng hệ thống'
-      ],
-      note: 'Tính năng chạy tự động ngầm khi bật Nexus Launcher. Khi tắt Nexus Launcher, tiến trình sẽ tự động dừng hoàn toàn.',
-      btnText: 'KÍCH HOẠT NGAY'
-    },asyInstallNote('');
+  const handleEasyInstallClick = async () => {
+    if (easyInstallState === 'activating') return;
+    const cleanAppId = (appIdInput || '').trim();
+    if (!cleanAppId) {
+      setEasyInstallState('error');
+      setEasyInstallNote('Vui lống nhập AppID game.');
+      return;
+    }
+    setEasyInstallState('activating');
+    setEasyInstallNote('');
 
     if (!api || !api.activate_easy_install_game) {
       // Dev mode / web browser fallback
