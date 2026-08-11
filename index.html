@@ -9039,6 +9039,60 @@ const Sidebar = ({ activeMenuLeft, setActiveMenuLeft }) => {
   );
 };
 
+
+const TopBar = ({ activeTab, setActiveTab, zoom, setZoom, currentUser, userData }) => {
+  const username = (userData && userData.displayName) || (currentUser && currentUser.displayName) || 'Nexus';
+  const role = (userData && userData.role) || 'THÀNH VIÊN';
+  const avatarUrl = (userData && userData.avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=00d8e6&color=000&rounded=true&font-size=0.6`;
+
+  return (
+    <div className="topbar-wrapper" onClick={() => {}}>
+      <div className="topbar-left">
+        <div className="app-logo">
+          <img src="https://nexus-launcher-gold.vercel.app/nexus-logo.png" alt="NexusGames" className="logo-img" onError={e => { e.target.style.display='none'; }} />
+          <span className="app-name-text">NexusGames</span>
+        </div>
+      </div>
+
+      <div className="topbar-tabs">
+        <div
+          className={`topbar-tab ${activeTab === 'home' ? 'active' : ''}`}
+          onClick={() => setActiveTab('home')}
+        >
+          <TopHomeIcon active={activeTab === 'home'} />
+          <span>TRANG CHỦ</span>
+        </div>
+        <div
+          className={`topbar-tab ${activeTab === 'game' ? 'active' : ''}`}
+          onClick={() => setActiveTab('game')}
+        >
+          <TopGameIcon active={activeTab === 'game'} />
+          <span>THƯ VIỆN</span>
+        </div>
+        <div
+          className={`topbar-tab ${activeTab === 'integrate' ? 'active' : ''}`}
+          onClick={() => setActiveTab('integrate')}
+        >
+          <TopIntegrateIcon active={activeTab === 'integrate'} />
+          <span>TÍCH HỢP</span>
+        </div>
+      </div>
+
+      <div className="topbar-right">
+        <div className="user-profile-wrapper">
+          <div className="user-profile-container" onClick={() => setActiveTab('profile')}>
+            <img src={avatarUrl} alt="Avatar" className="user-avatar" />
+            <div className="user-info">
+              <div className="user-name">{username}</div>
+              <div className="user-role">{role}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Login, Register & Member List features removed as requested
 const HEADER_CACHE = new Map();
 
