@@ -11262,6 +11262,34 @@ const UpcomingGameCard = ({ game, onClick }) => {
   const targetTime = React.useMemo(() => new Date(game.targetDate).getTime(), [game.targetDate]);
   const [now, setNow] = React.useState(() => Date.now());
 
+  // === FLUENTY UI (Millennium Steam skin) ===
+  const [fluentyState, setFluentyState] = React.useState('checking');
+  const [fluentyNote, setFluentyNote] = React.useState('');
+
+  // === MEMORY CLEANER (Tối ưu bộ nhớ RAM 24/24 khi Launcher mở) ===
+  const [memCleanerState, setMemCleanerState] = React.useState('checking');
+  const [memCleanerNote, setMemCleanerNote] = React.useState('');
+
+  React.useEffect(() => {
+    let cancelled = false;
+    async function checkMemCleaner() {
+      let api;
+      try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+      if (api && api.check_mem_cleaner) {
+        try {
+          const r = await api.check_mem_cleaner();
+          if (!cancelled) setMemCleanerState(r && r.active ? 'active' : 'disabled');
+        } catch (e) {
+          if (!cancelled) setMemCleanerState('disabled');
+        }
+      } else {
+        if (!cancelled) setMemCleanerState('disabled');
+      }
+    }
+    checkMemCleaner();
+    return () => { cancelled = true; };
+  }, []);
+
   // Cover LANDSCAPE (header.jpg 460x215) — khớp khung ngang mới.
   // game.cover đã là header.jpg (từ UPCOMING_GAMES, sync Steam API). Fallback header.jpg CDN.
   const initialImg = game.cover || `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${game.appId}/header.jpg`;
@@ -11540,32 +11568,72 @@ const IntegrateContent = () => {
   // State machine: 'checking' | 'idle' | 'installing' | 'installed'
   // 'checking' → ĐANG KIỂM TRA... (mount-time check via fluenty_precheck)
   // 'idle' → KÍCH HOẠT NGAY (click → install_fluenty: kill steam + download + extract + merge + relaunch)
-  // 'installing' → ĐANG CÀI ĐẶT... (disabled)
-  // 'installed' → GỠ CÀI ĐẶT (click → uninstall_fluenty: kill steam + delete Millennium/ + wsock32.dll + relaunch)
   const [fluentyState, setFluentyState] = React.useState('checking');
   const [fluentyNote, setFluentyNote] = React.useState('');
-
-  const closeToast = React.useCallback(() => {
-    setToastClosing(true);
-    setTimeout(() => {
-      setEasyInstallNote('');
-      setToastClosing(false);
-    }, 320);
-  }, []);
-
-  const handleEasyInstallClick = async () => {
-    const cleanAppId = (appIdInput || '').replace(/[^0-9]/g, '').trim();
-    if (!cleanAppId) {
-      setEasyInstallState('error');
-      setEasyInstallNote('Vui lòng nhập AppID hợp lệ (chỉ gồm các chữ số).');
-      return;
-    }
-
+  const handleMemCleanerClick = async () => {
     let api;
     try { api = window.pywebview && window.pywebview.api; } catch (e) {}
-    
-    setEasyInstallState('activating');
-    setEasyInstallNote('');
+    if (!api || !api.toggle_mem_cleaner) {
+      setEasyInstallNote('Vui lòng mở qua ứng dụng NexusGames.');
+      return;
+    }
+    try {
+      const r = await api.toggle_mem_cleaner();
+      if (r && r.active) {
+        setMemCleanerState('active');
+      } else {
+        setMemCleanerState('disabled');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const cards = [
+    {
+      id: 'cloud',
+      title: 'CLOUD SAVE',
+      badge: 'ĐỒNG BỘ DỮ LIỆU',
+      themeColor: '#b45309',
+      borderColor: '#f59e0b',
+      features: [
+        'Sync Save Data Game & Tiến trình tự động',
+        'Đồng bộ Thành tích & Thời gian chơi',
+        'Bảo toàn dữ liệu khi đổi thiết bị',
+        'Dung lượng Cloud lưu trữ không giới hạn',
+        'Hệ thống tự động Backup an toàn'
+      ],
+      infoBoxHeader: 'HỆ THỐNG CLOUD',
+      infoItems: [
+        'Máy chủ: Lưu trữ trên Máy Chủ Riêng Miễn Phí',
+        'Tự động Sync: Fix lỗi Steam Cloud mượt mà',
+        'Bảo mật: An toàn Dữ liệu Tuyệt đối'
+      ],
+      note: 'Dữ liệu được bảo mật an toàn tuyệt đối — Hỗ trợ dành riêng cho các trò chơi Steam tại Nexus Launcher',
+      btnText: 'KÍCH HOẠT NGAY'
+    },
+    {
+      id: 'memcleaner',
+      title: 'MEMORY CLEANER',
+      badge: 'TỐI ƯU BỘ NHỚ RAM',
+      themeColor: '#7c3aed',
+      borderColor: '#c084fc',
+      features: [
+        'Dọn dẹp RAM Working Set & Bộ nhớ rác tự động',
+        'Tự động kích hoạt khi RAM vượt ngưỡng trên 80%',
+        'Thu hồi RAM ngầm từ các ứng dụng rảnh rỗi',
+        'Tối ưu 100% tài nguyên RAM cho Game chiến mượt',
+        'Chỉ chạy khi Nexus Launcher đang mở (An toàn 100%)'
+      ],
+      infoBoxHeader: 'HỆ THỐNG TỐI ƯU MEMORY',
+      infoItems: [
+        'Cơ chế: EmptyWorkingSet API Win32 chính thức',
+        'Ngưỡng kích hoạt: Tự động dọn khi RAM > 80%',
+        'An toàn: 0% hao mòn SSD, không ảnh hưởng hệ thống'
+      ],
+      note: 'Tính năng chạy tự động ngầm khi bật Nexus Launcher. Khi tắt Nexus Launcher, tiến trình sẽ tự động dừng hoàn toàn.',
+      btnText: 'KÍCH HOẠT NGAY'
+    },asyInstallNote('');
 
     if (!api || !api.activate_easy_install_game) {
       // Dev mode / web browser fallback
@@ -12133,7 +12201,7 @@ const IntegrateContent = () => {
                     <button
                       className="card-action-btn"
                       style={{
-                        background: isCurrent ? card.borderColor : '#19222c',
+                        background: isCurrent ? (card.id === 'memcleaner' && memCleanerState === 'active' ? '#dc2626' : card.borderColor) : '#19222c',
                         color: isCurrent ? '#ffffff' : '#6b7c8d',
                         boxShadow: isCurrent ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
                         cursor: (card.id === 'cloud' && cloudState !== 'idle')
@@ -12147,7 +12215,8 @@ const IntegrateContent = () => {
                                      || fluentyState === 'uninstalling'))
                            ? 'default' : 'pointer'
                       }}
-                      disabled={(card.id === 'cloud' && cloudState !== 'idle')
+                      disabled={(card.id === 'memcleaner' && memCleanerState === 'checking')
+                             || (card.id === 'cloud' && cloudState !== 'idle')
                              || (card.id === 'vip' && easyInstallState === 'activating')
                              || ((card.id === 'canhcut' || card.id === 'thuanviet')
                                  && (integrateStates[card.id] === 'checking'
@@ -12156,14 +12225,19 @@ const IntegrateContent = () => {
                                  && (fluentyState === 'checking'
                                      || fluentyState === 'installing'
                                      || fluentyState === 'uninstalling'))}
-                      onClick={card.id === 'cloud' ? handleCloudClick
+                      onClick={card.id === 'memcleaner' ? handleMemCleanerClick
+                            : card.id === 'cloud' ? handleCloudClick
                             : card.id === 'vip' ? handleEasyInstallClick
                             : card.id === 'fluenty' ? handleFluentyClick
                             : (card.id === 'canhcut' || card.id === 'thuanviet')
                               ? () => handleIntegrateClick(card.id)
                             : undefined}
                     >
-                      {card.id === 'cloud'
+                      {card.id === 'memcleaner'
+                        ? (memCleanerState === 'checking' ? 'ĐANG KIỂM TRA...'
+                           : memCleanerState === 'active' ? 'VÔ HIỆU HÓA'
+                           : 'KÍCH HOẠT NGAY')
+                        : card.id === 'cloud'
                         ? (cloudState === 'checking' ? 'ĐANG KIỂM TRA...'
                            : cloudState === 'installed' ? 'ĐÃ KÍCH HOẠT'
                            : cloudState === 'installing' ? 'ĐANG CÀI ĐẶT...'
