@@ -11544,34 +11544,49 @@ const IntegrateContent = () => {
   const [activeIndex, setActiveIndex] = React.useState(0);
 
   // === Cloud Save state machine ===
-  // 'checking' | 'installed' | 'idle' | 'installing' | 'just_installed'
   const [cloudState, setCloudState] = React.useState('checking');
   const [cloudNote, setCloudNote] = React.useState('');
 
   // === EASY-INSTALL GAMES (AppID input & LUA download) ===
   const [appIdInput, setAppIdInput] = React.useState('');
-  // 'idle' | 'activating' | 'success' | 'already' | 'error'
   const [easyInstallState, setEasyInstallState] = React.useState('idle');
   const [easyInstallNote, setEasyInstallNote] = React.useState('');
   const [toastClosing, setToastClosing] = React.useState(false);
 
   // === TÍCH HỢP VIỆT HÓA (CanhCutTeam + GameThuầnViệt) ===
-  // State machine cho từng tool: 'checking' | 'idle' | 'installing' | 'installed'
-  // 'checking' → ĐANG KIỂM TRA... (disabled, mount-time check)
-  // 'idle' → KÍCH HOẠT NGAY (click → activate_integration: download+extract+del zip)
-  // 'installing' → ĐANG CÀI ĐẶT... (disabled, đang download+extract)
-  // 'installed' → KHỞI CHẠY (click → launch_integration: startfile exe)
   const [integrateStates, setIntegrateStates] = React.useState({
     canhcut: 'checking',
     thuanviet: 'checking',
   });
 
   // === FLUENTY UI (Millennium Steam skin) ===
-  // State machine: 'checking' | 'idle' | 'installing' | 'installed'
-  // 'checking' → ĐANG KIỂM TRA... (mount-time check via fluenty_precheck)
-  // 'idle' → KÍCH HOẠT NGAY (click → install_fluenty: kill steam + download + extract + merge + relaunch)
   const [fluentyState, setFluentyState] = React.useState('checking');
   const [fluentyNote, setFluentyNote] = React.useState('');
+
+  // === MEMORY CLEANER (Tối ưu bộ nhớ RAM 24/24 khi Launcher mở) ===
+  const [memCleanerState, setMemCleanerState] = React.useState('checking');
+  const [memCleanerNote, setMemCleanerNote] = React.useState('');
+
+  React.useEffect(() => {
+    let cancelled = false;
+    async function checkMemCleaner() {
+      let api;
+      try { api = window.pywebview && window.pywebview.api; } catch (e) {}
+      if (api && api.check_mem_cleaner) {
+        try {
+          const r = await api.check_mem_cleaner();
+          if (!cancelled) setMemCleanerState(r && r.active ? 'active' : 'disabled');
+        } catch (e) {
+          if (!cancelled) setMemCleanerState('disabled');
+        }
+      } else {
+        if (!cancelled) setMemCleanerState('disabled');
+      }
+    }
+    checkMemCleaner();
+    return () => { cancelled = true; };
+  }, []);
+
   const handleMemCleanerClick = async () => {
     let api;
     try { api = window.pywebview && window.pywebview.api; } catch (e) {}
@@ -11596,14 +11611,15 @@ const IntegrateContent = () => {
     const cleanAppId = (appIdInput || '').trim();
     if (!cleanAppId) {
       setEasyInstallState('error');
-      setEasyInstallNote('Vui lống nhập AppID game.');
+      setEasyInstallNote('Vui lòng nhập AppID game.');
       return;
     }
     setEasyInstallState('activating');
     setEasyInstallNote('');
 
+    let api;
+    try { api = window.pywebview && window.pywebview.api; } catch (e) {}
     if (!api || !api.activate_easy_install_game) {
-      // Dev mode / web browser fallback
       setTimeout(() => {
         setEasyInstallState('already');
         setEasyInstallNote('Bạn Đã Có Game Này');
@@ -11643,13 +11659,11 @@ const IntegrateContent = () => {
     }
     setToastClosing(false);
     const t = setTimeout(() => {
-      closeToast();
+      setEasyInstallNote('');
     }, 4500);
     return () => clearTimeout(t);
-  }, [easyInstallNote, closeToast]);
+  }, [easyInstallNote]);
 
-  // Luc mount: doc precheck tu api (Python main() set api.cloud_save_precheck truoc khi mo UI).
-  // Neu precheck chua co -> fallback goi check_cloud_save truc tiep.
   React.useEffect(() => {
     let api;
     try { api = window.pywebview && window.pywebview.api; } catch (e) {}
@@ -11658,9 +11672,8 @@ const IntegrateContent = () => {
       setCloudState(pre.installed ? 'installed' : 'idle');
       return;
     }
-    // Fallback: goi check_cloud_save (pywebview bridge).
     if (!api || !api.check_cloud_save) {
-      setCloudState('idle');  // Chua co bridge (dev browser) -> cho phep click de xem error.
+      setCloudState('idle');
       return;
     }
     let cancelled = false;
@@ -11675,7 +11688,6 @@ const IntegrateContent = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // Click "KÍCH HOẠT NGAY" -> kill Steam + download + extract + move 4 file.
   const handleCloudClick = async () => {
     if (cloudState !== 'idle') return;
     let api;
@@ -11704,14 +11716,10 @@ const IntegrateContent = () => {
     }
   };
 
-  // === TÍCH HỢP: mount-time check installed status (canhcut + thuanviet) ===
-  // Gọi api.check_integration(tool_id) → nếu exe tồn tại → 'installed' (KHỞI CHẠY),
-  // không → 'idle' (KÍCH HOẠT NGAY). Mỗi tool check folder riêng.
   React.useEffect(() => {
     let api;
     try { api = window.pywebview && window.pywebview.api; } catch (e) {}
     if (!api || !api.check_integration) {
-      // Dev mode / browser fallback → cho phép click (sẽ báo lỗi nếu không có api).
       setIntegrateStates({ canhcut: 'idle', thuanviet: 'idle' });
       return;
     }
@@ -11736,24 +11744,18 @@ const IntegrateContent = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // === FLUENTY UI: mount-time check (read fluenty_precheck tu Python API) ===
-  // Frontend doc api.fluenty_precheck (dict) -> set 'installed' (GỠ CÀI ĐẶT)
-  // hoac 'idle' (KÍCH HOẠT NGAY) ngay khi render, khong can goi API them.
-  // Fallback: goi api.check_fluenty_installed() neu khong co precheck.
   React.useEffect(() => {
     let api;
     try { api = window.pywebview && window.pywebview.api; } catch (e) {}
     if (!api) {
-      setFluentyState('idle');  // Dev mode / browser fallback
+      setFluentyState('idle');
       return;
     }
-    // Fast path: doc precheck (da chay trong main() truoc khi mo UI).
-    if (api.fluenty_precheck) {
-      const pre = api.fluenty_precheck;
-      setFluentyState(pre && pre.installed ? 'installed' : 'idle');
+    const pre = api.fluenty_precheck;
+    if (pre && typeof pre === 'object' && 'installed' in pre) {
+      setFluentyState(pre.installed ? 'installed' : 'idle');
       return;
     }
-    // Fallback: goi API check truc tiep.
     if (!api.check_fluenty_installed) {
       setFluentyState('idle');
       return;
@@ -11762,9 +11764,7 @@ const IntegrateContent = () => {
     (async () => {
       try {
         const r = await api.check_fluenty_installed();
-        if (!cancelled) {
-          setFluentyState(r && r.installed ? 'installed' : 'idle');
-        }
+        if (!cancelled) setFluentyState(r && r.installed ? 'installed' : 'idle');
       } catch (e) {
         if (!cancelled) setFluentyState('idle');
       }
@@ -11772,107 +11772,116 @@ const IntegrateContent = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // Auto-dismiss fluentyNote sau 3.5s (success) / 6s (error).
-  React.useEffect(() => {
-    if (!fluentyNote) return;
-    const isErr = fluentyNote.indexOf('Lỗi') >= 0 || fluentyNote.indexOf('Cần') >= 0
-      || fluentyNote.indexOf('Không') >= 0;
-    const t = setTimeout(() => setFluentyNote(''), isErr ? 6000 : 3500);
-    return () => clearTimeout(t);
-  }, [fluentyNote]);
-
-  // === FLUENTY UI: click handler — install (KÍCH HOẠT NGAY) hoặc uninstall (GỠ CÀI ĐẶT) ===
   const handleFluentyClick = async () => {
-    const cur = fluentyState;
-    if (cur === 'checking' || cur === 'installing') return;  // disabled states
     let api;
     try { api = window.pywebview && window.pywebview.api; } catch (e) {}
-    if (!api || !api.install_fluenty) {
+    if (!api) {
       setFluentyNote('Vui lòng mở qua ứng dụng NexusGames.');
       return;
     }
-    // Đã cài → GỠ CÀI ĐẶT → uninstall_fluenty.
-    if (cur === 'installed') {
+    setFluentyNote('');
+    if (fluentyState === 'installed') {
       setFluentyState('uninstalling');
-      setFluentyNote('Đang tắt Steam và gỡ cài đặt...');
       try {
         const r = await api.uninstall_fluenty();
         if (r && r.success) {
           setFluentyState('idle');
-          setFluentyNote('Đã gỡ Fluenty UI. Steam sẽ tự khởi động lại.');
+          setFluentyNote('Đã gỡ Fluenty UI thành công!');
         } else {
-          setFluentyState('installed');  // revert
-          setFluentyNote((r && r.error) ? ('Lỗi gỡ cài đặt: ' + r.error) : 'Lỗi gỡ cài đặt không xác định');
+          setFluentyState('installed');
+          setFluentyNote((r && r.error) || 'Lỗi gỡ cài đặt Fluenty UI.');
         }
       } catch (e) {
-        setFluentyState('installed');  // revert
+        setFluentyState('installed');
         setFluentyNote('Lỗi: ' + ((e && e.message) ? e.message : String(e)));
       }
-      return;
-    }
-    // Chưa cài → KÍCH HOẠT NGAY → install_fluenty.
-    setFluentyState('installing');
-    setFluentyNote('Đang tắt Steam và cài đặt...');
-    try {
-      const r = await api.install_fluenty();
-      if (r && r.success) {
-        setFluentyState('installed');
-        setFluentyNote(r.already ? 'Fluenty UI đã được cài đặt.' : 'Đã cài Fluenty UI. Steam sẽ tự khởi động lại.');
-      } else {
-        setFluentyState('idle');  // revert
-        setFluentyNote((r && r.error) ? ('Lỗi cài đặt: ' + r.error) : 'Lỗi cài đặt không xác định');
+    } else if (fluentyState === 'idle') {
+      setFluentyState('installing');
+      try {
+        const r = await api.install_fluenty();
+        if (r && r.already) {
+          setFluentyState('installed');
+          return;
+        }
+        if (r && r.success) {
+          setFluentyState('installed');
+          setFluentyNote('Đã cài đặt Fluenty UI thành công! Steam đã tự khởi chạy lại.');
+        } else {
+          setFluentyState('idle');
+          setFluentyNote((r && r.error) || 'Lỗi cài đặt Fluenty UI.');
+        }
+      } catch (e) {
+        setFluentyState('idle');
+        setFluentyNote('Lỗi: ' + ((e && e.message) ? e.message : String(e)));
       }
-    } catch (e) {
-      setFluentyState('idle');  // revert
-      setFluentyNote('Lỗi: ' + ((e && e.message) ? e.message : String(e)));
     }
   };
+
   const handleIntegrateClick = async (cardId) => {
-    const cur = integrateStates[cardId];
-    if (cur === 'checking' || cur === 'installing') return;  // disabled states
+    const st = integrateStates[cardId];
+    if (st === 'checking' || st === 'installing') return;
     let api;
     try { api = window.pywebview && window.pywebview.api; } catch (e) {}
-    if (!api || !api.activate_integration) {
+    if (!api) {
       setEasyInstallNote('Vui lòng mở qua ứng dụng NexusGames.');
       return;
     }
-    // Đã cài → KHỞI CHẠY → launch exe.
-    if (cur === 'installed') {
-      try {
-        const r = await api.launch_integration(cardId);
-        if (!r || !r.success) {
-          setEasyInstallState('error');
-          setEasyInstallNote((r && r.error) || 'Không thể khởi chạy.');
+    if (st === 'installed') {
+      if (api.launch_integration) {
+        try {
+          const r = await api.launch_integration(cardId);
+          if (!r || !r.success) {
+            setEasyInstallNote((r && r.error) || 'Không thể khởi chạy tool.');
+          }
+        } catch (e) {
+          setEasyInstallNote('Lỗi khởi chạy: ' + ((e && e.message) ? e.message : String(e)));
         }
-      } catch (e) {
-        setEasyInstallState('error');
-        setEasyInstallNote('Lỗi khởi chạy: ' + ((e && e.message) ? e.message : String(e)));
       }
       return;
     }
-    // Chưa cài → KÍCH HOẠT NGAY → download zip + extract + xóa zip.
     setIntegrateStates(prev => ({ ...prev, [cardId]: 'installing' }));
     try {
-      const r = await api.activate_integration(cardId);
-      if (r && r.success) {
-        setIntegrateStates(prev => ({ ...prev, [cardId]: 'installed' }));
-        if (!r.already_installed) {
-          setEasyInstallState('success');
-          setEasyInstallNote('Đã cài đặt thành công. Bấm KHỞI CHẠY để mở.');
+      if (api.activate_integration) {
+        const r = await api.activate_integration(cardId);
+        if (r && (r.success || r.already)) {
+          setIntegrateStates(prev => ({ ...prev, [cardId]: 'installed' }));
+        } else {
+          setIntegrateStates(prev => ({ ...prev, [cardId]: 'idle' }));
+          setEasyInstallNote((r && r.error) || 'Lỗi cài đặt tool.');
         }
       } else {
         setIntegrateStates(prev => ({ ...prev, [cardId]: 'idle' }));
-        setEasyInstallState('error');
-        setEasyInstallNote((r && r.error) || 'Lỗi không xác định.');
+        setEasyInstallNote('API activate_integration không tồn tại.');
       }
     } catch (e) {
       setIntegrateStates(prev => ({ ...prev, [cardId]: 'idle' }));
-      setEasyInstallState('error');
       setEasyInstallNote('Lỗi: ' + ((e && e.message) ? e.message : String(e)));
     }
   };
 
-  const cards = [
+    const cards = [
+    {
+      id: 'memcleaner',
+      title: 'MEMORY CLEANER',
+      badge: 'TỐI ƯU BỘ NHỚ RAM',
+      themeColor: '#7c3aed',
+      borderColor: '#c084fc',
+      features: [
+        'Dọn dẹp RAM Working Set & Bộ nhớ rác tự động',
+        'Tự động kích hoạt khi RAM vượt ngưỡng trên 80%',
+        'Thu hồi RAM ngầm từ các ứng dụng rảnh rỗi',
+        'Tối ưu 100% tài nguyên RAM cho Game chiến mượt',
+        'Chỉ chạy khi Nexus Launcher đang mở (An toàn 100%)'
+      ],
+      infoBoxHeader: 'HỆ THỐNG TỐI ƯU MEMORY',
+      infoItems: [
+        'Cơ chế: EmptyWorkingSet API Win32 chính thức',
+        'Ngưỡng kích hoạt: Tự động dọn khi RAM > 80%',
+        'An toàn: 0% hao mòn SSD, không ảnh hưởng hệ thống'
+      ],
+      note: 'Tính năng chạy tự động ngầm khi bật Nexus Launcher. Khi tắt Nexus Launcher, tiến trình sẽ tự động dừng hoàn toàn.',
+      btnText: 'KÍCH HOẠT NGAY'
+    },
     {
       id: 'cloud',
       title: 'CLOUD SAVE',
