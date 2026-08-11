@@ -11594,15 +11594,16 @@ const IntegrateContent = () => {
       setEasyInstallNote('Vui lòng mở qua ứng dụng NexusGames.');
       return;
     }
+    const targetState = memCleanerState === 'active' ? 'disabled' : 'active';
+    setMemCleanerState(targetState);
     try {
       const r = await api.toggle_mem_cleaner();
-      if (r && r.active) {
-        setMemCleanerState('active');
-      } else {
-        setMemCleanerState('disabled');
+      if (r && typeof r.active === 'boolean') {
+        setMemCleanerState(r.active ? 'active' : 'disabled');
       }
     } catch (e) {
       console.error(e);
+      setMemCleanerState(memCleanerState);
     }
   };
 
