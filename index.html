@@ -52,10 +52,20 @@ const firebaseConfig = {
   appId: "1:33411756902:web:271fff42ae280121768ea7",
   measurementId: "G-NRBP4T26VZ"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
+// Firebase guard: only init if SDK is loaded (offline/pywebview compatible)
+let auth = null, db = null, storage = null;
+try {
+  if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+    if (!firebase.apps || firebase.apps.length === 0) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    auth = firebase.auth();
+    db = firebase.firestore();
+    storage = firebase.storage();
+  }
+} catch(_e) {
+  console.warn('Firebase init skipped:', _e.message);
+}
 
 
 
@@ -11936,53 +11946,13 @@ const App = () => {
 
   const [currentUser, setCurrentUser] = React.useState(null);
   const [userData, setUserData] = React.useState(null);
-  const [authLoading, setAuthLoading] = React.useState(true);
 
   const [activeTab, setActiveTab] = React.useState('home');
   const [activeMenuLeft, setActiveMenuLeft] = React.useState('mienphi');
   const [selectedGame, setSelectedGame] = React.useState(null);
 
-  // Lắng nghe thay đổi trạng thái đăng nhập từ Firebase
-  React.useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        setCurrentUser(user);
-        
-        // Kích hoạt lắng nghe dữ liệu thời gian thực từ Firestore
-        const userRef = db.collection("users").doc(user.uid);
-        const unsubscribeSnapshot = userRef.onSnapshot(async (doc) => {
-          if (doc.exists) {
-            setUserData(doc.data());
-          } else {
-            // Đề phòng trường hợp chưa có Profile
-            const fallbackProfile = {
-              uid: user.uid,
-              displayName: user.displayName || "Thành viên",
-              email: user.email,
-              greenCoins: 0,
-              goldTickets: 0,
-              role: "THÀNH VIÊN",
-              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || "User")}&background=00d8e6&color=000&rounded=true&font-size=0.6`
-            };
-            await userRef.set(fallbackProfile);
-            setUserData(fallbackProfile);
-          }
-          setAuthLoading(false);
-        }, err => {
-          console.error("Lỗi Firestore: ", err);
-          setAuthLoading(false);
-        });
 
-        return () => unsubscribeSnapshot();
-      } else {
-        setCurrentUser(null);
-        setUserData(null);
-        setAuthLoading(false);
-      }
-    });
 
-    return () => unsubscribe();
-  }, []);
 
   if (gate === 'checking') {
     return (
