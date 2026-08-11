@@ -9048,10 +9048,6 @@ const TopBar = ({ activeTab, setActiveTab, zoom, setZoom, currentUser, userData 
   return (
     <div className="topbar" onClick={() => {}}>
       <div className="topbar-left">
-        <div className="app-logo">
-          <img src="https://nexus-launcher-gold.vercel.app/nexus-logo.png" alt="NexusGames" className="logo-img" onError={e => { e.target.style.display='none'; }} />
-          <span className="app-name-text">NexusGames</span>
-        </div>
         <div
           className={`top-nav-item ${activeTab === 'home' ? 'active-home' : ''}`}
           onClick={() => setActiveTab('home')}
