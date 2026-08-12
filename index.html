@@ -9072,15 +9072,7 @@ const TopBar = ({ activeTab, setActiveTab, zoom, setZoom, currentUser, userData 
       </div>
 
       <div className="topbar-right">
-        <div className="user-profile-wrapper">
-          <div className="user-profile-container" onClick={() => setActiveTab('profile')}>
-            <img src={avatarUrl} alt="Avatar" className="user-avatar" />
-            <div className="user-info">
-              <div className="user-name">{username}</div>
-              <div className="user-role">{role}</div>
-            </div>
-          </div>
-        </div>
+        <!-- User profile display removed -->
       </div>
     </div>
   );
@@ -11719,16 +11711,16 @@ const HomeContent = () => {
         <div className="bento-cell bento-profile">
           <div className="bento-profile-top">
             <div className="avatar-ring">
-              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=250&q=80" alt="NexusHideout" />
+              <img src="Logo_NexusT.png" alt="Nexus Games" />
             </div>
             <div className="bento-profile-id">
-              <div className="bento-status"><span className="status-dot"></span> ONLINE</div>
-              <h1 className="bento-name">NEXUSHIDEOUT</h1>
-              <div className="bento-role">FOUNDER · LEAD DESIGNER</div>
+              <div className="bento-status"><span className="status-dot"></span> READY</div>
+              <h1 className="bento-name">NEXUS GAMES</h1>
+              <div className="bento-role">DESKTOP LAUNCHER</div>
             </div>
           </div>
           <p className="bento-bio">
-            Crafting immersive digital experiences. A pixel-perfect React clone of the Nexus Launcher — modern glassmorphism UI, custom SVG rendering, fluid micro-animations.
+            Khu vực quản lý và khởi chạy ứng dụng game tối ưu tốc độ.
           </p>
           <div className="bento-links">
             <button className="btn-primary" onClick={() => window.open('https://github.com/KLKK93', '_blank')}><i className="ph-bold ph-github-logo"></i> GitHub</button>
