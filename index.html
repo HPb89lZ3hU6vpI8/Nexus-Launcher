@@ -35,6 +35,7 @@
         overflow-y: auto;
         padding: 24px 36px 60px;
         width: 100%;
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
       }
 
       .home-dashboard-wrapper {
@@ -52,24 +53,24 @@
       .home-spotlight-hero {
         position: relative;
         width: 100%;
-        min-height: 320px;
+        min-height: 340px;
         border-radius: 20px;
         overflow: hidden;
         display: flex;
         align-items: flex-end;
-        padding: 36px 40px;
-        background: #0d1117;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        padding: 40px 44px;
+        background: #090c10;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       }
 
       .home-spotlight-bg {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
         background-size: cover;
-        background-position: center top;
-        filter: brightness(0.65);
-        transition: transform 0.6s ease;
+        background-position: center 25%;
+        filter: brightness(0.6);
+        transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
       }
 
       .home-spotlight-hero:hover .home-spotlight-bg {
@@ -79,8 +80,8 @@
       .home-spotlight-overlay {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: linear-gradient(0deg, #090c10 10%, rgba(9, 12, 16, 0.7) 50%, rgba(9, 12, 16, 0.2) 100%),
-                    linear-gradient(90deg, #090c10 0%, rgba(9, 12, 16, 0.8) 40%, rgba(9, 12, 16, 0) 100%);
+        background: linear-gradient(0deg, #090c10 8%, rgba(9, 12, 16, 0.75) 55%, rgba(9, 12, 16, 0.2) 100%),
+                    linear-gradient(90deg, #090c10 0%, rgba(9, 12, 16, 0.85) 45%, rgba(9, 12, 16, 0) 100%);
         pointer-events: none;
       }
 
@@ -90,59 +91,147 @@
         display: flex;
         flex-direction: column;
         gap: 12px;
-        max-width: 720px;
+        max-width: 760px;
       }
 
       .home-spotlight-tag {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        font-size: 11px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 11.5px;
         font-weight: 800;
         letter-spacing: 1.5px;
-        color: #00d8e6;
+        color: #00f2fe;
         text-transform: uppercase;
+        background: rgba(0, 242, 254, 0.1);
+        border: 1px solid rgba(0, 242, 254, 0.25);
+        padding: 4px 12px;
+        border-radius: 20px;
+        width: fit-content;
       }
 
       .home-spotlight-title {
-        font-size: 36px;
+        font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+        font-size: 38px;
         font-weight: 900;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.2px;
         color: #ffffff;
         line-height: 1.15;
         margin: 0;
-        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+        text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9);
       }
 
       .home-spotlight-meta {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         font-size: 12.5px;
         font-weight: 700;
-        color: #a0a6b5;
+        color: #cbd5e1;
+        flex-wrap: wrap;
       }
 
       .home-spotlight-rating {
+        background: rgba(0, 230, 118, 0.12);
+        border: 1px solid rgba(0, 230, 118, 0.28);
+        padding: 3px 10px;
+        border-radius: 8px;
         color: #00e676;
-        display: flex;
+        font-size: 12px;
+        font-weight: 800;
+        display: inline-flex;
         align-items: center;
-        gap: 4px;
+        gap: 5px;
+      }
+
+      .home-spotlight-chip {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 3px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #cbd5e1;
       }
 
       .home-spotlight-desc {
         font-size: 14px;
         line-height: 1.6;
-        color: #c9d1d9;
+        color: #d1d5db;
         margin: 0;
+        max-width: 720px;
       }
 
       .home-spotlight-actions {
         display: flex;
         align-items: center;
-        gap: 14px;
-        margin-top: 8px;
+        gap: 12px;
+        margin-top: 10px;
         flex-wrap: wrap;
+      }
+
+      /* BUTTONS ĐỈNH CAO */
+      .btn-hero-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 26px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13.5px;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        color: #080b10;
+        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        box-shadow: 0 6px 20px rgba(0, 242, 254, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      .btn-hero-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(0, 242, 254, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        filter: brightness(1.08);
+      }
+
+      .btn-hero-primary:active {
+        transform: translateY(0);
+      }
+
+      .btn-hero-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        color: #f1f5f9;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 12px;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+        transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      .btn-hero-secondary:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.14);
+        border-color: rgba(0, 242, 254, 0.5);
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+        color: #00f2fe;
+      }
+
+      .btn-hero-secondary:active {
+        transform: translateY(0);
       }
 
       /* 2. SECTION SHELVES */
@@ -157,40 +246,45 @@
         align-items: center;
         justify-content: space-between;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        padding-bottom: 10px;
+        padding-bottom: 12px;
       }
 
       .home-shelf-title {
         display: flex;
         align-items: center;
         gap: 10px;
-        font-size: 16px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 17px;
         font-weight: 800;
-        letter-spacing: 1px;
+        letter-spacing: 0.6px;
         color: #ffffff;
         text-transform: uppercase;
       }
 
       .home-shelf-title i {
-        color: #00d8e6;
+        color: #00f2fe;
         font-size: 20px;
       }
 
       .home-shelf-btn-more {
-        background: transparent;
-        border: none;
-        color: #00d8e6;
+        background: rgba(0, 242, 254, 0.08);
+        border: 1px solid rgba(0, 242, 254, 0.22);
+        border-radius: 10px;
+        color: #00f2fe;
+        font-family: 'Plus Jakarta Sans', sans-serif;
         font-size: 12.5px;
         font-weight: 700;
+        padding: 6px 14px;
         cursor: pointer;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 6px;
-        transition: opacity 0.2s ease, transform 0.2s ease;
+        transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
       }
 
       .home-shelf-btn-more:hover {
-        opacity: 0.8;
+        background: rgba(0, 242, 254, 0.16);
+        border-color: rgba(0, 242, 254, 0.45);
         transform: translateX(3px);
       }
 
@@ -202,27 +296,28 @@
       }
 
       .home-genre-card {
-        background: rgba(22, 27, 34, 0.7);
+        background: rgba(22, 27, 34, 0.75);
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 14px;
-        padding: 16px 12px;
+        padding: 18px 14px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         cursor: pointer;
-        transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
       }
 
       .home-genre-card:hover {
         transform: translateY(-3px);
-        border-color: #00d8e6;
-        background: rgba(0, 216, 230, 0.08);
+        border-color: #00f2fe;
+        background: rgba(0, 242, 254, 0.09);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
       }
 
       .home-genre-icon {
-        font-size: 24px;
-        color: #00d8e6;
+        font-size: 26px;
+        color: #00f2fe;
       }
 
       .home-genre-name {
@@ -934,29 +1029,6 @@ const GAME_DATA = [
     }
   },
   {
-    id: 103,
-    title: "Grand Theft Auto IV: The Complete Edition",
-    appId: '12210',
-    percent: "81.26%",
-    reviewText: "RẤT TÍCH CỰC",
-    reviewCount: "81.435 đánh giá",
-    tags: ['HÀNH ĐỘNG', 'PHIÊU LƯU', 'CHƠI ĐƠN', 'CHƠI NHIỀU NGƯỜI'],
-    viethoa: false,
-    cloudSave: false,
-    baseName: "12210",
-    addedAt: '2026-07-12',
-    steamAccount: '',
-    sysreq: {
-      os: 'Windows 10 (64-bit)',
-      cpu: 'Intel Core 2 Duo 1.8GHz, AMD Athlon X2 64 2.4GHz',
-      ram: '1.5GB',
-      gpu: '256MB Nvidia 7900 / 256MB ATI X1900',
-      dx: 'DirectX 9.0c Compliant Card',
-      storage: '22GB of Hard Disc Space',
-      audio: '5.1 Channel Audio Card'
-    }
-  },
-  {
     id: 104,
     title: "Dead Space (2008)",
     appId: '17470',
@@ -1367,30 +1439,6 @@ const GAME_DATA = [
     }
   },
 
-  {
-    id: 123,
-    title: "Grand Theft Auto V Legacy",
-    appId: '271590',
-    percent: "83.66%",
-    reviewText: "RẤT TÍCH CỰC",
-    reviewCount: "645.341 đánh giá",
-    tags: ['HÀNH ĐỘNG', 'PHIÊU LƯU', 'CHƠI ĐƠN', 'CHƠI NHIỀU NGƯỜI', 'PVP', 'PVP TRỰC TUYẾN'],
-    viethoa: false,
-    cloudSave: false,
-    baseName: "GrandTheftAutoVLegacy",
-    addedAt: '2026-07-12',
-    steamAccount: '',
-    sysreq: {
-      arch64: true,
-      os: 'Windows 10 64 Bit',
-      cpu: 'Intel Core 2 Quad CPU Q6600 @ 2.40GHz (4 CPUs) / AMD Phenom 9850 Quad-Core Processor (4 CPUs) @ 2.5GHz',
-      ram: '4 GB RAM',
-      gpu: 'NVIDIA 9800 GT 1GB / AMD HD 4870 1GB (DX 10, 10.1, 11)',
-      storage: '125 GB available space',
-      audio: '100% DirectX 10 compatible',
-      note: 'Over time downloadable content and programming changes will change the system requirements for this game.  Please refer to your hardware manufacturer and  for current compatibility information. Some system components such as mobile chipsets, integrated, and AGP graphics cards may be incompatible. Unlisted specifications may not be supported by publisher.     Other requirements:  Installation and online play requires log-in to Rockstar Games Social Club (13+) network; internet connection required for activation, online play, and periodic entitlement verification; software installations required including Rockstar Games Social Club platform, DirectX , Chromium, and Microsoft Visual C++ 2008 sp1 Redistributable Package, and authentication software that recognizes certain hardware attributes for entitlement, digital rights management, system, and other support purposes.     SINGLE USE SERIAL CODE REGISTRATION VIA INTERNET REQUIRED; REGISTRATION IS LIMITED TO ONE ROCKSTAR GAMES SOCIAL CLUB ACCOUNT (13+) PER SERIAL CODE; ONLY ONE PC LOG-IN ALLOWED PER SOCIAL CLUB ACCOUNT AT ANY TIME; SERIAL CODE(S) ARE NON-TRANSFERABLE ONCE USED; SOCIAL CLUB ACCOUNTS ARE NON-TRANSFERABLE.  Partner Requirements:  Please check the terms of service of this site before purchasing this software.'
-    }
-  },
   {
     id: 124,
     title: "NARUTO SHIPPUDEN: Ultimate Ninja STORM Revolution",
@@ -2670,52 +2718,6 @@ const GAME_DATA = [
       note: 'Low 720p (30FPS). Microsoft no longer supports Windows 10 or older versions.'
     },
     redeem: true
-  },
-  {
-    id: 186,
-    title: "Grand Theft Auto: Vice City – The Definitive Edition",
-    appId: '1546990',
-    percent: "79.31%",
-    reviewText: "HẦU HẾT TÍCH CỰC",
-    reviewCount: "2.857 đánh giá",
-    tags: ['HÀNH ĐỘNG', 'PHIÊU LƯU', 'CHƠI ĐƠN'],
-    viethoa: false,
-    cloudSave: false,
-    baseName: "GrandTheftAutoViceCityTheDefinitiveEdition",
-    addedAt: '2026-07-12',
-    steamAccount: '',
-    sysreq: {
-      arch64: true,
-      os: 'Windows 10',
-      cpu: 'Intel® Core™ i5-6600K / AMD FX-6300',
-      ram: '8 GB RAM',
-      gpu: 'Nvidia GeForce GTX 760 2GB / AMD Radeon R9 280 3GB',
-      storage: '10 GB available space',
-      audio: 'DirectX compatible'
-    }
-  },
-  {
-    id: 187,
-    title: "Grand Theft Auto: San Andreas – The Definitive Edition",
-    appId: '1547000',
-    percent: "77.63%",
-    reviewText: "HẦU HẾT TÍCH CỰC",
-    reviewCount: "4.926 đánh giá",
-    tags: ['HÀNH ĐỘNG', 'PHIÊU LƯU', 'CHƠI ĐƠN'],
-    viethoa: false,
-    cloudSave: false,
-    baseName: "GrandTheftAutoSanAndreasTheDefinitiveEdition",
-    addedAt: '2026-07-12',
-    steamAccount: '',
-    sysreq: {
-      arch64: true,
-      os: 'Windows 10',
-      cpu: 'Intel® Core™ i5-6600K / AMD FX-6300',
-      ram: '8GB GB RAM',
-      gpu: 'Nvidia GeForce GTX 760 2GB / AMD Radeon R9 280 3GB',
-      storage: '19 GB available space',
-      audio: 'Direct X Compatible'
-    }
   },
   {
     id: 188,
@@ -18079,13 +18081,28 @@ const IntegrateContent = () => {
 };
 
 const HomeContent = ({ setActiveTab, setSelectedGame }) => {
-  // Game nổi bật làm Spotlight Hero
-  const featuredGame = GAME_DATA.find(g => String(g.appId) === '2358720') || GAME_DATA[0];
+  // Danh sách game thịnh hành ĐỘNG - tự động tính toán từ GAME_DATA (sắp xếp theo điểm đánh giá & độ phổ biến cao nhất)
+  const trendingGames = React.useMemo(() => {
+    return [...GAME_DATA]
+      .filter(g => g.percent && parseFloat(g.percent) > 0)
+      .sort((a, b) => {
+        const pA = parseFloat(a.percent) || 0;
+        const pB = parseFloat(b.percent) || 0;
+        const parseReviews = (str) => {
+          if (!str) return 0;
+          return parseInt(str.replace(/[^0-9]/g, ''), 10) || 0;
+        };
+        const rA = parseReviews(a.reviewCount);
+        const rB = parseReviews(b.reviewCount);
+        const scoreA = pA * 1000 + Math.min(rA / 100, 5000);
+        const scoreB = pB * 1000 + Math.min(rB / 100, 5000);
+        return scoreB - scoreA;
+      })
+      .slice(0, 16); // 16 game = 4 cột x 4 hàng dọc
+  }, []);
 
-  // Danh sách các tựa game bom tấn thịnh hành
-  const trendingAppIds = ['2358720', '1245620', '1593500', '1091500', '2124490', '1623730', '271590', '814380'];
-  const trendingGames = GAME_DATA.filter(g => trendingAppIds.includes(String(g.appId))).slice(0, 8);
-
+  // Spotlight Hero chọn tựa game xuất sắc nhất
+  const featuredGame = GAME_DATA.find(g => String(g.appId) === '2358720') || trendingGames[0] || GAME_DATA[0];
   const heroBg = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${featuredGame.appId}/library_hero.jpg`;
 
   return (
@@ -18105,39 +18122,36 @@ const HomeContent = ({ setActiveTab, setSelectedGame }) => {
             <h1 className="home-spotlight-title">{featuredGame.title}</h1>
             <div className="home-spotlight-meta">
               <span className="home-spotlight-rating"><i className="ph-fill ph-star"></i> {featuredGame.percent || '96%'} ({featuredGame.reviewText || 'Rất Tích Cực'})</span>
-              <span>•</span>
-              <span>{(featuredGame.tags || ['Hành Động', 'Nhập Vai']).slice(0, 3).join(' • ')}</span>
+              <span className="home-spotlight-chip">{(featuredGame.tags || ['Hành Động', 'Nhập Vai']).slice(0, 3).join(' • ')}</span>
+              {featuredGame.viethoa && <span className="home-spotlight-chip" style={{ color: '#ffd600', borderColor: 'rgba(255, 214, 0, 0.3)' }}><i className="ph-bold ph-translate"></i> SẴN VIỆT HÓA</span>}
             </div>
             <p className="home-spotlight-desc">
               Khám phá thế giới thần thoại phương Đông huyền bí, hóa thân thành Thiên Mệnh Nhân đối đầu muôn trùng thử thách với đồ họa Unreal Engine 5 đỉnh cao.
             </p>
             <div className="home-spotlight-actions">
               <button 
-                className="btn-primary" 
+                className="btn-hero-primary" 
                 onClick={() => { if (setSelectedGame) setSelectedGame(featuredGame); if (setActiveTab) setActiveTab('game'); }}
-                style={{ padding: '12px 24px', fontSize: '14px', fontWeight: '800' }}
               >
-                <i className="ph-bold ph-play-circle"></i> Xem & Kích Hoạt Ngay
+                <i className="ph-bold ph-play-circle" style={{ fontSize: '18px' }}></i> Xem & Kích Hoạt Ngay
               </button>
               <button 
-                className="btn-secondary" 
+                className="btn-hero-secondary" 
                 onClick={() => setActiveTab && setActiveTab('game')}
-                style={{ padding: '12px 20px', fontSize: '13px' }}
               >
-                <i className="ph-bold ph-squares-four"></i> Thư Viện ({GAME_DATA.length} Game)
+                <i className="ph-bold ph-squares-four" style={{ fontSize: '16px' }}></i> Thư Viện ({GAME_DATA.length} Game)
               </button>
               <button 
-                className="btn-secondary" 
+                className="btn-hero-secondary" 
                 onClick={() => setActiveTab && setActiveTab('integrate')}
-                style={{ padding: '12px 20px', fontSize: '13px' }}
               >
-                <i className="ph-bold ph-cloud-arrow-up"></i> Cloud Save
+                <i className="ph-bold ph-cloud-arrow-up" style={{ fontSize: '16px' }}></i> Cloud Save
               </button>
             </div>
           </div>
         </div>
 
-        {/* 2. SHELF: GAME NỔI BẬT & THỊNH HÀNH */}
+        {/* 2. SHELF: GAME NỔI BẬT & THỊNH HÀNH (ĐỘNG 16 GAMES = 4 HÀNG DỌC) */}
         <div className="home-shelf-section">
           <div className="home-shelf-header">
             <div className="home-shelf-title">
