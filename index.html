@@ -17854,58 +17854,202 @@ const IntegrateContent = () => {
   );
 };
 
-const HomeContent = () => {
+const HomeContent = ({ setActiveTab }) => {
   return (
     <div className="home-content-container">
       <div className="glow-bg-1"></div>
       <div className="glow-bg-2"></div>
 
-      <div className="bento-grid">
-        <div className="bento-cell bento-profile">
-          <div className="bento-profile-top">
-            <div className="avatar-ring">
+      <div className="home-dashboard-wrapper">
+        {/* 1. HERO BANNER */}
+        <div className="home-hero-card">
+          <div className="home-hero-left">
+            <div className="home-hero-avatar-ring">
               <img src="Logo_NexusT.png" alt="Nexus Games" />
             </div>
-            <div className="bento-profile-id">
-              <div className="bento-status"><span className="status-dot"></span> READY</div>
-              <h1 className="bento-name">NEXUS GAMES</h1>
-              <div className="bento-role">DESKTOP LAUNCHER</div>
+            <div className="home-hero-info">
+              <div className="home-status-badge">
+                <span className="status-dot"></span> KHO GAME STEAM SẴN SÀNG
+              </div>
+              <h1 className="home-hero-title">NEXUS GAMES LAUNCHER</h1>
+              <div className="home-hero-subtitle">TRUNG TÂM QUẢN LÝ & KHỞI CHẠY GAME STEAM CHUYÊN NGHIỆP</div>
+              <p className="home-hero-desc">
+                Thư viện tổng hợp hơn {GAME_DATA.length} trò chơi Steam bản quyền đa thể loại. Hỗ trợ kích hoạt nhanh chỉ với 1 cú click chuột, xem trước video trailer Full HD, ảnh chụp in-game 1080p và tự động đồng bộ Cloud Save lên Google Drive an toàn.
+              </p>
             </div>
           </div>
-          <p className="bento-bio">
-            Khu vực quản lý và khởi chạy ứng dụng game tối ưu tốc độ.
-          </p>
-          <div className="bento-links">
-            <button className="btn-primary" onClick={() => window.open('https://github.com/KLKK93', '_blank')}><i className="ph-bold ph-github-logo"></i> GitHub</button>
-            <button className="btn-secondary" onClick={() => window.open('https://discord.gg/fsQW3FaNnG', '_blank')}><i className="ph-bold ph-discord-logo"></i> Discord</button>
+          <div className="home-hero-actions">
+            <button className="btn-primary" onClick={() => setActiveTab && setActiveTab('game')} style={{width: '100%', justifyContent: 'center'}}>
+              <i className="ph-bold ph-game-controller"></i> Vào Thư Viện ({GAME_DATA.length} Game)
+            </button>
+            <button className="btn-secondary" onClick={() => setActiveTab && setActiveTab('integrate')} style={{width: '100%', justifyContent: 'center'}}>
+              <i className="ph-bold ph-squares-four"></i> Tiện Ích & Cloud Save
+            </button>
+            <div style={{display: 'flex', gap: '8px'}}>
+              <button className="btn-secondary" onClick={() => window.open('https://discord.gg/fsQW3FaNnG', '_blank')} style={{flex: 1, justifyContent: 'center', padding: '9px 12px', fontSize: '12px'}}>
+                <i className="ph-bold ph-discord-logo"></i> Discord
+              </button>
+              <button className="btn-secondary" onClick={() => window.open('https://github.com/KLKK93', '_blank')} style={{flex: 1, justifyContent: 'center', padding: '9px 12px', fontSize: '12px'}}>
+                <i className="ph-bold ph-github-logo"></i> GitHub
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="bento-cell bento-stat">
-          <div className="bento-stat-value">{GAME_DATA.length}</div>
-          <div className="bento-stat-label">GAMES CURATED</div>
-          <i className="ph ph-game-controller bento-stat-icon"></i>
+        {/* 2. STATS ROW */}
+        <div className="home-stats-row">
+          <div className="home-stat-box">
+            <div className="home-stat-data">
+              <div className="home-stat-num">{GAME_DATA.length}+</div>
+              <div className="home-stat-title">TỰA GAME STEAM</div>
+              <div className="home-stat-sub">Bom tấn AAA & Indie phong phú</div>
+            </div>
+            <div className="home-stat-icon-wrapper">
+              <i className="ph-bold ph-game-controller"></i>
+            </div>
+          </div>
+
+          <div className="home-stat-box">
+            <div className="home-stat-data">
+              <div className="home-stat-num">100%</div>
+              <div className="home-stat-title">TRAILER & HÌNH ẢNH</div>
+              <div className="home-stat-sub">Video gameplay & ảnh Full HD</div>
+            </div>
+            <div className="home-stat-icon-wrapper">
+              <i className="ph-bold ph-film-strip"></i>
+            </div>
+          </div>
+
+          <div className="home-stat-box">
+            <div className="home-stat-data">
+              <div className="home-stat-num">CLOUD</div>
+              <div className="home-stat-title">ĐỒNG BỘ LƯU TRỮ</div>
+              <div className="home-stat-sub">Sao lưu tiến trình lên Google Drive</div>
+            </div>
+            <div className="home-stat-icon-wrapper">
+              <i className="ph-bold ph-cloud-arrow-up"></i>
+            </div>
+          </div>
+
+          <div className="home-stat-box">
+            <div className="home-stat-data">
+              <div className="home-stat-num">13+</div>
+              <div className="home-stat-title">GAME SẮP PHÁT HÀNH</div>
+              <div className="home-stat-sub">Đếm ngược ngày ra mắt thực tế</div>
+            </div>
+            <div className="home-stat-icon-wrapper">
+              <i className="ph-bold ph-clock-countdown"></i>
+            </div>
+          </div>
         </div>
 
-        <div className="bento-cell bento-stat">
-          <div className="bento-stat-value">100%</div>
-          <div className="bento-stat-label">HANDCRAFTED UI</div>
-          <i className="ph ph-cube bento-stat-icon"></i>
+        {/* 3. DANH MỤC THỂ LOẠI GAME NỔI BẬT */}
+        <div className="home-panel-card">
+          <div className="home-panel-header">
+            <i className="ph-bold ph-grid-four"></i> CÁC THỂ LOẠI GAME NỔI BẬT TRONG THƯ VIỆN
+          </div>
+          <div className="home-categories-grid">
+            <div className="home-category-card" onClick={() => setActiveTab && setActiveTab('game')}>
+              <div className="home-category-header">
+                <i className="ph-bold ph-sword"></i>
+                <span>Hành Động & Chặt Chém</span>
+              </div>
+              <div className="home-category-games">
+                Black Myth: Wukong, God of War Ragnarök, Sekiro, Elden Ring, Ghost of Tsushima, Devil May Cry...
+              </div>
+            </div>
+
+            <div className="home-category-card" onClick={() => setActiveTab && setActiveTab('game')}>
+              <div className="home-category-header">
+                <i className="ph-bold ph-ghost"></i>
+                <span>Kinh Dị & Sinh Tồn</span>
+              </div>
+              <div className="home-category-games">
+                Silent Hill 2 Remake, The Outlast Trials, Resident Evil 4, Dead Space, The Forest, Sons Of The Forest...
+              </div>
+            </div>
+
+            <div className="home-category-card" onClick={() => setActiveTab && setActiveTab('game')}>
+              <div className="home-category-header">
+                <i className="ph-bold ph-compass"></i>
+                <span>Thế Giới Mở & Phiêu Lưu</span>
+              </div>
+              <div className="home-category-games">
+                Cyberpunk 2077, Grand Theft Auto V, Red Dead Redemption 2, Forza Horizon 5, Hogwarts Legacy...
+              </div>
+            </div>
+
+            <div className="home-category-card" onClick={() => setActiveTab && setActiveTab('game')}>
+              <div className="home-category-header">
+                <i className="ph-bold ph-sparkle"></i>
+                <span>Nhập Vai & Cốt Truyện</span>
+              </div>
+              <div className="home-category-games">
+                Final Fantasy XVI, Persona series, Baldur's Gate 3, The Witcher 3, Dragon's Dogma 2, Like a Dragon...
+              </div>
+            </div>
+
+            <div className="home-category-card" onClick={() => setActiveTab && setActiveTab('game')}>
+              <div className="home-category-header">
+                <i className="ph-bold ph-users-three"></i>
+                <span>Chơi Cùng Bạn Bè (Co-op)</span>
+              </div>
+              <div className="home-category-games">
+                Palworld, It Takes Two, Left 4 Dead 2, Raft, Helldivers 2, Overcooked 2, Lethal Company, Phasmophobia...
+              </div>
+            </div>
+
+            <div className="home-category-card" onClick={() => setActiveTab && setActiveTab('game')}>
+              <div className="home-category-header">
+                <i className="ph-bold ph-wrench"></i>
+                <span>Mô Phỏng & Sandbox</span>
+              </div>
+              <div className="home-category-games">
+                WorldBox - God Simulator, Bus Simulator, Low-Budget Repairs, Total War, Cities: Skylines, Farming Simulator...
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="bento-cell bento-project">
-          <div className="bento-cell-head"><i className="ph ph-stack"></i> PROJECT</div>
-          <h2 className="bento-project-title">NEXUS <span className="highlight">LAUNCHER</span></h2>
-          <p className="bento-project-desc">React 18 single-file architecture, pointer-driven gallery, aspect-aware media frame.</p>
+        {/* 4. HƯỚNG DẪN 3 BƯỚC KHỞI CHẠY */}
+        <div className="home-panel-card">
+          <div className="home-panel-header">
+            <i className="ph-bold ph-lightbulb"></i> HƯỚNG DẪN SỬ DỤNG NHANH CHO GAME THỦ
+          </div>
+          <div className="home-tips-list">
+            <div className="home-tip-row">
+              <span className="home-tip-badge">Bước 1</span>
+              <div className="home-tip-text">
+                Vào tab <strong>THƯ VIỆN</strong> trên thanh menu để khám phá hơn {GAME_DATA.length} trò chơi, tìm kiếm theo tên hoặc lọc theo thể loại yêu thích.
+              </div>
+            </div>
+
+            <div className="home-tip-row">
+              <span className="home-tip-badge">Bước 2</span>
+              <div className="home-tip-text">
+                Chọn game để xem video trailer Full HD, thông số cấu hình và nhấn nút <strong>KÍCH HOẠT NGAY</strong> để tự động thêm game vào tài khoản Steam của bạn.
+              </div>
+            </div>
+
+            <div className="home-tip-row">
+              <span className="home-tip-badge">Bước 3</span>
+              <div className="home-tip-text">
+                Truy cập tab <strong>TÍCH HỢP</strong> để kích hoạt tính năng sao lưu <strong>Cloud Save</strong> (tự động đồng bộ file save game lên Google Drive cá nhân) và giao diện <strong>Fluenty UI</strong> cho Steam.
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="bento-cell bento-tech">
-          <div className="bento-cell-head"><i className="ph ph-code"></i> TECH STACK</div>
-          <div className="bento-tech-grid">
-            <div className="tech-item"><i className="fa-brands fa-react"></i> React 18</div>
-            <div className="tech-item"><i className="fa-brands fa-js"></i> ES6+</div>
-            <div className="tech-item"><i className="fa-brands fa-css3-alt"></i> Modern CSS</div>
-            <div className="tech-item"><i className="fa-solid fa-paintbrush"></i> Custom SVG</div>
+        {/* 5. FOOTER THÔNG TIN */}
+        <div className="home-footer-strip">
+          <div className="home-footer-left">
+            <i className="ph-bold ph-game-controller"></i>
+            <span>NEXUS GAMES LAUNCHER • KHO GAME STEAM TẬP TRUNG DÀNH CHO CỘNG ĐỒNG GAME THỦ</span>
+          </div>
+          <div className="home-footer-tags">
+            <span className="home-tech-tag"><i className="ph-bold ph-check-circle"></i> 290+ Game Bản Quyền</span>
+            <span className="home-tech-tag"><i className="ph-bold ph-cloud-check"></i> Cloud Save Google Drive</span>
+            <span className="home-tech-tag"><i className="ph-bold ph-shield-check"></i> An Toàn & Bảo Mật</span>
           </div>
         </div>
       </div>
@@ -18086,7 +18230,7 @@ const App = () => {
         />
         {activeTab === 'home' ? (
           <div key="home" className="tab-content-transition">
-            <HomeContent />
+            <HomeContent setActiveTab={setActiveTab} />
           </div>
         ) : activeTab === 'profile' ? (
           <div key="profile" className="tab-content-transition">
