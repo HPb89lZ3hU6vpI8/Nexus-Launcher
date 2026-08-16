@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://shared.akamai.steamstatic.com" crossorigin>
     <link rel="preconnect" href="https://video.akamai.steamstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://nexus-launcher-zeta.vercel.app">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=Saira:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,700&family=Montserrat:wght@500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
@@ -25,7 +25,7 @@
         to   { transform: rotate(360deg); }
       }
 
-      /* --- MODERN GAME LAUNCHER HOME SCREEN --- */
+      /* --- MODERN GAME LAUNCHER HOME SCREEN (BE VIETNAM PRO & MONTSERRAT) --- */
       .home-content-container {
         flex: 1;
         position: relative;
@@ -35,7 +35,7 @@
         overflow-y: auto;
         padding: 24px 36px 60px;
         width: 100%;
-        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
       }
 
       .home-dashboard-wrapper {
@@ -45,7 +45,7 @@
         max-width: 1440px;
         display: flex;
         flex-direction: column;
-        gap: 32px;
+        gap: 28px;
         animation: fadeInUpScale 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
       }
 
@@ -53,15 +53,15 @@
       .home-spotlight-hero {
         position: relative;
         width: 100%;
-        min-height: 340px;
-        border-radius: 20px;
+        min-height: 320px;
+        border-radius: 16px;
         overflow: hidden;
         display: flex;
         align-items: flex-end;
-        padding: 40px 44px;
+        padding: 36px 40px;
         background: #090c10;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
       }
 
       .home-spotlight-bg {
@@ -69,7 +69,7 @@
         top: 0; left: 0; right: 0; bottom: 0;
         background-size: cover;
         background-position: center 25%;
-        filter: brightness(0.6);
+        filter: brightness(0.65);
         transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
       }
 
@@ -80,7 +80,7 @@
       .home-spotlight-overlay {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: linear-gradient(0deg, #090c10 8%, rgba(9, 12, 16, 0.75) 55%, rgba(9, 12, 16, 0.2) 100%),
+        background: linear-gradient(0deg, #090c10 10%, rgba(9, 12, 16, 0.72) 55%, rgba(9, 12, 16, 0.15) 100%),
                     linear-gradient(90deg, #090c10 0%, rgba(9, 12, 16, 0.85) 45%, rgba(9, 12, 16, 0) 100%);
         pointer-events: none;
       }
@@ -90,111 +90,125 @@
         z-index: 2;
         display: flex;
         flex-direction: column;
-        gap: 12px;
-        max-width: 760px;
+        gap: 10px;
+        max-width: 740px;
       }
 
       .home-spotlight-tag {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        font-family: 'Outfit', sans-serif;
-        font-size: 11.5px;
-        font-weight: 800;
-        letter-spacing: 1.5px;
-        color: #00f2fe;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #00d8e6;
         text-transform: uppercase;
-        background: rgba(0, 242, 254, 0.1);
-        border: 1px solid rgba(0, 242, 254, 0.25);
-        padding: 4px 12px;
-        border-radius: 20px;
+        background: rgba(0, 216, 230, 0.12);
+        border: 1px solid rgba(0, 216, 230, 0.25);
+        padding: 4px 10px;
+        border-radius: 6px;
         width: fit-content;
       }
 
       .home-spotlight-title {
-        font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
-        font-size: 38px;
-        font-weight: 900;
+        font-family: 'Montserrat', 'Be Vietnam Pro', sans-serif;
+        font-size: 34px;
+        font-weight: 800;
         letter-spacing: 0.2px;
         color: #ffffff;
         line-height: 1.15;
         margin: 0;
-        text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9);
+        text-shadow: 0 3px 18px rgba(0, 0, 0, 0.8);
       }
 
       .home-spotlight-meta {
         display: flex;
         align-items: center;
-        gap: 10px;
-        font-size: 12.5px;
-        font-weight: 700;
-        color: #cbd5e1;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #94a3b8;
         flex-wrap: wrap;
       }
 
       .home-spotlight-rating {
-        background: rgba(0, 230, 118, 0.12);
-        border: 1px solid rgba(0, 230, 118, 0.28);
-        padding: 3px 10px;
-        border-radius: 8px;
-        color: #00e676;
-        font-size: 12px;
-        font-weight: 800;
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        padding: 3px 9px;
+        border-radius: 6px;
+        color: #10b981;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 11.5px;
+        font-weight: 700;
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 4px;
       }
 
       .home-spotlight-chip {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        padding: 3px 10px;
-        border-radius: 8px;
-        font-size: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 11.5px;
         font-weight: 600;
-        color: #cbd5e1;
+        color: #94a3b8;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .home-spotlight-chip.viethoa {
+        background: rgba(234, 179, 8, 0.12);
+        border-color: rgba(234, 179, 8, 0.25);
+        color: #eab308;
+        font-weight: 700;
       }
 
       .home-spotlight-desc {
-        font-size: 14px;
-        line-height: 1.6;
-        color: #d1d5db;
-        margin: 0;
-        max-width: 720px;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 13.5px;
+        font-weight: 400;
+        line-height: 1.65;
+        color: #94a3b8;
+        margin: 2px 0 4px;
+        max-width: 680px;
       }
 
       .home-spotlight-actions {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-top: 10px;
+        gap: 10px;
+        margin-top: 6px;
         flex-wrap: wrap;
       }
 
-      /* BUTTONS ĐỈNH CAO */
+      /* BUTTONS ĐỈNH CAO CHUẨN GAMING */
       .btn-hero-primary {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        padding: 12px 26px;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 13.5px;
-        font-weight: 800;
-        letter-spacing: 0.4px;
-        color: #080b10;
-        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+        gap: 7px;
+        padding: 10px 22px;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        color: #090c10;
+        background: linear-gradient(135deg, #00d8e6 0%, #0099cc 100%);
         border: none;
-        border-radius: 12px;
+        border-radius: 8px;
         cursor: pointer;
-        box-shadow: 0 6px 20px rgba(0, 242, 254, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        box-shadow: 0 4px 14px rgba(0, 216, 230, 0.35);
+        transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
       }
 
       .btn-hero-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 28px rgba(0, 242, 254, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-        filter: brightness(1.08);
+        background: linear-gradient(135deg, #33e2ee 0%, #00a6dd 100%);
+        box-shadow: 0 6px 20px rgba(0, 216, 230, 0.5);
       }
 
       .btn-hero-primary:active {
@@ -205,29 +219,25 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        padding: 12px 20px;
-        font-family: 'Plus Jakarta Sans', sans-serif;
+        gap: 7px;
+        padding: 10px 18px;
+        font-family: 'Be Vietnam Pro', sans-serif;
         font-size: 13px;
-        font-weight: 700;
-        letter-spacing: 0.3px;
-        color: #f1f5f9;
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 12px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        color: #e2e8f0;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
         cursor: pointer;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-        transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
       }
 
       .btn-hero-secondary:hover {
         transform: translateY(-2px);
-        background: rgba(255, 255, 255, 0.14);
-        border-color: rgba(0, 242, 254, 0.5);
-        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
-        color: #00f2fe;
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(0, 216, 230, 0.4);
+        color: #ffffff;
       }
 
       .btn-hero-secondary:active {
@@ -238,92 +248,92 @@
       .home-shelf-section {
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 14px;
       }
 
       .home-shelf-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        padding-bottom: 10px;
       }
 
       .home-shelf-title {
         display: flex;
         align-items: center;
-        gap: 10px;
-        font-family: 'Outfit', sans-serif;
-        font-size: 17px;
+        gap: 8px;
+        font-family: 'Montserrat', 'Be Vietnam Pro', sans-serif;
+        font-size: 15px;
         font-weight: 800;
-        letter-spacing: 0.6px;
-        color: #ffffff;
+        letter-spacing: 0.8px;
+        color: #f8fafc;
         text-transform: uppercase;
       }
 
       .home-shelf-title i {
-        color: #00f2fe;
-        font-size: 20px;
+        color: #00d8e6;
+        font-size: 18px;
       }
 
       .home-shelf-btn-more {
-        background: rgba(0, 242, 254, 0.08);
-        border: 1px solid rgba(0, 242, 254, 0.22);
-        border-radius: 10px;
-        color: #00f2fe;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 12.5px;
-        font-weight: 700;
-        padding: 6px 14px;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        color: #00d8e6;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 12px;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        gap: 5px;
+        transition: all 0.2s ease;
       }
 
       .home-shelf-btn-more:hover {
-        background: rgba(0, 242, 254, 0.16);
-        border-color: rgba(0, 242, 254, 0.45);
-        transform: translateX(3px);
+        background: rgba(0, 216, 230, 0.1);
+        border-color: rgba(0, 216, 230, 0.3);
+        transform: translateX(2px);
       }
 
       /* 3. GENRE CHIPS GRID */
       .home-genre-grid {
         display: grid;
         grid-template-columns: repeat(6, 1fr);
-        gap: 12px;
+        gap: 10px;
       }
 
       .home-genre-card {
-        background: rgba(22, 27, 34, 0.75);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 14px;
-        padding: 18px 14px;
+        background: rgba(18, 22, 30, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 10px;
+        padding: 16px 12px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         cursor: pointer;
-        transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+        transition: all 0.2s ease;
       }
 
       .home-genre-card:hover {
-        transform: translateY(-3px);
-        border-color: #00f2fe;
-        background: rgba(0, 242, 254, 0.09);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+        transform: translateY(-2px);
+        border-color: rgba(0, 216, 230, 0.4);
+        background: rgba(0, 216, 230, 0.06);
       }
 
       .home-genre-icon {
-        font-size: 26px;
-        color: #00f2fe;
+        font-size: 22px;
+        color: #00d8e6;
       }
 
       .home-genre-name {
-        font-size: 12.5px;
-        font-weight: 800;
-        color: #ffffff;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: #e2e8f0;
         text-align: center;
       }
 
