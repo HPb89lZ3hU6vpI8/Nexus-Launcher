@@ -17,7 +17,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
-    <link rel="stylesheet" href="./style.css?v=50">
+    <link rel="stylesheet" href="./style.css?v=20260816_1">
     <style>
       /* Spinner animation cho nut "VUI LONG CHO..." */
       @keyframes spin {
@@ -335,6 +335,241 @@
         font-weight: 600;
         color: #e2e8f0;
         text-align: center;
+      }
+
+      /* --- TOPBAR & SEGMENTED TABS (DIRECT OVERRIDE) --- */
+      .topbar {
+        height: 64px !important;
+        background: rgba(11, 15, 23, 0.95) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 0 28px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        flex-shrink: 0 !important;
+        z-index: 90 !important;
+      }
+
+      .topbar-left {
+        display: flex !important;
+        align-items: center !important;
+        gap: 20px !important;
+        height: 100% !important;
+      }
+
+      .brand-logo {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        cursor: pointer !important;
+        transition: transform 0.2s ease !important;
+      }
+
+      .brand-logo:hover {
+        transform: scale(1.02) !important;
+      }
+
+      .brand-logo-icon {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 10px !important;
+        background: linear-gradient(135deg, #00d8e6 0%, #0088cc 100%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 20px !important;
+        color: #080b10 !important;
+        box-shadow: 0 0 14px rgba(0, 216, 230, 0.4) !important;
+      }
+
+      .brand-text {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+      }
+
+      .brand-title {
+        font-family: 'Montserrat', sans-serif !important;
+        font-size: 18px !important;
+        font-weight: 900 !important;
+        letter-spacing: 1px !important;
+        color: #ffffff !important;
+      }
+
+      .brand-badge {
+        background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+        color: #ffffff !important;
+        font-family: 'Be Vietnam Pro', sans-serif !important;
+        font-size: 10px !important;
+        font-weight: 800 !important;
+        padding: 2px 7px !important;
+        border-radius: 6px !important;
+        letter-spacing: 0.5px !important;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4) !important;
+      }
+
+      .top-nav-segmented {
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 4px !important;
+        border-radius: 12px !important;
+      }
+
+      .top-nav-pill {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        height: 38px !important;
+        padding: 0 16px !important;
+        color: #94a3b8 !important;
+        font-family: 'Be Vietnam Pro', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 12.5px !important;
+        letter-spacing: 0.3px !important;
+        cursor: pointer !important;
+        border-radius: 9px !important;
+        background: transparent !important;
+        border: 1px solid transparent !important;
+        transition: all 0.2s ease !important;
+        user-select: none !important;
+        white-space: nowrap !important;
+        box-sizing: border-box !important;
+      }
+
+      .top-nav-pill i {
+        font-size: 17px !important;
+        color: #94a3b8 !important;
+        transition: color 0.2s ease !important;
+      }
+
+      .top-nav-pill:hover {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+      }
+
+      .top-nav-pill:hover i {
+        color: #ffffff !important;
+      }
+
+      .top-nav-pill.active {
+        background: rgba(0, 216, 230, 0.14) !important;
+        color: #00d8e6 !important;
+        border-color: rgba(0, 216, 230, 0.3) !important;
+        box-shadow: 0 0 16px rgba(0, 216, 230, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+      }
+
+      .top-nav-pill.active i {
+        color: #00d8e6 !important;
+        filter: drop-shadow(0 0 6px rgba(0, 216, 230, 0.6)) !important;
+      }
+
+      .top-nav-pill.integrate-tab.active {
+        background: rgba(245, 158, 11, 0.14) !important;
+        color: #f59e0b !important;
+        border-color: rgba(245, 158, 11, 0.3) !important;
+        box-shadow: 0 0 16px rgba(245, 158, 11, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+      }
+
+      .top-nav-pill.integrate-tab.active i {
+        color: #f59e0b !important;
+      }
+
+      .nav-count-pill {
+        background: rgba(0, 0, 0, 0.4) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        padding: 1px 6px !important;
+        border-radius: 6px !important;
+        font-size: 10.5px !important;
+        font-weight: 800 !important;
+        color: #94a3b8 !important;
+      }
+
+      .top-nav-pill.active .nav-count-pill {
+        border-color: rgba(0, 216, 230, 0.4) !important;
+        color: #00d8e6 !important;
+        background: rgba(0, 216, 230, 0.15) !important;
+      }
+
+      .topbar-right {
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px !important;
+      }
+
+      .zoom-controls-wrapper {
+        display: flex !important;
+        align-items: center !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 9px !important;
+        padding: 2px !important;
+      }
+
+      .zoom-btn {
+        background: transparent !important;
+        border: none !important;
+        color: #94a3b8 !important;
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 7px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        font-size: 13px !important;
+        transition: all 0.15s ease !important;
+      }
+
+      .zoom-btn:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #ffffff !important;
+      }
+
+      .zoom-level-text {
+        font-family: 'Be Vietnam Pro', sans-serif !important;
+        font-size: 11.5px !important;
+        font-weight: 700 !important;
+        color: #cbd5e1 !important;
+        padding: 0 8px !important;
+        cursor: pointer !important;
+      }
+
+      .status-pill-online {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 7px !important;
+        background: rgba(239, 68, 68, 0.1) !important;
+        border: 1px solid rgba(239, 68, 68, 0.25) !important;
+        padding: 6px 12px !important;
+        border-radius: 20px !important;
+      }
+
+      .status-dot {
+        width: 7px !important;
+        height: 7px !important;
+        border-radius: 50% !important;
+        background: #ef4444 !important;
+        box-shadow: 0 0 8px #ef4444 !important;
+        animation: pulseDot 2s infinite ease-in-out !important;
+      }
+
+      @keyframes pulseDot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.85); }
+      }
+
+      .status-label {
+        font-family: 'Be Vietnam Pro', sans-serif !important;
+        font-size: 11px !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.8px !important;
+        color: #fca5a5 !important;
+        text-transform: uppercase !important;
       }
 
       @media (max-width: 1200px) {
@@ -15272,8 +15507,8 @@ const UplaySvg = () => (
 
 const Sidebar = ({ activeMenuLeft, setActiveMenuLeft }) => {
   const menuItems = [
-    { id: 'mienphi', icon: <MoneyBanknoteIcon />, label: 'MIỄN PHÍ', isFree: true },
-    { id: 'steam', icon: <i className="fa-brands fa-steam brand-steam"></i>, label: 'STEAM' },
+    { id: 'mienphi', icon: <i className="ph-fill ph-fire"></i>, label: 'TẤT CẢ', isFree: true },
+    { id: 'steam', icon: <i className="fa-brands fa-steam"></i>, label: 'STEAM' },
     { id: 'battle', icon: <BattleNetSvg />, label: 'BATTLE' },
     { id: 'eaplay', icon: <EaSvg />, label: 'EA PLAY' },
     { id: 'uplay', icon: <UplaySvg />, label: 'UPLAY' },
@@ -15283,60 +15518,100 @@ const Sidebar = ({ activeMenuLeft, setActiveMenuLeft }) => {
   return (
     <div className="sidebar">
       <div className="sidebar-logo">
-        <img src="https://ui-avatars.com/api/?name=N&background=fff&color=000&rounded=true&font-size=0.6" alt="Logo" />
+        <div className="sidebar-brand-avatar">
+          <i className="ph-bold ph-shield-star"></i>
+        </div>
       </div>
       
-      {menuItems.map(item => (
-        <div 
-          key={item.id}
-          className={`sidebar-item ${item.isFree ? 'item-free' : ''} ${activeMenuLeft === item.id ? 'active-menu-left' : ''}`}
-          onClick={() => setActiveMenuLeft(item.id)}
-        >
-          {item.isFree && <div className="badge-99">99+</div>}
-          <div className="icon-wrapper">
-            {item.icon}
+      <div className="sidebar-items-list" style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+        {menuItems.map(item => (
+          <div 
+            key={item.id}
+            className={`sidebar-item ${item.isFree ? 'item-free' : ''} ${activeMenuLeft === item.id ? 'active-menu-left' : ''}`}
+            onClick={() => setActiveMenuLeft(item.id)}
+          >
+            {item.isFree && <div className="badge-99">99+</div>}
+            <div className="icon-wrapper">
+              {item.icon}
+            </div>
+            <span>{item.label}</span>
           </div>
-          <span>{item.label}</span>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
 
 
 const TopBar = ({ activeTab, setActiveTab, zoom, setZoom, currentUser, userData }) => {
-  const username = (userData && userData.displayName) || (currentUser && currentUser.displayName) || 'Nexus';
-  const role = (userData && userData.role) || 'THÀNH VIÊN';
-  const avatarUrl = (userData && userData.avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=00d8e6&color=000&rounded=true&font-size=0.6`;
+  const handleZoomIn = () => {
+    if (setZoom) setZoom(prev => Math.min(1.8, +(prev + 0.05).toFixed(2)));
+  };
+  const handleZoomOut = () => {
+    if (setZoom) setZoom(prev => Math.max(0.6, +(prev - 0.05).toFixed(2)));
+  };
+  const handleZoomReset = () => {
+    if (setZoom) setZoom(1.0);
+  };
 
   return (
-    <div className="topbar" onClick={() => {}}>
+    <div className="topbar">
       <div className="topbar-left">
-        <div
-          className={`top-nav-item ${activeTab === 'home' ? 'active-home' : ''}`}
-          onClick={() => setActiveTab('home')}
-        >
-          <TopHomeIcon active={activeTab === 'home'} />
-          <span>TRANG CHỦ</span>
+        <div className="brand-logo" onClick={() => setActiveTab('home')}>
+          <div className="brand-logo-icon">
+            <i className="ph-bold ph-game-controller"></i>
+          </div>
+          <div className="brand-text">
+            <span className="brand-title">NEXUS</span>
+            <span className="brand-badge">YT</span>
+          </div>
         </div>
-        <div
-          className={`top-nav-item ${activeTab === 'game' ? 'active-game' : ''}`}
-          onClick={() => setActiveTab('game')}
-        >
-          <TopGameIcon active={activeTab === 'game'} />
-          <span>THƯ VIỆN</span>
-        </div>
-        <div
-          className={`top-nav-item integrate-tab ${activeTab === 'integrate' ? 'active-integrate' : ''}`}
-          onClick={() => setActiveTab('integrate')}
-        >
-          <TopIntegrateIcon active={activeTab === 'integrate'} />
-          <span>TÍCH HỢP</span>
+
+        <div className="top-nav-segmented">
+          <div
+            className={`top-nav-pill ${activeTab === 'home' ? 'active' : ''}`}
+            onClick={() => setActiveTab('home')}
+          >
+            <i className="ph-bold ph-house"></i>
+            <span>TRANG CHỦ</span>
+          </div>
+          <div
+            className={`top-nav-pill ${activeTab === 'game' ? 'active' : ''}`}
+            onClick={() => setActiveTab('game')}
+          >
+            <i className="ph-bold ph-squares-four"></i>
+            <span>THƯ VIỆN</span>
+            <span className="nav-count-pill">{GAME_DATA ? GAME_DATA.length : 287}</span>
+          </div>
+          <div
+            className={`top-nav-pill integrate-tab ${activeTab === 'integrate' ? 'active' : ''}`}
+            onClick={() => setActiveTab('integrate')}
+          >
+            <i className="ph-bold ph-puzzle-piece"></i>
+            <span>TÍCH HỢP</span>
+          </div>
         </div>
       </div>
 
       <div className="topbar-right">
-        {/* User profile display removed */}
+        {setZoom && (
+          <div className="zoom-controls-wrapper">
+            <button className="zoom-btn" onClick={handleZoomOut} title="Thu nhỏ (Ctrl -)">
+              <i className="ph-bold ph-minus"></i>
+            </button>
+            <span className="zoom-level-text" onClick={handleZoomReset} title="Khôi phục mặc định (Ctrl 0)">
+              {Math.round((zoom || 1.0) * 100)}%
+            </span>
+            <button className="zoom-btn" onClick={handleZoomIn} title="Phóng to (Ctrl +)">
+              <i className="ph-bold ph-plus"></i>
+            </button>
+          </div>
+        )}
+
+        <div className="status-pill-online">
+          <span className="status-dot"></span>
+          <span className="status-label">YOUTUBE EDITION</span>
+        </div>
       </div>
     </div>
   );
