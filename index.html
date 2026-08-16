@@ -25,7 +25,7 @@
         to   { transform: rotate(360deg); }
       }
 
-      /* --- HOME CONTENT (NEXUS DASHBOARD) --- */
+      /* --- MODERN GAME LAUNCHER HOME SCREEN --- */
       .home-content-container {
         flex: 1;
         position: relative;
@@ -33,7 +33,7 @@
         justify-content: center;
         align-items: flex-start;
         overflow-y: auto;
-        padding: 24px 32px 48px;
+        padding: 24px 36px 60px;
         width: 100%;
       }
 
@@ -41,358 +41,211 @@
         position: relative;
         z-index: 10;
         width: 100%;
-        max-width: 1380px;
+        max-width: 1440px;
         display: flex;
         flex-direction: column;
-        gap: 20px;
-        animation: fadeInUpScale 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        gap: 32px;
+        animation: fadeInUpScale 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
       }
 
-      /* 1. HERO BANNER */
-      .home-hero-card {
-        background: rgba(18, 22, 30, 0.85);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(255, 255, 255, 0.09);
-        border-radius: 20px;
-        padding: 28px 32px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 28px;
-        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      /* 1. SPOTLIGHT HERO BANNER */
+      .home-spotlight-hero {
         position: relative;
+        width: 100%;
+        min-height: 320px;
+        border-radius: 20px;
         overflow: hidden;
+        display: flex;
+        align-items: flex-end;
+        padding: 36px 40px;
+        background: #0d1117;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
       }
 
-      .home-hero-card::after {
-        content: '';
+      .home-spotlight-bg {
         position: absolute;
-        top: -50%; right: -20%;
-        width: 450px; height: 350px;
-        background: radial-gradient(circle, rgba(0, 216, 230, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
-        filter: blur(60px);
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-size: cover;
+        background-position: center top;
+        filter: brightness(0.65);
+        transition: transform 0.6s ease;
+      }
+
+      .home-spotlight-hero:hover .home-spotlight-bg {
+        transform: scale(1.03);
+      }
+
+      .home-spotlight-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(0deg, #090c10 10%, rgba(9, 12, 16, 0.7) 50%, rgba(9, 12, 16, 0.2) 100%),
+                    linear-gradient(90deg, #090c10 0%, rgba(9, 12, 16, 0.8) 40%, rgba(9, 12, 16, 0) 100%);
         pointer-events: none;
       }
 
-      .home-hero-left {
-        display: flex;
-        align-items: center;
-        gap: 24px;
-        flex: 1;
-      }
-
-      .home-hero-avatar-ring {
-        width: 90px;
-        height: 90px;
-        border-radius: 50%;
-        padding: 3px;
-        background: linear-gradient(135deg, #00d8e6, #8c42f6);
-        box-shadow: 0 0 25px rgba(0, 216, 230, 0.35);
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .home-hero-avatar-ring img {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        object-fit: cover;
-        background: #0f1218;
-      }
-
-      .home-hero-info {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .home-status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 1.2px;
-        color: var(--accent-cyan, #00d8e6);
-        text-transform: uppercase;
-        background: rgba(0, 216, 230, 0.08);
-        border: 1px solid rgba(0, 216, 230, 0.2);
-        padding: 4px 12px;
-        border-radius: 20px;
-        width: fit-content;
-      }
-
-      .home-hero-title {
-        font-size: 28px;
-        font-weight: 900;
-        letter-spacing: 0.5px;
-        color: #ffffff;
-        line-height: 1.2;
-        margin: 0;
-      }
-
-      .home-hero-subtitle {
-        font-size: 12.5px;
-        font-weight: 700;
-        letter-spacing: 1.5px;
-        color: #7b8394;
-        text-transform: uppercase;
-      }
-
-      .home-hero-desc {
-        font-size: 13.5px;
-        line-height: 1.6;
-        color: #b0b6c6;
-        margin: 0;
-        max-width: 780px;
-      }
-
-      .home-hero-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        min-width: 220px;
-      }
-
-      /* 2. STATS ROW */
-      .home-stats-row {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
-      }
-
-      .home-stat-box {
-        background: rgba(20, 24, 33, 0.75);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 16px;
-        padding: 20px 22px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      .home-spotlight-content {
         position: relative;
-        overflow: hidden;
-        transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s ease;
-      }
-
-      .home-stat-box:hover {
-        transform: translateY(-3px);
-        border-color: rgba(0, 216, 230, 0.35);
-      }
-
-      .home-stat-data {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .home-stat-num {
-        font-size: 30px;
-        font-weight: 900;
-        color: var(--accent-cyan, #00d8e6);
-        line-height: 1;
-      }
-
-      .home-stat-title {
-        font-size: 12px;
-        font-weight: 800;
-        letter-spacing: 0.8px;
-        color: #ffffff;
-        text-transform: uppercase;
-      }
-
-      .home-stat-sub {
-        font-size: 11px;
-        color: #7b8394;
-      }
-
-      .home-stat-icon-wrapper {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        background: rgba(0, 216, 230, 0.08);
-        border: 1px solid rgba(0, 216, 230, 0.18);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--accent-cyan, #00d8e6);
-        font-size: 24px;
-      }
-
-      /* 3. MAIN CARDS GRID */
-      .home-panel-card {
-        background: rgba(20, 24, 33, 0.75);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 18px;
-        padding: 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-      }
-
-      .home-panel-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 12px;
-        font-weight: 800;
-        letter-spacing: 1.5px;
-        color: var(--accent-cyan, #00d8e6);
-        text-transform: uppercase;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        padding-bottom: 12px;
-      }
-
-      .home-categories-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
-      }
-
-      .home-category-card {
-        background: rgba(14, 18, 26, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 14px;
-        padding: 16px 18px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s ease;
-        cursor: pointer;
-      }
-
-      .home-category-card:hover {
-        transform: translateY(-2px);
-        border-color: rgba(0, 216, 230, 0.35);
-        background: rgba(18, 23, 33, 0.85);
-      }
-
-      .home-category-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 13.5px;
-        font-weight: 800;
-        color: #ffffff;
-      }
-
-      .home-category-header i {
-        color: var(--accent-cyan, #00d8e6);
-        font-size: 18px;
-      }
-
-      .home-category-games {
-        font-size: 12px;
-        line-height: 1.5;
-        color: #8f96a8;
-      }
-
-      /* 4. GUIDE & SHORTCUTS */
-      .home-tips-list {
+        z-index: 2;
         display: flex;
         flex-direction: column;
         gap: 12px;
+        max-width: 720px;
       }
 
-      .home-tip-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        background: rgba(12, 15, 22, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 12px;
-        padding: 14px;
-      }
-
-      .home-tip-badge {
-        background: rgba(0, 216, 230, 0.12);
-        color: var(--accent-cyan, #00d8e6);
-        border: 1px solid rgba(0, 216, 230, 0.2);
-        border-radius: 8px;
-        font-size: 11px;
-        font-weight: 800;
-        padding: 2px 8px;
-        white-space: nowrap;
-      }
-
-      .home-tip-text {
-        font-size: 12.5px;
-        line-height: 1.5;
-        color: #c2c7d6;
-      }
-
-      .home-tip-text strong {
-        color: #ffffff;
-      }
-
-      /* 5. FOOTER TECH STRIP */
-      .home-footer-strip {
-        background: rgba(16, 19, 27, 0.65);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 14px;
-        padding: 14px 20px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-
-      .home-footer-left {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 12px;
-        font-weight: 700;
-        color: #8c93a4;
-      }
-
-      .home-footer-tags {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      .home-tech-tag {
+      .home-spotlight-tag {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        font-size: 11.5px;
-        font-weight: 600;
-        color: #b0b6c6;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        padding: 4px 10px;
-        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        color: #00d8e6;
+        text-transform: uppercase;
       }
 
-      .home-tech-tag i {
-        color: var(--accent-cyan, #00d8e6);
+      .home-spotlight-title {
+        font-size: 36px;
+        font-weight: 900;
+        letter-spacing: 0.5px;
+        color: #ffffff;
+        line-height: 1.15;
+        margin: 0;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
       }
 
-      @media (max-width: 1100px) {
-        .home-stats-row {
+      .home-spotlight-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #a0a6b5;
+      }
+
+      .home-spotlight-rating {
+        color: #00e676;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .home-spotlight-desc {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #c9d1d9;
+        margin: 0;
+      }
+
+      .home-spotlight-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+
+      /* 2. SECTION SHELVES */
+      .home-shelf-section {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .home-shelf-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 10px;
+      }
+
+      .home-shelf-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #ffffff;
+        text-transform: uppercase;
+      }
+
+      .home-shelf-title i {
+        color: #00d8e6;
+        font-size: 20px;
+      }
+
+      .home-shelf-btn-more {
+        background: transparent;
+        border: none;
+        color: #00d8e6;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      .home-shelf-btn-more:hover {
+        opacity: 0.8;
+        transform: translateX(3px);
+      }
+
+      /* 3. GENRE CHIPS GRID */
+      .home-genre-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 12px;
+      }
+
+      .home-genre-card {
+        background: rgba(22, 27, 34, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 16px 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      }
+
+      .home-genre-card:hover {
+        transform: translateY(-3px);
+        border-color: #00d8e6;
+        background: rgba(0, 216, 230, 0.08);
+      }
+
+      .home-genre-icon {
+        font-size: 24px;
+        color: #00d8e6;
+      }
+
+      .home-genre-name {
+        font-size: 12.5px;
+        font-weight: 800;
+        color: #ffffff;
+        text-align: center;
+      }
+
+      @media (max-width: 1200px) {
+        .home-genre-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (max-width: 768px) {
+        .home-genre-grid {
           grid-template-columns: repeat(2, 1fr);
         }
-        .home-categories-grid {
-          grid-template-columns: repeat(2, 1fr);
+        .home-spotlight-hero {
+          padding: 24px;
         }
-        .home-hero-card {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-        .home-hero-actions {
-          width: 100%;
-          flex-direction: row;
+        .home-spotlight-title {
+          font-size: 26px;
         }
       }
     </style>
@@ -18225,202 +18078,139 @@ const IntegrateContent = () => {
   );
 };
 
-const HomeContent = ({ setActiveTab }) => {
+const HomeContent = ({ setActiveTab, setSelectedGame }) => {
+  // Game nổi bật làm Spotlight Hero
+  const featuredGame = GAME_DATA.find(g => String(g.appId) === '2358720') || GAME_DATA[0];
+
+  // Danh sách các tựa game bom tấn thịnh hành
+  const trendingAppIds = ['2358720', '1245620', '1593500', '1091500', '2124490', '1623730', '271590', '814380'];
+  const trendingGames = GAME_DATA.filter(g => trendingAppIds.includes(String(g.appId))).slice(0, 8);
+
+  const heroBg = `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${featuredGame.appId}/library_hero.jpg`;
+
   return (
     <div className="home-content-container">
-      <div className="glow-bg-1"></div>
-      <div className="glow-bg-2"></div>
-
       <div className="home-dashboard-wrapper">
-        {/* 1. HERO BANNER */}
-        <div className="home-hero-card">
-          <div className="home-hero-left">
-            <div className="home-hero-avatar-ring">
-              <img src="Logo_NexusT.png" alt="Nexus Games" />
+        {/* 1. SPOTLIGHT HERO BANNER */}
+        <div className="home-spotlight-hero">
+          <div 
+            className="home-spotlight-bg" 
+            style={{ backgroundImage: `url(${heroBg})` }}
+          />
+          <div className="home-spotlight-overlay" />
+          <div className="home-spotlight-content">
+            <div className="home-spotlight-tag">
+              <i className="ph-bold ph-fire"></i> GAME NỔI BẬT NHẤT
             </div>
-            <div className="home-hero-info">
-              <div className="home-status-badge">
-                <span className="status-dot"></span> KHO GAME STEAM SẴN SÀNG
-              </div>
-              <h1 className="home-hero-title">NEXUS GAMES LAUNCHER</h1>
-              <div className="home-hero-subtitle">TRUNG TÂM QUẢN LÝ & KHỞI CHẠY GAME STEAM CHUYÊN NGHIỆP</div>
-              <p className="home-hero-desc">
-                Thư viện tổng hợp hơn {GAME_DATA.length} trò chơi Steam bản quyền đa thể loại. Hỗ trợ kích hoạt nhanh chỉ với 1 cú click chuột, xem trước video trailer Full HD, ảnh chụp in-game 1080p và tự động đồng bộ Cloud Save lên Google Drive an toàn.
-              </p>
+            <h1 className="home-spotlight-title">{featuredGame.title}</h1>
+            <div className="home-spotlight-meta">
+              <span className="home-spotlight-rating"><i className="ph-fill ph-star"></i> {featuredGame.percent || '96%'} ({featuredGame.reviewText || 'Rất Tích Cực'})</span>
+              <span>•</span>
+              <span>{(featuredGame.tags || ['Hành Động', 'Nhập Vai']).slice(0, 3).join(' • ')}</span>
             </div>
-          </div>
-          <div className="home-hero-actions">
-            <button className="btn-primary" onClick={() => setActiveTab && setActiveTab('game')} style={{width: '100%', justifyContent: 'center'}}>
-              <i className="ph-bold ph-game-controller"></i> Vào Thư Viện ({GAME_DATA.length} Game)
-            </button>
-            <button className="btn-secondary" onClick={() => setActiveTab && setActiveTab('integrate')} style={{width: '100%', justifyContent: 'center'}}>
-              <i className="ph-bold ph-squares-four"></i> Tiện Ích & Cloud Save
-            </button>
-            <div style={{display: 'flex', gap: '8px'}}>
-              <button className="btn-secondary" onClick={() => window.open('https://discord.gg/fsQW3FaNnG', '_blank')} style={{flex: 1, justifyContent: 'center', padding: '9px 12px', fontSize: '12px'}}>
-                <i className="ph-bold ph-discord-logo"></i> Discord
+            <p className="home-spotlight-desc">
+              Khám phá thế giới thần thoại phương Đông huyền bí, hóa thân thành Thiên Mệnh Nhân đối đầu muôn trùng thử thách với đồ họa Unreal Engine 5 đỉnh cao.
+            </p>
+            <div className="home-spotlight-actions">
+              <button 
+                className="btn-primary" 
+                onClick={() => { if (setSelectedGame) setSelectedGame(featuredGame); if (setActiveTab) setActiveTab('game'); }}
+                style={{ padding: '12px 24px', fontSize: '14px', fontWeight: '800' }}
+              >
+                <i className="ph-bold ph-play-circle"></i> Xem & Kích Hoạt Ngay
               </button>
-              <button className="btn-secondary" onClick={() => window.open('https://github.com/KLKK93', '_blank')} style={{flex: 1, justifyContent: 'center', padding: '9px 12px', fontSize: '12px'}}>
-                <i className="ph-bold ph-github-logo"></i> GitHub
+              <button 
+                className="btn-secondary" 
+                onClick={() => setActiveTab && setActiveTab('game')}
+                style={{ padding: '12px 20px', fontSize: '13px' }}
+              >
+                <i className="ph-bold ph-squares-four"></i> Thư Viện ({GAME_DATA.length} Game)
+              </button>
+              <button 
+                className="btn-secondary" 
+                onClick={() => setActiveTab && setActiveTab('integrate')}
+                style={{ padding: '12px 20px', fontSize: '13px' }}
+              >
+                <i className="ph-bold ph-cloud-arrow-up"></i> Cloud Save
               </button>
             </div>
           </div>
         </div>
 
-        {/* 2. STATS ROW */}
-        <div className="home-stats-row">
-          <div className="home-stat-box">
-            <div className="home-stat-data">
-              <div className="home-stat-num">{GAME_DATA.length}+</div>
-              <div className="home-stat-title">TỰA GAME STEAM</div>
-              <div className="home-stat-sub">Bom tấn AAA & Indie phong phú</div>
+        {/* 2. SHELF: GAME NỔI BẬT & THỊNH HÀNH */}
+        <div className="home-shelf-section">
+          <div className="home-shelf-header">
+            <div className="home-shelf-title">
+              <i className="ph-bold ph-trend-up"></i> TRÒ CHƠI THỊNH HÀNH
             </div>
-            <div className="home-stat-icon-wrapper">
-              <i className="ph-bold ph-game-controller"></i>
-            </div>
+            <button className="home-shelf-btn-more" onClick={() => setActiveTab && setActiveTab('game')}>
+              Xem tất cả ({GAME_DATA.length}) <i className="ph-bold ph-caret-right"></i>
+            </button>
           </div>
-
-          <div className="home-stat-box">
-            <div className="home-stat-data">
-              <div className="home-stat-num">100%</div>
-              <div className="home-stat-title">TRAILER & HÌNH ẢNH</div>
-              <div className="home-stat-sub">Video gameplay & ảnh Full HD</div>
-            </div>
-            <div className="home-stat-icon-wrapper">
-              <i className="ph-bold ph-film-strip"></i>
-            </div>
-          </div>
-
-          <div className="home-stat-box">
-            <div className="home-stat-data">
-              <div className="home-stat-num">CLOUD</div>
-              <div className="home-stat-title">ĐỒNG BỘ LƯU TRỮ</div>
-              <div className="home-stat-sub">Sao lưu tiến trình lên Google Drive</div>
-            </div>
-            <div className="home-stat-icon-wrapper">
-              <i className="ph-bold ph-cloud-arrow-up"></i>
-            </div>
-          </div>
-
-          <div className="home-stat-box">
-            <div className="home-stat-data">
-              <div className="home-stat-num">13+</div>
-              <div className="home-stat-title">GAME SẮP PHÁT HÀNH</div>
-              <div className="home-stat-sub">Đếm ngược ngày ra mắt thực tế</div>
-            </div>
-            <div className="home-stat-icon-wrapper">
-              <i className="ph-bold ph-clock-countdown"></i>
-            </div>
+          <div className="game-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+            {trendingGames.map(game => (
+              <GameCard 
+                key={game.id} 
+                game={game} 
+                onClick={(g) => { 
+                  if (setSelectedGame) setSelectedGame(g); 
+                  if (setActiveTab) setActiveTab('game'); 
+                }} 
+              />
+            ))}
           </div>
         </div>
 
-        {/* 3. DANH MỤC THỂ LOẠI GAME NỔI BẬT */}
-        <div className="home-panel-card">
-          <div className="home-panel-header">
-            <i className="ph-bold ph-grid-four"></i> CÁC THỂ LOẠI GAME NỔI BẬT TRONG THƯ VIỆN
+        {/* 3. SHELF: GAME SẮP PHÁT HÀNH */}
+        <div className="home-shelf-section">
+          <div className="home-shelf-header">
+            <div className="home-shelf-title">
+              <i className="ph-bold ph-clock-countdown"></i> SẮP PHÁT HÀNH
+            </div>
+            <button className="home-shelf-btn-more" onClick={() => setActiveTab && setActiveTab('game')}>
+              Toàn bộ danh sách <i className="ph-bold ph-caret-right"></i>
+            </button>
           </div>
-          <div className="home-categories-grid">
-            <div className="home-category-card" onClick={() => setActiveTab && setActiveTab('game')}>
-              <div className="home-category-header">
-                <i className="ph-bold ph-sword"></i>
-                <span>Hành Động & Chặt Chém</span>
-              </div>
-              <div className="home-category-games">
-                Black Myth: Wukong, God of War Ragnarök, Sekiro, Elden Ring, Ghost of Tsushima, Devil May Cry...
-              </div>
-            </div>
-
-            <div className="home-category-card" onClick={() => setActiveTab && setActiveTab('game')}>
-              <div className="home-category-header">
-                <i className="ph-bold ph-ghost"></i>
-                <span>Kinh Dị & Sinh Tồn</span>
-              </div>
-              <div className="home-category-games">
-                Silent Hill 2 Remake, The Outlast Trials, Resident Evil 4, Dead Space, The Forest, Sons Of The Forest...
-              </div>
-            </div>
-
-            <div className="home-category-card" onClick={() => setActiveTab && setActiveTab('game')}>
-              <div className="home-category-header">
-                <i className="ph-bold ph-compass"></i>
-                <span>Thế Giới Mở & Phiêu Lưu</span>
-              </div>
-              <div className="home-category-games">
-                Cyberpunk 2077, Grand Theft Auto V, Red Dead Redemption 2, Forza Horizon 5, Hogwarts Legacy...
-              </div>
-            </div>
-
-            <div className="home-category-card" onClick={() => setActiveTab && setActiveTab('game')}>
-              <div className="home-category-header">
-                <i className="ph-bold ph-sparkle"></i>
-                <span>Nhập Vai & Cốt Truyện</span>
-              </div>
-              <div className="home-category-games">
-                Final Fantasy XVI, Persona series, Baldur's Gate 3, The Witcher 3, Dragon's Dogma 2, Like a Dragon...
-              </div>
-            </div>
-
-            <div className="home-category-card" onClick={() => setActiveTab && setActiveTab('game')}>
-              <div className="home-category-header">
-                <i className="ph-bold ph-users-three"></i>
-                <span>Chơi Cùng Bạn Bè (Co-op)</span>
-              </div>
-              <div className="home-category-games">
-                Palworld, It Takes Two, Left 4 Dead 2, Raft, Helldivers 2, Overcooked 2, Lethal Company, Phasmophobia...
-              </div>
-            </div>
-
-            <div className="home-category-card" onClick={() => setActiveTab && setActiveTab('game')}>
-              <div className="home-category-header">
-                <i className="ph-bold ph-wrench"></i>
-                <span>Mô Phỏng & Sandbox</span>
-              </div>
-              <div className="home-category-games">
-                WorldBox - God Simulator, Bus Simulator, Low-Budget Repairs, Total War, Cities: Skylines, Farming Simulator...
-              </div>
-            </div>
-          </div>
+          <UpcomingSection 
+            onSelectGame={(g) => { 
+              if (setSelectedGame) setSelectedGame(g); 
+              if (setActiveTab) setActiveTab('game'); 
+            }} 
+          />
         </div>
 
-        {/* 4. HƯỚNG DẪN 3 BƯỚC KHỞI CHẠY */}
-        <div className="home-panel-card">
-          <div className="home-panel-header">
-            <i className="ph-bold ph-lightbulb"></i> HƯỚNG DẪN SỬ DỤNG NHANH CHO GAME THỦ
-          </div>
-          <div className="home-tips-list">
-            <div className="home-tip-row">
-              <span className="home-tip-badge">Bước 1</span>
-              <div className="home-tip-text">
-                Vào tab <strong>THƯ VIỆN</strong> trên thanh menu để khám phá hơn {GAME_DATA.length} trò chơi, tìm kiếm theo tên hoặc lọc theo thể loại yêu thích.
-              </div>
-            </div>
-
-            <div className="home-tip-row">
-              <span className="home-tip-badge">Bước 2</span>
-              <div className="home-tip-text">
-                Chọn game để xem video trailer Full HD, thông số cấu hình và nhấn nút <strong>KÍCH HOẠT NGAY</strong> để tự động thêm game vào tài khoản Steam của bạn.
-              </div>
-            </div>
-
-            <div className="home-tip-row">
-              <span className="home-tip-badge">Bước 3</span>
-              <div className="home-tip-text">
-                Truy cập tab <strong>TÍCH HỢP</strong> để kích hoạt tính năng sao lưu <strong>Cloud Save</strong> (tự động đồng bộ file save game lên Google Drive cá nhân) và giao diện <strong>Fluenty UI</strong> cho Steam.
-              </div>
+        {/* 4. KHÁM PHÁ THEO THỂ LOẠI */}
+        <div className="home-shelf-section">
+          <div className="home-shelf-header">
+            <div className="home-shelf-title">
+              <i className="ph-bold ph-compass"></i> KHÁM PHÁ THEO THỂ LOẠI
             </div>
           </div>
-        </div>
-
-        {/* 5. FOOTER THÔNG TIN */}
-        <div className="home-footer-strip">
-          <div className="home-footer-left">
-            <i className="ph-bold ph-game-controller"></i>
-            <span>NEXUS GAMES LAUNCHER • KHO GAME STEAM TẬP TRUNG DÀNH CHO CỘNG ĐỒNG GAME THỦ</span>
-          </div>
-          <div className="home-footer-tags">
-            <span className="home-tech-tag"><i className="ph-bold ph-check-circle"></i> 290+ Game Bản Quyền</span>
-            <span className="home-tech-tag"><i className="ph-bold ph-cloud-check"></i> Cloud Save Google Drive</span>
-            <span className="home-tech-tag"><i className="ph-bold ph-shield-check"></i> An Toàn & Bảo Mật</span>
+          <div className="home-genre-grid">
+            <div className="home-genre-card" onClick={() => setActiveTab && setActiveTab('game')}>
+              <i className="ph-bold ph-sword home-genre-icon"></i>
+              <div className="home-genre-name">Hành Động & Chặt Chém</div>
+            </div>
+            <div className="home-genre-card" onClick={() => setActiveTab && setActiveTab('game')}>
+              <i className="ph-bold ph-ghost home-genre-icon"></i>
+              <div className="home-genre-name">Kinh Dị & Sinh Tồn</div>
+            </div>
+            <div className="home-genre-card" onClick={() => setActiveTab && setActiveTab('game')}>
+              <i className="ph-bold ph-globe home-genre-icon"></i>
+              <div className="home-genre-name">Thế Giới Mở</div>
+            </div>
+            <div className="home-genre-card" onClick={() => setActiveTab && setActiveTab('game')}>
+              <i className="ph-bold ph-sparkle home-genre-icon"></i>
+              <div className="home-genre-name">Nhập Vai & Cốt Truyện</div>
+            </div>
+            <div className="home-genre-card" onClick={() => setActiveTab && setActiveTab('game')}>
+              <i className="ph-bold ph-users-three home-genre-icon"></i>
+              <div className="home-genre-name">Chơi Cùng Bạn Bè</div>
+            </div>
+            <div className="home-genre-card" onClick={() => setActiveTab && setActiveTab('game')}>
+              <i className="ph-bold ph-wrench home-genre-icon"></i>
+              <div className="home-genre-name">Mô Phỏng & Sandbox</div>
+            </div>
           </div>
         </div>
       </div>
@@ -18601,7 +18391,7 @@ const App = () => {
         />
         {activeTab === 'home' ? (
           <div key="home" className="tab-content-transition">
-            <HomeContent setActiveTab={setActiveTab} />
+            <HomeContent setActiveTab={setActiveTab} setSelectedGame={setSelectedGame} />
           </div>
         ) : activeTab === 'profile' ? (
           <div key="profile" className="tab-content-transition">
