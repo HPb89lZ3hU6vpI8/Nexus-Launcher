@@ -17,11 +17,341 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
-    <link rel="stylesheet" href="./style.css?v=20260816_1">
+    <link rel="stylesheet" href="./style.css?v=50">
     <style>
+      /* Spinner animation cho nut "VUI LONG CHO..." */
       @keyframes spin {
         from { transform: rotate(0deg); }
         to   { transform: rotate(360deg); }
+      }
+
+      /* --- MODERN GAME LAUNCHER HOME SCREEN (BE VIETNAM PRO & MONTSERRAT) --- */
+      .home-content-container {
+        flex: 1;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        overflow-y: auto;
+        padding: 24px 36px 60px;
+        width: 100%;
+        font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
+      }
+
+      .home-dashboard-wrapper {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 1440px;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+        animation: fadeInUpScale 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+
+      /* 1. SPOTLIGHT HERO BANNER */
+      .home-spotlight-hero {
+        position: relative;
+        width: 100%;
+        min-height: 320px;
+        border-radius: 16px;
+        overflow: hidden;
+        display: flex;
+        align-items: flex-end;
+        padding: 36px 40px;
+        background: #090c10;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      .home-spotlight-bg {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-size: cover;
+        background-position: center 25%;
+        filter: brightness(0.65);
+        transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      .home-spotlight-hero:hover .home-spotlight-bg {
+        transform: scale(1.03);
+      }
+
+      .home-spotlight-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(0deg, #090c10 10%, rgba(9, 12, 16, 0.72) 55%, rgba(9, 12, 16, 0.15) 100%),
+                    linear-gradient(90deg, #090c10 0%, rgba(9, 12, 16, 0.85) 45%, rgba(9, 12, 16, 0) 100%);
+        pointer-events: none;
+      }
+
+      .home-spotlight-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 740px;
+      }
+
+      .home-spotlight-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #00d8e6;
+        text-transform: uppercase;
+        background: rgba(0, 216, 230, 0.12);
+        border: 1px solid rgba(0, 216, 230, 0.25);
+        padding: 4px 10px;
+        border-radius: 6px;
+        width: fit-content;
+      }
+
+      .home-spotlight-title {
+        font-family: 'Montserrat', 'Be Vietnam Pro', sans-serif;
+        font-size: 34px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        color: #ffffff;
+        line-height: 1.15;
+        margin: 0;
+        text-shadow: 0 3px 18px rgba(0, 0, 0, 0.8);
+      }
+
+      .home-spotlight-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #94a3b8;
+        flex-wrap: wrap;
+      }
+
+      .home-spotlight-rating {
+        background: rgba(16, 185, 129, 0.12);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        padding: 3px 9px;
+        border-radius: 6px;
+        color: #10b981;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 11.5px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .home-spotlight-chip {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #94a3b8;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .home-spotlight-chip.viethoa {
+        background: rgba(234, 179, 8, 0.12);
+        border-color: rgba(234, 179, 8, 0.25);
+        color: #eab308;
+        font-weight: 700;
+      }
+
+      .home-spotlight-desc {
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 13.5px;
+        font-weight: 400;
+        line-height: 1.65;
+        color: #94a3b8;
+        margin: 2px 0 4px;
+        max-width: 680px;
+      }
+
+      .home-spotlight-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 6px;
+        flex-wrap: wrap;
+      }
+
+      /* BUTTONS ĐỈNH CAO CHUẨN GAMING */
+      .btn-hero-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 22px;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        color: #090c10;
+        background: linear-gradient(135deg, #00d8e6 0%, #0099cc 100%);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(0, 216, 230, 0.35);
+        transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      .btn-hero-primary:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #33e2ee 0%, #00a6dd 100%);
+        box-shadow: 0 6px 20px rgba(0, 216, 230, 0.5);
+      }
+
+      .btn-hero-primary:active {
+        transform: translateY(0);
+      }
+
+      .btn-hero-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 18px;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        color: #e2e8f0;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      .btn-hero-secondary:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(0, 216, 230, 0.4);
+        color: #ffffff;
+      }
+
+      .btn-hero-secondary:active {
+        transform: translateY(0);
+      }
+
+      /* 2. SECTION SHELVES */
+      .home-shelf-section {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .home-shelf-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        padding-bottom: 10px;
+      }
+
+      .home-shelf-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Montserrat', 'Be Vietnam Pro', sans-serif;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        color: #f8fafc;
+        text-transform: uppercase;
+      }
+
+      .home-shelf-title i {
+        color: #00d8e6;
+        font-size: 18px;
+      }
+
+      .home-shelf-btn-more {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        color: #00d8e6;
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 12px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.2s ease;
+      }
+
+      .home-shelf-btn-more:hover {
+        background: rgba(0, 216, 230, 0.1);
+        border-color: rgba(0, 216, 230, 0.3);
+        transform: translateX(2px);
+      }
+
+      /* 3. GENRE CHIPS GRID */
+      .home-genre-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+      }
+
+      .home-genre-card {
+        background: rgba(18, 22, 30, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 10px;
+        padding: 16px 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .home-genre-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(0, 216, 230, 0.4);
+        background: rgba(0, 216, 230, 0.06);
+      }
+
+      .home-genre-icon {
+        font-size: 22px;
+        color: #00d8e6;
+      }
+
+      .home-genre-name {
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: #e2e8f0;
+        text-align: center;
+      }
+
+      @media (max-width: 1200px) {
+        .home-genre-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (max-width: 768px) {
+        .home-genre-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .home-spotlight-hero {
+          padding: 24px;
+        }
+        .home-spotlight-title {
+          font-size: 26px;
+        }
       }
     </style>
 </head>
@@ -14942,8 +15272,8 @@ const UplaySvg = () => (
 
 const Sidebar = ({ activeMenuLeft, setActiveMenuLeft }) => {
   const menuItems = [
-    { id: 'mienphi', icon: <i className="ph-fill ph-fire"></i>, label: 'TẤT CẢ', isFree: true },
-    { id: 'steam', icon: <i className="fa-brands fa-steam"></i>, label: 'STEAM' },
+    { id: 'mienphi', icon: <MoneyBanknoteIcon />, label: 'MIỄN PHÍ', isFree: true },
+    { id: 'steam', icon: <i className="fa-brands fa-steam brand-steam"></i>, label: 'STEAM' },
     { id: 'battle', icon: <BattleNetSvg />, label: 'BATTLE' },
     { id: 'eaplay', icon: <EaSvg />, label: 'EA PLAY' },
     { id: 'uplay', icon: <UplaySvg />, label: 'UPLAY' },
@@ -14953,100 +15283,60 @@ const Sidebar = ({ activeMenuLeft, setActiveMenuLeft }) => {
   return (
     <div className="sidebar">
       <div className="sidebar-logo">
-        <div className="sidebar-brand-avatar">
-          <i className="ph-bold ph-shield-star"></i>
-        </div>
+        <img src="https://ui-avatars.com/api/?name=N&background=fff&color=000&rounded=true&font-size=0.6" alt="Logo" />
       </div>
       
-      <div className="sidebar-items-list" style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-        {menuItems.map(item => (
-          <div 
-            key={item.id}
-            className={`sidebar-item ${item.isFree ? 'item-free' : ''} ${activeMenuLeft === item.id ? 'active-menu-left' : ''}`}
-            onClick={() => setActiveMenuLeft(item.id)}
-          >
-            {item.isFree && <div className="badge-99">99+</div>}
-            <div className="icon-wrapper">
-              {item.icon}
-            </div>
-            <span>{item.label}</span>
+      {menuItems.map(item => (
+        <div 
+          key={item.id}
+          className={`sidebar-item ${item.isFree ? 'item-free' : ''} ${activeMenuLeft === item.id ? 'active-menu-left' : ''}`}
+          onClick={() => setActiveMenuLeft(item.id)}
+        >
+          {item.isFree && <div className="badge-99">99+</div>}
+          <div className="icon-wrapper">
+            {item.icon}
           </div>
-        ))}
-      </div>
+          <span>{item.label}</span>
+        </div>
+      ))}
     </div>
   );
 };
 
 
 const TopBar = ({ activeTab, setActiveTab, zoom, setZoom, currentUser, userData }) => {
-  const handleZoomIn = () => {
-    if (setZoom) setZoom(prev => Math.min(1.8, +(prev + 0.05).toFixed(2)));
-  };
-  const handleZoomOut = () => {
-    if (setZoom) setZoom(prev => Math.max(0.6, +(prev - 0.05).toFixed(2)));
-  };
-  const handleZoomReset = () => {
-    if (setZoom) setZoom(1.0);
-  };
+  const username = (userData && userData.displayName) || (currentUser && currentUser.displayName) || 'Nexus';
+  const role = (userData && userData.role) || 'THÀNH VIÊN';
+  const avatarUrl = (userData && userData.avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=00d8e6&color=000&rounded=true&font-size=0.6`;
 
   return (
-    <div className="topbar">
+    <div className="topbar" onClick={() => {}}>
       <div className="topbar-left">
-        <div className="brand-logo" onClick={() => setActiveTab('home')}>
-          <div className="brand-logo-icon">
-            <i className="ph-bold ph-game-controller"></i>
-          </div>
-          <div className="brand-text">
-            <span className="brand-title">NEXUS</span>
-            <span className="brand-badge">YT</span>
-          </div>
+        <div
+          className={`top-nav-item ${activeTab === 'home' ? 'active-home' : ''}`}
+          onClick={() => setActiveTab('home')}
+        >
+          <TopHomeIcon active={activeTab === 'home'} />
+          <span>TRANG CHỦ</span>
         </div>
-
-        <div className="top-nav-segmented">
-          <div
-            className={`top-nav-pill ${activeTab === 'home' ? 'active' : ''}`}
-            onClick={() => setActiveTab('home')}
-          >
-            <i className="ph-bold ph-house"></i>
-            <span>TRANG CHỦ</span>
-          </div>
-          <div
-            className={`top-nav-pill ${activeTab === 'game' ? 'active' : ''}`}
-            onClick={() => setActiveTab('game')}
-          >
-            <i className="ph-bold ph-squares-four"></i>
-            <span>THƯ VIỆN</span>
-            <span className="nav-count-pill">{GAME_DATA ? GAME_DATA.length : 287}</span>
-          </div>
-          <div
-            className={`top-nav-pill integrate-tab ${activeTab === 'integrate' ? 'active' : ''}`}
-            onClick={() => setActiveTab('integrate')}
-          >
-            <i className="ph-bold ph-puzzle-piece"></i>
-            <span>TÍCH HỢP</span>
-          </div>
+        <div
+          className={`top-nav-item ${activeTab === 'game' ? 'active-game' : ''}`}
+          onClick={() => setActiveTab('game')}
+        >
+          <TopGameIcon active={activeTab === 'game'} />
+          <span>THƯ VIỆN</span>
+        </div>
+        <div
+          className={`top-nav-item integrate-tab ${activeTab === 'integrate' ? 'active-integrate' : ''}`}
+          onClick={() => setActiveTab('integrate')}
+        >
+          <TopIntegrateIcon active={activeTab === 'integrate'} />
+          <span>TÍCH HỢP</span>
         </div>
       </div>
 
       <div className="topbar-right">
-        {setZoom && (
-          <div className="zoom-controls-wrapper">
-            <button className="zoom-btn" onClick={handleZoomOut} title="Thu nhỏ (Ctrl -)">
-              <i className="ph-bold ph-minus"></i>
-            </button>
-            <span className="zoom-level-text" onClick={handleZoomReset} title="Khôi phục mặc định (Ctrl 0)">
-              {Math.round((zoom || 1.0) * 100)}%
-            </span>
-            <button className="zoom-btn" onClick={handleZoomIn} title="Phóng to (Ctrl +)">
-              <i className="ph-bold ph-plus"></i>
-            </button>
-          </div>
-        )}
-
-        <div className="status-pill-online">
-          <span className="status-dot"></span>
-          <span className="status-label">YOUTUBE EDITION</span>
-        </div>
+        {/* User profile display removed */}
       </div>
     </div>
   );
