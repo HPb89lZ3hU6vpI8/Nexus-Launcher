@@ -14,7 +14,7 @@
     callApi, openExternal,
     pctNum, reviewTone, TONE_ICON, reviewCountNum, fmtCount, fmtBytes,
     getGamePlatform, isOnlineGame, hasCloudSave, customAppIdOf,
-    coverSources, fetchMedia, buildMedia,
+    coverSources, fetchMedia, buildMedia, fetchTranslation,
     REV_STATE_CACHE, setRevListener,
     useEscape, useToast,
     Img, ScoreRing, Note
@@ -54,6 +54,188 @@
     _decoder.innerHTML = s;
     s = _decoder.value;
     return s.replace(/\n{3,}/g, '\n\n').replace(/[ \t]+\n/g, '\n').trim();
+  }
+
+  /* --------------------------------------------------------------------------
+     CAT MO TA THANH KHOI
+     Steam chi tra ve mot khoi van ban dai. Doc mot buc tuong chu la cuc hinh,
+     nen o day tach ra thanh: doan dan, tieu de phu, danh sach gach dau dong,
+     doan thuong -- de mat luot qua van nam duoc y chinh.
+     ------------------------------------------------------------------------ */
+
+  const BULLET_RE = /^[•▪●·*\-–—]\s+/;
+
+  function parseAbout(text) {
+    const lines = String(text || '').split('\n').map(function (l) { return l.trim(); });
+    const blocks = [];
+    let para = [];
+    let list = [];
+
+    /* Steam doi khi ngat dong giua cau -> noi lai neu dong truoc chua ket thuc */
+    function pushPara(t) {
+      const last = para.length ? para[para.length - 1] : '';
+      if (last && !/[.!?…:;"”'’)\]]$/.test(last)) para[para.length - 1] = last + ' ' + t;
+      else para.push(t);
+    }
+    function flushPara() {
+      for (let i = 0; i < para.length; i++) blocks.push({ k: 'p', t: para[i] });
+      para = [];
+    }
+    function flushList() {
+      if (list.length) { blocks.push({ k: 'ul', items: list }); list = []; }
+    }
+    function nextAt(i) {
+      for (let j = i + 1; j < lines.length; j++) if (lines[j]) return lines[j];
+      return '';
+    }
+    /* Dong ngan, khong dau ket cau, dung truoc mot doan dai -> tieu de phu */
+    function isHead(t, next) {
+      if (!next || BULLET_RE.test(t)) return false;
+      if (/[:：]$/.test(t)) return true;
+      if (t.length > 52 || t.split(/\s+/).length > 7) return false;
+      if (/[.,;!?…"”'’]$/.test(t)) return false;
+      if (!/^[\p{Lu}\p{N}]/u.test(t)) return false;
+      return BULLET_RE.test(next) || next.length > 60;
+    }
+
+    for (let i = 0; i < lines.length; i++) {
+      const t = lines[i];
+      if (!t) {
+        /* Dong trong giua hai gach dau dong khong duoc cat doi danh sach */
+        if (!BULLET_RE.test(nextAt(i))) flushList();
+        flushPara();
+        continue;
+      }
+      if (BULLET_RE.test(t)) { flushPara(); list.push(t.replace(BULLET_RE, '').trim()); continue; }
+      flushList();
+      if (isHead(t, nextAt(i))) {
+        flushPara();
+        blocks.push({ k: 'h', t: t.replace(/[:：]$/, '') });
+        continue;
+      }
+      pushPara(t);
+    }
+    flushList();
+    flushPara();
+
+    /* Vai game dung dau cham tron cho tieu de muc -> danh sach chi co 1 muc
+       thuc chat la mot tieu de, khong phai gach dau dong. */
+    for (let i = 0; i < blocks.length; i++) {
+      const b = blocks[i];
+      if (b.k === 'ul' && b.items.length === 1 && b.items[0].length <= 64 &&
+          !/[.!?…]$/.test(b.items[0])) {
+        blocks[i] = { k: 'h', t: b.items[0].replace(/[:：]$/, '') };
+      }
+    }
+
+    for (let i = 0; i < blocks.length; i++) {
+      if (blocks[i].k === 'p') { blocks[i].k = 'lead'; break; }
+    }
+    return blocks;
+  }
+
+  /* Cao toi da khi chua bung -- du de doc y chinh ma khong nuot ca trang */
+  const ABOUT_CLAMP = 470;
+
+  function AboutBlock({ appId, live, about }) {
+    const [tr, setTr] = useState(null);     /* null = dang cho, false = khong co */
+    const [orig, setOrig] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [tall, setTall] = useState(false);
+    const body = useRef(null);
+
+    /* Steam khong co trang tieng Viet cho game nay -> nho may chu dich */
+    const needTr = !!(about && live && live.about_lang === 'en');
+
+    useEffect(function () {
+      if (!needTr || !appId) return undefined;
+      let alive = true;
+      setTr(null);
+      fetchTranslation(appId).then(function (d) { if (alive) setTr(d || false); });
+      return function () { alive = false; };
+    }, [needTr, appId]);
+
+    const viText = tr && tr.about ? tr.about : '';
+    const text = (!orig && viText) ? viText : about;
+    const blocks = useMemo(function () { return parseAbout(text); }, [text]);
+
+    useEffect(function () {
+      const el = body.current;
+      setTall(!!el && el.scrollHeight > ABOUT_CLAMP + 90);
+    }, [blocks]);
+
+    useEffect(function () { setOpen(false); }, [orig]);
+
+    return (
+      <section className="gd__about">
+        <div className="gd__about-h">
+          <span className="gd__about-i"><i className="ph-fill ph-article"></i></span>
+          <h3>Giới thiệu</h3>
+          <span className="gd__rule" />
+          {needTr && tr === null && (
+            <span className="gd__trwait"><span className="nx-spin" />Đang dịch</span>
+          )}
+          {!!viText && (
+            <div className="gd__seg" role="group" aria-label="Ngôn ngữ mô tả">
+              <button type="button" className={orig ? '' : 'is-on'}
+                      onClick={function () { setOrig(false); }}>Tiếng Việt</button>
+              <button type="button" className={orig ? 'is-on' : ''}
+                      onClick={function () { setOrig(true); }}>Bản gốc</button>
+            </div>
+          )}
+        </div>
+
+        {!about && live === null && (
+          <div className="gd__skel" aria-label="Đang tải mô tả">
+            <span /><span /><span /><span /><span />
+          </div>
+        )}
+
+        {!about && live !== null && (
+          <p className="gd__p gd__p--empty">Chưa có mô tả cho trò chơi này.</p>
+        )}
+
+        {!!about && (
+          <React.Fragment>
+            <div className={'gd__body' + (tall && !open ? ' is-clamp' : '')} ref={body}>
+              {blocks.map(function (b, i) {
+                if (b.k === 'h') return <h4 className="gd__h" key={i}>{b.t}</h4>;
+                if (b.k === 'ul') {
+                  return (
+                    <ul className="gd__ul" key={i}>
+                      {b.items.map(function (t, j) {
+                        return (
+                          <li key={j}>
+                            <i className="ph-fill ph-caret-right" aria-hidden="true"></i>
+                            <span>{t}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  );
+                }
+                return <p className={b.k === 'lead' ? 'gd__lead' : 'gd__p'} key={i}>{b.t}</p>;
+              })}
+            </div>
+
+            {tall && (
+              <button type="button" className="gd__more"
+                      onClick={function () { setOpen(!open); }}>
+                <i className={'ph-bold ' + (open ? 'ph-caret-up' : 'ph-caret-down')}></i>
+                {open ? 'Thu gọn' : 'Đọc thêm'}
+              </button>
+            )}
+
+            {!orig && tr && tr.source === 'auto' && (
+              <div className="gd__trnote">
+                <i className="ph-bold ph-translate"></i>
+                <span>Bản dịch tự động — bản gốc do nhà phát hành viết bằng tiếng Anh.</span>
+              </div>
+            )}
+          </React.Fragment>
+        )}
+      </section>
+    );
   }
 
   const PALWORLD_APPID = '1623730';
@@ -474,7 +656,7 @@
      TRANG CHI TIET
      ========================================================================== */
 
-  function GameDetail({ game, onBack }) {
+  function GameDetail({ game, onBack, backLabel, backIcon }) {
     const toast = useToast();
 
     /* ---- Hang so dan xuat: khai bao TRUOC moi effect de khong dinh TDZ ---- */
@@ -917,10 +1099,17 @@
 
         <div className="gd__inner">
           <div className="gd__head">
-            <button className="gd__back" onClick={onBack}>
-              <i className="ph-bold ph-arrow-left"></i>Quay lại
+            <button className="gd__back" onClick={onBack} title="Quay lại (Esc)" aria-label="Quay lại">
+              <i className="ph-bold ph-arrow-left"></i>
             </button>
-            <div className="gd__crumb">Thư viện · <b>{game.title}</b></div>
+            <nav className="gd__crumb" aria-label="Đường dẫn">
+              <button type="button" className="gd__crumb-b" onClick={onBack}>
+                <i className={backIcon || 'ph-fill ph-squares-four'}></i>
+                <span>{backLabel || 'Thư viện'}</span>
+              </button>
+              <i className="gd__crumb-s ph-bold ph-caret-right" aria-hidden="true"></i>
+              <span className="gd__crumb-c" title={game.title}>{game.title}</span>
+            </nav>
           </div>
 
           <div className="gd__grid">
@@ -928,21 +1117,7 @@
             <div>
               <MediaStage game={game} media={media} idx={idx} setIdx={setIdx} onZoom={setZoom} />
 
-              <div className="gd__about">
-                <h3><i className="ph-bold ph-text-align-left"></i>Giới thiệu</h3>
-                {about ? (
-                  <div className="gd__desc">{about}</div>
-                ) : live === null ? (
-                  <div className="gd__desc" style={{ color: 'var(--tx-faint)' }}>
-                    <span className="nx-spin" style={{ marginRight: 8, verticalAlign: '-2px' }} />
-                    Đang tải mô tả từ Steam...
-                  </div>
-                ) : (
-                  <div className="gd__desc" style={{ color: 'var(--tx-faint)' }}>
-                    Chưa có mô tả cho trò chơi này.
-                  </div>
-                )}
-              </div>
+              <AboutBlock appId={appId} live={live} about={about} />
             </div>
 
             {/* ------------------------------ COT PHAI ------------------------------ */}
@@ -1112,14 +1287,27 @@
               <div className="pc">
                 {!isUpcoming && (
                   <div className={'rev is-' + tone}>
-                    <ScoreRing percent={game.percent} size={58} />
+                    <div className="rev__wrap">
+                      <ScoreRing percent={game.percent} size={64} thickness={5} />
+                      {pct !== null && (
+                        <span className="rev__badge" aria-hidden="true">
+                          <i className={TONE_ICON[tone]}></i>
+                        </span>
+                      )}
+                    </div>
                     <div className="rev__main">
-                      <div className={'rev__txt is-' + tone}>{game.reviewText || 'Chưa có đánh giá'}</div>
+                      <div className="rev__txt">{game.reviewText || 'Chưa có đánh giá'}</div>
                       <div className="rev__cnt">
-                        {revCount > 0 ? fmtCount(revCount) + ' lượt đánh giá trên Steam' : (game.reviewCount || '—')}
+                        {revCount > 0 ? (
+                          <React.Fragment>
+                            <b>{fmtCount(revCount)}</b>
+                            <span>lượt đánh giá trên Steam</span>
+                          </React.Fragment>
+                        ) : (
+                          <span>{game.reviewCount || 'Chưa có dữ liệu'}</span>
+                        )}
                       </div>
                     </div>
-                    {pct !== null && <i className={TONE_ICON[tone] + ' is-' + tone} style={{ fontSize: 20 }}></i>}
                   </div>
                 )}
 
@@ -1296,5 +1484,5 @@
      XUAT RA
      ------------------------------------------------------------------------ */
 
-  Object.assign(window.NX, { GameDetail, MediaStage, ActionButton, Sheet, ZoomView, noteTone, stripHtml });
+  Object.assign(window.NX, { GameDetail, MediaStage, ActionButton, AboutBlock, parseAbout, Sheet, ZoomView, noteTone, stripHtml });
 })();

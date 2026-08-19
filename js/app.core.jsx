@@ -216,7 +216,7 @@ function heroSources(appId) {
    Gop cac loi goi trung appId (inflight) de khong ban 2 request cung luc.
    -------------------------------------------------------------------------- */
 
-const SS_PREFIX = 'nx_media_v3_';
+const SS_PREFIX = 'nx_media_v4_';
 const memMedia = new Map();
 const inflight = new Map();
 
@@ -255,6 +255,8 @@ function normalizeMedia(raw) {
     sysreq_rec:   raw.sysreq_rec || null,
     desc:         raw.short_description || raw.desc || '',
     about:        raw.about || '',
+    about_lang:   raw.about_lang || '',
+    desc_lang:    raw.desc_lang || '',
     developers:   Array.isArray(raw.developers) ? raw.developers : [],
     publishers:   Array.isArray(raw.publishers) ? raw.publishers : [],
     release:      raw.release_date || raw.release || '',
@@ -306,6 +308,54 @@ function fetchMedia(appId) {
   })().finally(() => inflight.delete(key));
 
   inflight.set(key, job);
+  return job;
+}
+
+/* ----------------------------------------------------------------------------
+   BAN DICH MO TA
+   Steam chi co trang tieng Viet cho mot so game. Voi phan con lai, ham
+   serverless /api/translate se dich va Vercel cache lai — nen lan mo thu hai
+   cua bat ky ai cung gan nhu tuc thi. Hong mang thi im lang giu ban goc.
+   -------------------------------------------------------------------------- */
+
+const TR_PREFIX = 'nx_tr_v1_';
+const memTr = new Map();
+const trInflight = new Map();
+
+function fetchTranslation(appId) {
+  const key = String(appId);
+  if (memTr.has(key)) return Promise.resolve(memTr.get(key));
+  if (trInflight.has(key)) return trInflight.get(key);
+
+  try {
+    const cached = sessionStorage.getItem(TR_PREFIX + key);
+    if (cached) {
+      const v = JSON.parse(cached);
+      memTr.set(key, v);
+      return Promise.resolve(v);
+    }
+  } catch (e) { /* bo qua */ }
+
+  const job = (async () => {
+    try {
+      const ac = new AbortController();
+      const to = setTimeout(() => ac.abort(), 20000);
+      const res = await fetch('/api/translate?appid=' + key, { signal: ac.signal });
+      clearTimeout(to);
+      if (res.ok) {
+        const d = await res.json();
+        if (d && d.lang === 'vi' && d.about) {
+          memTr.set(key, d);
+          try { sessionStorage.setItem(TR_PREFIX + key, JSON.stringify(d)); } catch (e) {}
+          return d;
+        }
+      }
+    } catch (e) { /* mat mang -> giu ban goc */ }
+    memTr.set(key, null);
+    return null;
+  })().finally(() => trInflight.delete(key));
+
+  trInflight.set(key, job);
   return job;
 }
 
@@ -510,20 +560,37 @@ function Img({ sources, alt, className, imgClass, style, draggable }) {
 }
 
 /* Vong tron ti le danh gia */
-function ScoreRing({ percent, size }) {
+let _ringSeq = 0;
+
+function ScoreRing({ percent, size, thickness }) {
   const n = pctNum(percent);
   const s = size || 56;
-  const r = (s - 6) / 2;
+  const w = thickness || 5;
+  const r = (s - w - 3) / 2;
   const c = 2 * Math.PI * r;
   const off = n === null ? c : c * (1 - Math.max(0, Math.min(100, n)) / 100);
+  /* Moi vong can mot id chuyen sac rieng, neu trung id thi trinh duyet
+     dung chung mot dinh nghia va mau se sai o vong thu hai tro di. */
+  const gid = useMemo(function () { return 'nxring' + (++_ringSeq); }, []);
   return (
     <div className="rev__ring" style={{ width: s, height: s }}>
       <svg width={s} height={s} aria-hidden="true">
-        <circle className="rev__trk" cx={s / 2} cy={s / 2} r={r} />
-        <circle className="rev__val" cx={s / 2} cy={s / 2} r={r}
+        <defs>
+          <linearGradient id={gid} x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor="currentColor" stopOpacity="0.3" />
+            <stop offset="55%"  stopColor="currentColor" stopOpacity="0.82" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="1" />
+          </linearGradient>
+        </defs>
+        <circle className="rev__trk" cx={s / 2} cy={s / 2} r={r} strokeWidth={w} />
+        <circle className="rev__val" cx={s / 2} cy={s / 2} r={r} strokeWidth={w}
+                stroke={'url(#' + gid + ')'}
                 strokeDasharray={c} strokeDashoffset={off} />
       </svg>
-      <span className="rev__pct">{n === null ? '—' : Math.round(n)}</span>
+      <span className="rev__pct">
+        {n === null ? '—' : Math.round(n)}
+        {n !== null && <em>%</em>}
+      </span>
     </div>
   );
 }
@@ -597,7 +664,7 @@ window.NX = {
   pyApi, hasApi, callApi, apiProp, openExternal,
   pctNum, reviewTone, TONE_ICON, reviewCountNum, fmtCount, fmtBytes, sortKey,
   getGamePlatform, isOnlineGame, hasCloudSave, customAppIdOf,
-  coverSources, heroSources, fetchMedia, buildMedia,
+  coverSources, heroSources, fetchMedia, buildMedia, fetchTranslation,
   REV_STATE_CACHE, setRevListener,
   useFallbackImg, useCountdown, useClickOutside, useEscape,
   ToastHost, useToast,

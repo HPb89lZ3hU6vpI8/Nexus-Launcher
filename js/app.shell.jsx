@@ -195,16 +195,17 @@
      ------------------------------------------------------------------------ */
 
   const TOP_COPY = {
-    home:      { t: 'Trang chủ',  s: 'Trò chơi nổi bật và mới cập nhật' },
-    library:   { t: 'Thư viện',   s: 'Toàn bộ trò chơi có trong Nexus' },
-    integrate: { t: 'Tích hợp',   s: 'Dịch vụ chạy trực tiếp trên máy bạn' },
-    game:      { t: 'Chi tiết',   s: 'Thông tin, hình ảnh và cài đặt' }
+    home:      { t: 'Trang chủ',  s: 'Trò chơi nổi bật và mới cập nhật',   i: 'ph-fill ph-house' },
+    library:   { t: 'Thư viện',   s: 'Toàn bộ trò chơi có trong Nexus',    i: 'ph-fill ph-squares-four' },
+    integrate: { t: 'Tích hợp',   s: 'Dịch vụ chạy trực tiếp trên máy bạn', i: 'ph-fill ph-plugs-connected' },
+    game:      { t: 'Chi tiết',   s: 'Thông tin, hình ảnh và cài đặt',      i: 'ph-fill ph-game-controller' }
   };
 
   function TopBar({ tab }) {
     const c = TOP_COPY[tab] || TOP_COPY.home;
     return (
       <header className="nx-top">
+        <span className="nx-top__ico" aria-hidden="true"><i className={c.i}></i></span>
         <div className="nx-top__head">
           <div className="nx-top__title">{c.t}</div>
           <div className="nx-top__sub">{c.s}</div>
@@ -350,7 +351,15 @@
     if (narrow) {
       body = <NotSupported width={vw} />;
     } else if (active) {
-      body = <GameDetail key={active.id || active.appId} game={active} onBack={closeGame} />;
+      body = (
+        <GameDetail
+          key={active.id || active.appId}
+          game={active}
+          onBack={closeGame}
+          backLabel={(TOP_COPY[backTab.current] || TOP_COPY.library).t}
+          backIcon={(TOP_COPY[backTab.current] || TOP_COPY.library).i}
+        />
+      );
     } else if (tab === 'library') {
       body = (
         <LibraryContent

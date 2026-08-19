@@ -116,6 +116,16 @@ function parseSysreq(htmlStr) {
   return Object.keys(out).length ? out : null;
 }
 
+// Dau thanh + nguyen am rieng cua tieng Viet -> doan xem Steam da dich chua.
+const VI_MARK =
+  /[ăâđêôơưĂÂĐÊÔƠƯáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]/g;
+
+function isVietnamese(s) {
+  if (!s) return false;
+  const hits = String(s).match(VI_MARK);
+  return !!hits && hits.length >= 3;
+}
+
 // Steam tra hls_h264 (chuoi .m3u8) hoac mp4/webm (chuoi HOAC object {480, max}).
 function pickMovieSrc(m) {
   if (typeof m.hls_h264 === 'string' && m.hls_h264) return m.hls_h264;
@@ -152,7 +162,7 @@ module.exports = async (req, res) => {
 
   const lang = /^[a-z]+$/i.test(String((req.query && req.query.l) || ''))
     ? String(req.query.l)
-    : 'english';
+    : 'vietnamese';
 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 7000);
@@ -167,7 +177,7 @@ module.exports = async (req, res) => {
       headers: {
         'User-Agent': UA,
         Accept: 'application/json',
-        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.6,en;q=0.4',
       },
     });
     clearTimeout(timer);
@@ -232,6 +242,10 @@ module.exports = async (req, res) => {
 
       short_description: short,
       about: about.length > 4000 ? about.slice(0, 4000).trim() + '…' : about,
+      // Nhieu game khong co trang cua hang tieng Viet -> Steam van tra tieng Anh.
+      // Giao dien dua vao co nay de goi /api/translate.
+      about_lang: isVietnamese(about) ? 'vi' : 'en',
+      desc_lang: isVietnamese(short) ? 'vi' : 'en',
 
       developers: Array.isArray(d.developers) ? d.developers.slice(0, 6) : [],
       publishers: Array.isArray(d.publishers) ? d.publishers.slice(0, 6) : [],
