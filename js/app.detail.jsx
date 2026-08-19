@@ -162,20 +162,27 @@
     const onDown = function (e) {
       const el = strip.current;
       if (!el) return;
-      drag.current = { down: true, moved: false, x: e.clientX, left: el.scrollLeft };
-      try { el.setPointerCapture(e.pointerId); } catch (err) {}
+      drag.current = { down: true, moved: false, cap: false, x: e.clientX, left: el.scrollLeft };
+      /* KHONG bat con tro ngay o day. Neu bat, Chromium se chuyen huong su kien
+         click sang chinh dai anh thay vi vao nut ben trong -> khong doi duoc
+         anh/video. Chi bat khi nguoi dung that su keo (xem onMove). */
     };
     const onMove = function (e) {
       const el = strip.current;
       if (!el || !drag.current.down) return;
       const dx = e.clientX - drag.current.x;
-      if (!drag.current.moved && Math.abs(dx) > DRAG_THRESHOLD) { drag.current.moved = true; setDragging(true); }
+      if (!drag.current.moved && Math.abs(dx) > DRAG_THRESHOLD) {
+        drag.current.moved = true;
+        setDragging(true);
+        try { el.setPointerCapture(e.pointerId); drag.current.cap = true; } catch (err) {}
+      }
       if (drag.current.moved) el.scrollLeft = drag.current.left - dx;
     };
     const onUp = function (e) {
       const el = strip.current;
-      if (el) { try { el.releasePointerCapture(e.pointerId); } catch (err) {} }
+      if (el && drag.current.cap) { try { el.releasePointerCapture(e.pointerId); } catch (err) {} }
       drag.current.down = false;
+      drag.current.cap = false;
       setDragging(false);
     };
     const pick = function (i) { if (!drag.current.moved) setIdx(i); };
@@ -946,40 +953,9 @@
                 <div className="gd__cover-t">{game.title}</div>
               </div>
 
-              <div className="pc">
-                {!isUpcoming && (
-                  <div className={'rev is-' + tone}>
-                    <ScoreRing percent={game.percent} size={58} />
-                    <div className="rev__main">
-                      <div className={'rev__txt is-' + tone}>{game.reviewText || 'Chưa có đánh giá'}</div>
-                      <div className="rev__cnt">
-                        {revCount > 0 ? fmtCount(revCount) + ' lượt đánh giá trên Steam' : (game.reviewCount || '—')}
-                      </div>
-                    </div>
-                    {pct !== null && <i className={TONE_ICON[tone] + ' is-' + tone} style={{ fontSize: 20 }}></i>}
-                  </div>
-                )}
-
-                {tags.length > 0 && (
-                  <div className="gd__tags">
-                    <span className="nx-tag" style={{ color: 'var(--c-steam)' }}>
-                      <i className="fa-brands fa-steam"></i>STEAM
-                    </span>
-                    {tags.map(function (t) { return <span className="nx-tag" key={t}>{t}</span>; })}
-                  </div>
-                )}
-
-                <div className="pt">
-                  <button className={'pt__b' + (tab === 'info' ? ' is-on' : '')} onClick={function () { setTab('info'); }}>
-                    <i className="ph-bold ph-info"></i>Thông tin
-                  </button>
-                  <button className={'pt__b' + (tab === 'sys' ? ' is-on' : '')} onClick={function () { setTab('sys'); }}>
-                    <i className="ph-bold ph-desktop-tower"></i>Cấu hình
-                  </button>
-                </div>
-
-                {tab === 'info' ? <InfoSpecs game={game} live={live} /> : <SysSpecs req={sysreq} rec={sysreqRec} />}
-
+              {/* Khoi hanh dong dat ngay duoi anh bia de luon nhin thay ma
+                 khong phai cuon xuong. */}
+              <div className="pc pc--act">
                 {/* ---------------------------- HANH DONG ---------------------------- */}
                 <div className="act">
                   {isUpcoming && (
@@ -1131,6 +1107,42 @@
                     </button>
                   )}
                 </div>
+              </div>
+
+              <div className="pc">
+                {!isUpcoming && (
+                  <div className={'rev is-' + tone}>
+                    <ScoreRing percent={game.percent} size={58} />
+                    <div className="rev__main">
+                      <div className={'rev__txt is-' + tone}>{game.reviewText || 'Chưa có đánh giá'}</div>
+                      <div className="rev__cnt">
+                        {revCount > 0 ? fmtCount(revCount) + ' lượt đánh giá trên Steam' : (game.reviewCount || '—')}
+                      </div>
+                    </div>
+                    {pct !== null && <i className={TONE_ICON[tone] + ' is-' + tone} style={{ fontSize: 20 }}></i>}
+                  </div>
+                )}
+
+                {tags.length > 0 && (
+                  <div className="gd__tags">
+                    <span className="nx-tag" style={{ color: 'var(--c-steam)' }}>
+                      <i className="fa-brands fa-steam"></i>STEAM
+                    </span>
+                    {tags.map(function (t) { return <span className="nx-tag" key={t}>{t}</span>; })}
+                  </div>
+                )}
+
+                <div className="pt">
+                  <button className={'pt__b' + (tab === 'info' ? ' is-on' : '')} onClick={function () { setTab('info'); }}>
+                    <i className="ph-bold ph-info"></i>Thông tin
+                  </button>
+                  <button className={'pt__b' + (tab === 'sys' ? ' is-on' : '')} onClick={function () { setTab('sys'); }}>
+                    <i className="ph-bold ph-desktop-tower"></i>Cấu hình
+                  </button>
+                </div>
+
+                {tab === 'info' ? <InfoSpecs game={game} live={live} /> : <SysSpecs req={sysreq} rec={sysreqRec} />}
+
               </div>
 
               {/* ------------------------------ BANNER ------------------------------ */}

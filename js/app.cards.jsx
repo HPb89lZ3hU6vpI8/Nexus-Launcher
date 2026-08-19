@@ -78,8 +78,8 @@ function GameCard({ game, onOpen }) {
       <div className="gc__body">
         <div className="gc__title nx-clamp-2">{game.title}</div>
         <div className="gc__meta">
-          <span className={'gc__rev gc__rev--' + tone}>{game.reviewText}</span>
-          {count > 0 && <span className="gc__revn">{fmtCount(count)} đánh giá</span>}
+          <span className={'gc__rev gc__rev--dot gc__rev--' + tone}>{game.reviewText}</span>
+          {count > 0 && <span className="gc__revn">{fmtCount(count)}<em>đánh giá</em></span>}
         </div>
       </div>
     </button>
@@ -112,7 +112,7 @@ function GameRow({ game, onOpen }) {
               {Math.round(n)}% · {game.reviewText}
             </span>
           )}
-          {count > 0 && <span className="gc__revn">{fmtCount(count)} đánh giá</span>}
+          {count > 0 && <span className="gc__revn">{fmtCount(count)}<em>đánh giá</em></span>}
         </div>
       </div>
       <div className="glr__side">

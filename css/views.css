@@ -324,10 +324,21 @@
   aspect-ratio: 16 / 9;
   border-radius: var(--r-lg);
   overflow: hidden;
-  background: #000;
+  background:
+    radial-gradient(120% 100% at 50% 0%, #0d1119 0%, #05070b 62%, #000 100%);
   border: 1px solid var(--line-mid);
-  box-shadow: var(--sh-4);
+  box-shadow: var(--sh-4), inset 0 0 0 1px rgba(255, 255, 255, 0.035);
   animation: nx-rise 480ms var(--e-out) both;
+}
+/* Vien sang mo o canh tren cho khung media co chieu sau */
+.gd__stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 18%);
+  pointer-events: none;
+  z-index: 2;
 }
 .gd__slide {
   position: absolute;
@@ -338,7 +349,7 @@
 }
 .gd__slide.is-on { opacity: 1; visibility: visible; transition: opacity 400ms var(--e-out), visibility 0s; z-index: 1; }
 .gd__slide img,
-.gd__slide video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+.gd__slide video { width: 100%; height: 100%; object-fit: contain; background: transparent; }
 .gd__slide img { cursor: zoom-in; }
 
 .gd__stage-load {
@@ -425,6 +436,9 @@
   scrollbar-width: none;
   cursor: grab;
   touch-action: pan-y;
+  /* Mo dan hai dau de thay ro con anh phia sau */
+  -webkit-mask: linear-gradient(90deg, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%);
+  mask: linear-gradient(90deg, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%);
 }
 .gd__strip::-webkit-scrollbar { height: 0; }
 .gd__strip.is-drag { cursor: grabbing; }
@@ -437,16 +451,31 @@
   border-radius: var(--r-sm);
   overflow: hidden;
   background: var(--bg-sunken);
-  border: 2px solid transparent;
-  opacity: 0.5;
-  transition: opacity var(--t-base) var(--e-out), border-color var(--t-base), transform var(--t-base) var(--e-out);
+  border: 1px solid var(--line);
+  opacity: 0.52;
+  transition:
+    opacity var(--t-base) var(--e-out),
+    border-color var(--t-base) var(--e-out),
+    box-shadow var(--t-base) var(--e-out);
 }
 .gd__thumb img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-.gd__thumb:hover { opacity: 0.86; transform: translateY(-2px); }
+.gd__thumb:hover { opacity: 0.92; border-color: var(--line-strong); }
+
+/* Muc dang xem: vien lam deu bon canh + vach sang duoi day */
 .gd__thumb.is-on {
   opacity: 1;
-  border-color: var(--br-1);
-  box-shadow: 0 0 0 1px rgba(58, 216, 255, 0.25), 0 6px 20px rgba(58, 216, 255, 0.24);
+  border-color: rgba(58, 216, 255, 0.72);
+  box-shadow:
+    0 0 0 1px rgba(58, 216, 255, 0.22),
+    0 8px 22px -10px rgba(58, 216, 255, 0.55);
+}
+.gd__thumb.is-on::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 3px;
+  background: var(--grad-brand);
+  z-index: 2;
 }
 .gd__thumb-play {
   position: absolute;
@@ -839,7 +868,9 @@
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 22px;
   padding: 12px var(--pad-page) 52px;
-  align-items: start;
+  /* Cac the trong cung mot hang cao bang nhau -> nut CTA thang hang tuyet doi,
+     du noi dung tung the dai ngan khac nhau. */
+  align-items: stretch;
 }
 .ig__grid > * { grid-column: span 2; }
 .ig__grid > *:nth-child(4) { grid-column: 2 / span 2; }
@@ -1281,54 +1312,107 @@
    NUT HANH DONG LON TRONG PANEL (2 dong: nhan phu + nhan chinh)
    ========================================================================== */
 
+/* ----------------------------------------------------------------------------
+   NUT HANH DONG LON (TRUY CAP GAME, FIX GAME, ...)
+   Thiet ke lai: khung mong va gon, o icon vuong bo goc mem voi vien rieng,
+   khong dung khoi mau chuoi qua chi. Hieu ung hover diu, khong giat.
+   -------------------------------------------------------------------------- */
+
 .abtn {
+  --abtn-accent: var(--br-1);
+  --abtn-accent-rgb: 58, 216, 255;
   display: flex;
   align-items: center;
-  gap: 13px;
+  gap: 12px;
   width: 100%;
-  padding: 12px 15px;
+  padding: 11px 13px;
   border-radius: var(--r-md);
-  border: 1px solid transparent;
+  border: 1px solid var(--line-mid);
+  background: var(--bg-raised);
+  color: var(--tx-hi);
   text-align: left;
   position: relative;
+  isolation: isolate;
   overflow: hidden;
   transition:
-    transform var(--t-fast) var(--e-out),
-    box-shadow var(--t-base) var(--e-out),
-    background var(--t-base),
-    border-color var(--t-base);
+    border-color var(--t-base) var(--e-out),
+    background var(--t-base) var(--e-out),
+    box-shadow var(--t-base) var(--e-out);
 }
+
+/* Quang mau rat nhat toa tu canh trai, thay cho khoi mau dac */
+.abtn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg,
+    rgba(var(--abtn-accent-rgb), 0.14), rgba(var(--abtn-accent-rgb), 0) 62%);
+  opacity: 0.85;
+  transition: opacity var(--t-base) var(--e-out);
+  pointer-events: none;
+}
+.abtn:hover:not(:disabled)::before { opacity: 1; }
+
+/* Vet sang quet ngang khi hover */
 .abtn::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.16) 50%, transparent 70%);
+  z-index: -1;
+  background: linear-gradient(100deg, transparent 34%, rgba(255, 255, 255, 0.09) 50%, transparent 66%);
   transform: translateX(-130%);
-  transition: transform 700ms var(--e-out);
+  transition: transform 760ms var(--e-out);
   pointer-events: none;
 }
 .abtn:hover:not(:disabled)::after { transform: translateX(130%); }
-.abtn:hover:not(:disabled) { transform: translateY(-2px); }
-.abtn:active:not(:disabled) { transform: translateY(0) scale(0.99); }
-.abtn:disabled { cursor: wait; opacity: 0.72; }
 
+.abtn:hover:not(:disabled) {
+  border-color: rgba(var(--abtn-accent-rgb), 0.55);
+  box-shadow: 0 0 0 1px rgba(var(--abtn-accent-rgb), 0.14),
+              0 10px 24px -12px rgba(var(--abtn-accent-rgb), 0.5);
+}
+.abtn:active:not(:disabled) { box-shadow: none; border-color: rgba(var(--abtn-accent-rgb), 0.4); }
+.abtn:disabled { cursor: wait; }
+
+/* O icon: vuong bo goc mem, nen chim, vien rieng — gon va sac net */
 .abtn__ico {
-  width: 42px; height: 42px;
+  width: 38px; height: 38px;
   flex: none;
   display: grid;
   place-items: center;
-  border-radius: var(--r-sm);
-  font-size: 21px;
+  border-radius: 11px;
+  border: 1px solid rgba(var(--abtn-accent-rgb), 0.3);
+  background: rgba(var(--abtn-accent-rgb), 0.11);
+  color: var(--abtn-accent);
+  font-size: 19px;
+  line-height: 1;
+  transition: border-color var(--t-base), background var(--t-base);
 }
+.abtn:hover:not(:disabled) .abtn__ico {
+  border-color: rgba(var(--abtn-accent-rgb), 0.5);
+  background: rgba(var(--abtn-accent-rgb), 0.17);
+}
+.abtn__ico .nx-spin { width: 19px; height: 19px; border-width: 2px; }
+
+/* Khi dang xu ly: o icon nhap nhe de thay ung dung van dang chay */
+.abtn:disabled:not(.abtn--mute) .abtn__ico {
+  border-color: rgba(var(--abtn-accent-rgb), 0.45);
+  background: rgba(var(--abtn-accent-rgb), 0.15);
+  animation: nx-breathe 1.8s ease-in-out infinite;
+}
+
 .abtn__txt { flex: 1; min-width: 0; text-align: left; }
 .abtn__k {
   display: block;
-  font-size: 9.5px;
+  font-family: var(--f-ui);
+  font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
-  opacity: 0.72;
-  line-height: 1.2;
+  color: var(--tx-dim);
+  color: color-mix(in srgb, var(--abtn-accent) 78%, var(--tx-dim));
+  line-height: 1.25;
   margin-bottom: 3px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1337,45 +1421,37 @@
 .abtn__v {
   display: block;
   font-family: var(--f-display);
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: -0.015em;
+  font-size: 14.5px;
+  font-weight: 750;
+  letter-spacing: -0.005em;
   line-height: 1.25;
-}
-.abtn__go { flex: none; font-size: 16px; opacity: 0.7; transition: transform var(--t-base) var(--e-out); }
-.abtn:hover:not(:disabled) .abtn__go { transform: translateX(4px); opacity: 1; }
-
-.abtn--primary {
-  background: linear-gradient(120deg, rgba(58, 216, 255, 0.16), rgba(139, 108, 255, 0.14));
-  border-color: rgba(58, 216, 255, 0.32);
   color: var(--tx-hi);
 }
-.abtn--primary .abtn__ico { background: var(--grad-brand); color: #041019; box-shadow: 0 4px 16px rgba(58, 216, 255, 0.34); }
-.abtn--primary:hover:not(:disabled) { border-color: rgba(58, 216, 255, 0.6); box-shadow: 0 12px 32px rgba(58, 216, 255, 0.2); }
-
-.abtn--gold {
-  background: rgba(255, 207, 92, 0.09);
-  border-color: rgba(255, 207, 92, 0.28);
-  color: var(--tx-hi);
+.abtn__go {
+  flex: none;
+  font-size: 15px;
+  color: var(--tx-faint);
+  transition: transform var(--t-base) var(--e-out), color var(--t-base);
 }
-.abtn--gold .abtn__ico { background: rgba(255, 207, 92, 0.16); color: var(--gold); }
-.abtn--gold:hover:not(:disabled) { border-color: rgba(255, 207, 92, 0.55); box-shadow: 0 12px 30px rgba(255, 207, 92, 0.14); }
+.abtn:hover:not(:disabled) .abtn__go { transform: translateX(3px); color: var(--abtn-accent); }
+
+/* --- Cac sac thai --- */
+.abtn--primary { --abtn-accent: var(--br-1); --abtn-accent-rgb: 58, 216, 255; }
+
+.abtn--gold { --abtn-accent: var(--gold); --abtn-accent-rgb: 255, 207, 92; }
 
 .abtn--ghost {
-  background: rgba(255, 255, 255, 0.045);
-  border-color: var(--line-mid);
-  color: var(--tx-hi);
+  --abtn-accent: var(--br-3);
+  --abtn-accent-rgb: 139, 108, 255;
 }
-.abtn--ghost .abtn__ico { background: rgba(255, 255, 255, 0.07); color: var(--br-1); }
-.abtn--ghost:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); border-color: var(--line-strong); }
 
 .abtn--mute {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: var(--line);
-  color: var(--tx-dim);
+  --abtn-accent: var(--tx-faint);
+  --abtn-accent-rgb: 150, 160, 178;
   cursor: not-allowed;
+  opacity: 0.72;
 }
-.abtn--mute .abtn__ico { background: rgba(255, 255, 255, 0.05); color: var(--tx-faint); }
+.abtn--mute .abtn__v { color: var(--tx-dim); }
 
 /* Dai phan cach "San sang khoi chay" */
 .act__hr {

@@ -17,50 +17,27 @@
   } = window.NX;
 
   /* --------------------------------------------------------------------------
-     THU PHONG — dat tren documentElement (ban cu dat tren body nen khong an)
+     TY LE HIEN THI CO DINH
      ------------------------------------------------------------------------ */
 
-  const ZOOM_KEY = 'nx.zoom';
-  const ZOOM_MIN = 0.7;
-  const ZOOM_MAX = 1.4;
-  const ZOOM_STEP = 0.05;
-
-  function readZoom() {
-    try {
-      const v = parseFloat(localStorage.getItem(ZOOM_KEY));
-      if (!isNaN(v) && v >= ZOOM_MIN && v <= ZOOM_MAX) return v;
-    } catch (e) {}
-    return 1;
-  }
-
-  function clampZoom(v) {
-    return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(v * 100) / 100));
-  }
-
-  function useZoom() {
-    const [zoom, setZoom] = useState(readZoom);
-
+  /* Launcher chay o ty le co dinh 100%: khoa moi thao tac thu phong cua
+     trinh duyet (Ctrl +/-/0, Ctrl + con lan) va xoa muc thu phong da luu
+     tu cac phien truoc de giao dien khong bi lech. */
+  function useNoZoom() {
     useEffect(function () {
-      document.documentElement.style.zoom = zoom === 1 ? '' : String(zoom);
-      try { localStorage.setItem(ZOOM_KEY, String(zoom)); } catch (e) {}
-    }, [zoom]);
+      document.documentElement.style.zoom = '';
+      try { localStorage.removeItem('nx.zoom'); } catch (e) {}
 
-    const bump = useCallback(function (d) {
-      setZoom(function (v) { return clampZoom(v + d * ZOOM_STEP); });
-    }, []);
-    const reset = useCallback(function () { setZoom(1); }, []);
-
-    useEffect(function () {
       const onKey = function (e) {
         if (!e.ctrlKey && !e.metaKey) return;
-        if (e.key === '+' || e.key === '=' || e.code === 'NumpadAdd') { e.preventDefault(); bump(1); }
-        else if (e.key === '-' || e.key === '_' || e.code === 'NumpadSubtract') { e.preventDefault(); bump(-1); }
-        else if (e.key === '0' || e.code === 'Numpad0') { e.preventDefault(); reset(); }
+        const k = e.key;
+        if (k === '+' || k === '=' || k === '-' || k === '_' || k === '0' ||
+            e.code === 'NumpadAdd' || e.code === 'NumpadSubtract' || e.code === 'Numpad0') {
+          e.preventDefault();
+        }
       };
       const onWheel = function (e) {
-        if (!e.ctrlKey && !e.metaKey) return;
-        e.preventDefault();
-        bump(e.deltaY < 0 ? 1 : -1);
+        if (e.ctrlKey || e.metaKey) e.preventDefault();
       };
       window.addEventListener('keydown', onKey);
       window.addEventListener('wheel', onWheel, { passive: false });
@@ -68,9 +45,7 @@
         window.removeEventListener('keydown', onKey);
         window.removeEventListener('wheel', onWheel);
       };
-    }, [bump, reset]);
-
-    return { zoom: zoom, bump: bump, reset: reset };
+    }, []);
   }
 
   /* --------------------------------------------------------------------------
@@ -226,7 +201,7 @@
     game:      { t: 'Chi tiết',   s: 'Thông tin, hình ảnh và cài đặt' }
   };
 
-  function TopBar({ tab, zoom, onZoom, onResetZoom }) {
+  function TopBar({ tab }) {
     const c = TOP_COPY[tab] || TOP_COPY.home;
     return (
       <header className="nx-top">
@@ -238,23 +213,6 @@
         <span className="nx-top__spacer" />
 
         <SteamPill />
-
-        <div className="nx-top__zoom">
-          <button className="nx-icobtn" onClick={function () { onZoom(-1); }} title="Thu nhỏ (Ctrl -)">
-            <i className="ph-bold ph-minus"></i>
-          </button>
-          <button
-            className="nx-chip nx-chip--static"
-            onClick={onResetZoom}
-            title="Đặt lại 100% (Ctrl 0)"
-            style={{ cursor: 'pointer', minWidth: 58, justifyContent: 'center' }}
-          >
-            {Math.round(zoom * 100)}%
-          </button>
-          <button className="nx-icobtn" onClick={function () { onZoom(1); }} title="Phóng to (Ctrl +)">
-            <i className="ph-bold ph-plus"></i>
-          </button>
-        </div>
 
         <button className="nx-icobtn" onClick={function () { openExternal(DISCORD_URL); }} title="Discord">
           <i className="fa-brands fa-discord"></i>
@@ -316,7 +274,7 @@
     const scrollRef = useRef(null);
     const memo = useRef({});
 
-    const z = useZoom();
+    useNoZoom();
     const vw = useViewport();
     useDesktopLock();
 
@@ -420,7 +378,7 @@
       <div className="nx-shell">
         <Rail tab={active ? backTab.current : tab} onTab={goTab} counts={counts} />
         <main className="nx-main">
-          <TopBar tab={view} zoom={z.zoom} onZoom={z.bump} onResetZoom={z.reset} />
+          <TopBar tab={view} />
           <div className="nx-scroll" ref={scrollRef} onScroll={remember}>
             {body}
           </div>
@@ -449,5 +407,5 @@
     ReactDOM.render(<Root />, mount);
   }
 
-  Object.assign(window.NX, { App, Rail, TopBar, useZoom, dismissBoot });
+  Object.assign(window.NX, { App, Rail, TopBar, dismissBoot });
 })();

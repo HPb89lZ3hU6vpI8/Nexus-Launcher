@@ -25,33 +25,35 @@
     border-color var(--t-base) var(--e-out),
     background var(--t-base) var(--e-out);
 }
+/* Hover: vien sang deu tren ca bon canh (dung border + box-shadow nen khong
+   bao gio bi overflow:hidden cat mat canh tren nhu ky thuat mask cu),
+   nang the len rat nhe va them quang sang lanh. Khong phong to anh. */
 .gc:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   background: var(--bg-raised);
-  border-color: var(--line-strong);
-  box-shadow: var(--sh-3);
+  border-color: rgba(58, 216, 255, 0.58);
+  box-shadow:
+    0 0 0 1px rgba(58, 216, 255, 0.18),
+    0 18px 38px -14px rgba(0, 0, 0, 0.78),
+    0 0 30px -8px rgba(58, 216, 255, 0.28);
   z-index: 2;
 }
+.gc:active { transform: translateY(-2px); }
 
-/* Vien sang chay quanh the khi hover — lop gradient duoi mask */
+/* Vach sang mong chay doc canh tren khi hover */
 .gc::before {
   content: '';
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg,
-    rgba(58, 216, 255, 0.85), rgba(139, 108, 255, 0.55) 42%, transparent 70%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity var(--t-base) var(--e-out);
+  left: 0; right: 0; top: 0;
+  height: 2px;
+  background: var(--grad-brand);
+  transform: scaleX(0);
+  transform-origin: 50% 50%;
+  transition: transform 420ms var(--e-out);
   pointer-events: none;
-  z-index: 3;
+  z-index: 4;
 }
-.gc:hover::before { opacity: 1; }
+.gc:hover::before { transform: scaleX(1); }
 
 .gc__shot {
   position: relative;
@@ -66,10 +68,10 @@
   display: block;
   opacity: 0;
   transform: scale(1.03);
-  transition: opacity 480ms var(--e-out), transform 620ms var(--e-out);
+  transition: opacity 480ms var(--e-out), transform 620ms var(--e-out), filter var(--t-base) var(--e-out);
 }
 .gc__img.is-in { opacity: 1; transform: scale(1); }
-.gc:hover .gc__img { transform: scale(1.075); }
+.gc:hover .gc__img { transform: scale(1); filter: brightness(1.06) saturate(1.05); }
 
 /* Lop phu chuyen sang khi hover */
 .gc__shot::after {
@@ -187,20 +189,53 @@
   margin-top: auto;
 }
 .gc__rev {
-  font-size: 10.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--f-display);
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.005em;
+  line-height: 1;
+}
+.gc__rev--dot::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent);
+  flex: none;
 }
 .gc__rev--pos { color: var(--ok); }
 .gc__rev--mix { color: var(--warn); }
 .gc__rev--neg { color: var(--bad); }
+
+/* So luot danh gia: vien nho, chu so canh deu */
 .gc__revn {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: var(--r-xs);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
   font-family: var(--f-num);
-  font-size: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--tx-dim);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transition: border-color var(--t-base), color var(--t-base);
+}
+.gc__revn em {
+  font-family: var(--f-ui);
+  font-style: normal;
+  font-size: 9.5px;
   font-weight: 600;
   color: var(--tx-faint);
-  font-variant-numeric: tabular-nums;
 }
+.gc:hover .gc__revn { border-color: var(--line-strong); color: var(--tx); }
 
 /* ----------------------------------------------------------------------------
    LUOI THU VIEN

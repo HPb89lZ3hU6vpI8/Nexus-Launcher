@@ -129,6 +129,12 @@
 }
 
 /* Nhip tho rat nhe cho cham trang thai */
+/* Nhip sang nhe cho o icon dang xu ly (khong lam thay doi kich thuoc) */
+@keyframes nx-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+  50%      { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05); }
+}
+
 @keyframes nx-pulse {
   0%, 100% { opacity: 1;   transform: scale(1); }
   50%      { opacity: 0.55; transform: scale(0.82); }
@@ -151,9 +157,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *:not(.nx-spin):not(.prog__bar),
+  *:not(.nx-spin):not(.prog__bar)::before,
+  *:not(.nx-spin):not(.prog__bar)::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+  /* Vong quay va thanh tien trinh la chi bao trang thai: luon phai chay,
+     neu khong nguoi dung tuong ung dung bi treo. */
+  .nx-spin { animation: nx-spin 640ms linear infinite !important; }
 }
