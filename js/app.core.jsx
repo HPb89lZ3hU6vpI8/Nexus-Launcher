@@ -9,6 +9,69 @@
 const { useState, useEffect, useRef, useMemo, useCallback, useLayoutEffect } = React;
 
 /* ----------------------------------------------------------------------------
+   0. NGON NGU
+   js/i18n.js chay truoc file nay nen window.NXI18N chac chan da co. Van de mot
+   ban du phong: neu vi ly do nao do no khong nap duoc thi ca giao dien van chay
+   binh thuong bang tieng Viet thay vi trang trang.
+   -------------------------------------------------------------------------- */
+
+const I18N = window.NXI18N || {
+  LANGS: [{ code: 'vi', label: 'Tiếng Việt', short: 'VI', steam: 'vietnamese', html: 'vi', flag: '🇻🇳' }],
+  t: function (s) { return s; },
+  get: function () { return 'vi'; },
+  info: function () { return { code: 'vi', label: 'Tiếng Việt', short: 'VI', steam: 'vietnamese', html: 'vi', flag: '🇻🇳' }; },
+  set: function () {},
+  subscribe: function () { return function () {}; }
+};
+
+/* TX('cau tieng Viet') -> cau do theo ngon ngu dang chon.
+   TX('Xem mục {n}', { n: 3 }) -> thay cho cho cac o {…}. */
+function TX(s, vars) { return I18N.t(s, vars); }
+
+/* Goi trong mot thanh phan React de no tu ve lai khi nguoi dung doi ngon ngu */
+function useLang() {
+  const [, bump] = useState(0);
+  useEffect(function () {
+    return I18N.subscribe(function () { bump(function (n) { return n + 1; }); });
+  }, []);
+  return I18N.get();
+}
+
+/* ----------------------------------------------------------------------------
+   DAU SAC THAI CHO CAU THONG BAO
+   Truoc day mau cua o thong bao duoc doan bang cach do xem cau chu co chua tu
+   'Lỗi' hay 'Thành Công' hay khong. Cach do chi dung khi giao dien mai mai la
+   tieng Viet. Nay moi cau thong bao mang san mot ky tu vo hinh o dau de noi ro
+   no la loi hay thanh cong; cach do tu ra khong bao gio doc nham nua.
+   -------------------------------------------------------------------------- */
+
+const TONE_MARK = { bad: '\u0001', ok: '\u0002', warn: '\u0003', info: '\u0004' };
+const MARK_RE = /^[\u0001-\u0004]/;
+
+/* Gan dau sac thai vao dau cau */
+function tagTone(tone, msg) {
+  const s = msg === null || msg === undefined ? '' : String(msg);
+  if (!s || MARK_RE.test(s)) return s;
+  return (TONE_MARK[tone] || '') + s;
+}
+
+/* Doc dau sac thai. Khong co dau thi tra ve null de noi goi tu doan lay. */
+function markedTone(msg) {
+  const s = String(msg || '');
+  const c = s.charAt(0);
+  if (c === TONE_MARK.bad) return 'bad';
+  if (c === TONE_MARK.ok) return 'ok';
+  if (c === TONE_MARK.warn) return 'warn';
+  if (c === TONE_MARK.info) return 'info';
+  return null;
+}
+
+/* Bo dau sac thai truoc khi hien ra man hinh */
+function stripTone(msg) {
+  return String(msg === null || msg === undefined ? '' : msg).replace(MARK_RE, '');
+}
+
+/* ----------------------------------------------------------------------------
    1. HANG SO
    -------------------------------------------------------------------------- */
 
@@ -77,11 +140,11 @@ function hasApi(name) {
 async function callApi(name, ...args) {
   const a = pyApi();
   if (!a || typeof a[name] !== 'function') {
-    return { success: false, __missing: true, error: 'Chức năng chưa khả dụng trong phiên bản này.' };
+    return { success: false, __missing: true, error: tagTone('bad', TX('Chức năng chưa khả dụng trong phiên bản này.')) };
   }
   try {
     const r = await a[name](...args);
-    if (r === null || r === undefined) return { success: false, error: 'Không nhận được phản hồi.' };
+    if (r === null || r === undefined) return { success: false, error: tagTone('bad', TX('Không nhận được phản hồi.')) };
     if (typeof r === 'string') { try { return JSON.parse(r); } catch (e) { return { success: false, error: r }; } }
     return r;
   } catch (err) {
@@ -279,8 +342,16 @@ function writeSS(appId, data) {
   catch (e) { /* het cho -> bo qua, van con bo nho */ }
 }
 
-function fetchMedia(appId) {
-  const key = String(appId);
+/* Ten ngon ngu ma Steam hieu — dung cho tham so ?l= cua appdetails. */
+const STEAM_L = { vi: 'vietnamese', en: 'english', ja: 'japanese', es: 'spanish', fr: 'french' };
+
+/* Doi ngon ngu thi the loai, ngay phat hanh va bang cau hinh cung phai doi theo,
+   nen kho nho phai kem ma ngon ngu. Ban Python chua biet nhan tham so ngon ngu
+   nen chi dung no cho tieng Viet; cac thu tieng khac di qua ham tren Vercel. */
+function fetchMedia(appId, lang) {
+  const lg = STEAM_L[lang] ? lang : 'vi';
+  const id = String(appId);
+  const key = lg + ':' + id;
   if (memMedia.has(key)) return Promise.resolve(memMedia.get(key));
   if (inflight.has(key)) return inflight.get(key);
 
@@ -289,8 +360,8 @@ function fetchMedia(appId) {
 
   const job = (async () => {
     /* Nguon 1: Python — nhanh nhat, khong vuong CORS, du 100% trailer */
-    if (hasApi('get_steam_media')) {
-      const r = await callApi('get_steam_media', key);
+    if (lg === 'vi' && hasApi('get_steam_media')) {
+      const r = await callApi('get_steam_media', id);
       const n = normalizeMedia(r && r.data ? r.data : r);
       if (n) { memMedia.set(key, n); writeSS(key, n); return n; }
     }
@@ -298,7 +369,7 @@ function fetchMedia(appId) {
     try {
       const ac = new AbortController();
       const to = setTimeout(() => ac.abort(), 6000);
-      const res = await fetch('/api/steammedia?appid=' + key, { signal: ac.signal });
+      const res = await fetch('/api/steammedia?appid=' + id + '&l=' + STEAM_L[lg], { signal: ac.signal });
       clearTimeout(to);
       if (res.ok) {
         const n = normalizeMedia(await res.json());
@@ -320,12 +391,15 @@ function fetchMedia(appId) {
    cua bat ky ai cung gan nhu tuc thi. Hong mang thi im lang giu ban goc.
    -------------------------------------------------------------------------- */
 
-const TR_PREFIX = 'nx_tr_v2_';
+const TR_PREFIX = 'nx_tr_v3_';
 const memTr = new Map();
 const trInflight = new Map();
 
-function fetchTranslation(appId) {
-  const key = String(appId);
+/* Moi ngon ngu co mot ban dich rieng nen khoa nho phai kem ma ngon ngu, neu
+   khong thi doi sang tieng Nhat van se thay ban tieng Viet cu nam trong bo nho. */
+function fetchTranslation(appId, lang) {
+  const lg = lang || I18N.get();
+  const key = lg + ':' + String(appId);
   if (memTr.has(key)) return Promise.resolve(memTr.get(key));
   if (trInflight.has(key)) return trInflight.get(key);
 
@@ -342,11 +416,11 @@ function fetchTranslation(appId) {
     try {
       const ac = new AbortController();
       const to = setTimeout(() => ac.abort(), 20000);
-      const res = await fetch('/api/translate?appid=' + key, { signal: ac.signal });
+      const res = await fetch('/api/translate?appid=' + String(appId) + '&to=' + lg, { signal: ac.signal });
       clearTimeout(to);
       if (res.ok) {
         const d = await res.json();
-        if (d && d.lang === 'vi' && (d.about || (d.about_rich && d.about_rich.length))) {
+        if (d && d.lang === lg && (d.about || (d.about_rich && d.about_rich.length))) {
           memTr.set(key, d);
           try { sessionStorage.setItem(TR_PREFIX + key, JSON.stringify(d)); } catch (e) {}
           return d;
@@ -415,18 +489,58 @@ function setRevListener(l) { _revListener = l; }
    7. HOOK
    -------------------------------------------------------------------------- */
 
-/* Anh tu chuyen sang nguon du phong khi loi, co hieu ung hien dan */
+/* Anh tu chuyen sang nguon du phong khi loi, co hieu ung hien dan.
+
+   LOI DA SUA: truoc day trang thai duoc dat lai trong useEffect. useEffect chi
+   chay SAU khi trinh duyet ve xong khung hinh, con mot tam anh da nam san trong
+   bo nho dem thi bao "tai xong" gan nhu tuc thi — tuc la truoc do. Thu tu that
+   su xay ra: ve -> anh bao xong -> ghi nhan da tai -> useEffect cua lan gan moi
+   chay -> XOA sach ghi nhan do -> tam anh nam im o do trong bang 0 mai mai.
+   Cang chuyen qua lai giua cac trang thi cang nhieu anh vao bo dem, nen cang
+   dung lau cang den nhieu the. Nay dat lai ngay trong luc ve, va hoi thang the
+   anh xem no da xong chua thay vi cho no bao.
+   -------------------------------------------------------------------------- */
 function useFallbackImg(sources) {
+  const key = Array.isArray(sources)
+    ? sources.filter(Boolean).join('|')
+    : String(sources || '');
+
   const list = useMemo(
     () => (Array.isArray(sources) ? sources.filter(Boolean) : [sources]).concat(PLACEHOLDER),
-    [Array.isArray(sources) ? sources.join('|') : sources]
+    [key]
   );
+
   const [idx, setIdx] = useState(0);
   const [loaded, setLoaded] = useState(false);
-  useEffect(() => { setIdx(0); setLoaded(false); }, [list]);
-  const onError = useCallback(() => setIdx(i => (i < list.length - 1 ? i + 1 : i)), [list]);
-  const onLoad  = useCallback(() => setLoaded(true), []);
-  return { src: list[idx], loaded, onError, onLoad };
+  const elRef = useRef(null);
+
+  /* Doi anh: dat lai ngay tai day. React cho phep mot thanh phan tu dat lai
+     trang thai cua chinh no trong luc ve — no bo ket qua ve dang do va ve lai,
+     khong he co khoang trong de anh trong bo dem chen vao giua. */
+  const keyRef = useRef(key);
+  if (keyRef.current !== key) {
+    keyRef.current = key;
+    setIdx(0);
+    setLoaded(false);
+  }
+
+  const markLoaded = useCallback(function () { setLoaded(true); }, []);
+  const onError = useCallback(function () {
+    setLoaded(false);
+    setIdx(function (i) { return i < list.length - 1 ? i + 1 : i; });
+  }, [list]);
+
+  /* Chot chan sau moi lan ve: hoi thang the anh. complete = da tai xong hoac
+     da that bai; naturalWidth > 0 phan biet hai truong hop do. Nho vay du tay
+     nghe load/error co bi lo mat thi trang thai van dung. */
+  useEffect(function () {
+    const el = elRef.current;
+    if (!el || !el.complete) return;
+    if (el.naturalWidth > 0) { if (!loaded) setLoaded(true); }
+    else if (idx < list.length - 1) { setIdx(idx + 1); }
+  });
+
+  return { src: list[idx], loaded: loaded, onError: onError, onLoad: markLoaded, ref: elRef };
 }
 
 /* ----------------------------------------------------------------------------
@@ -471,7 +585,14 @@ function vnParts(input) {
   };
 }
 
-const VN_WD = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+const VN_WD_SRC = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+/* Doc theo ngon ngu dang chon ngay luc goi, khong chot cung tu luc nap trang */
+const VN_WD = new Proxy(VN_WD_SRC, {
+  get: function (a, k) {
+    const v = a[k];
+    return typeof v === 'string' ? TX(v) : v;
+  }
+});
 const p2 = function (n) { return String(n).padStart(2, '0'); };
 
 /* "18/08/2026" theo gio VN */
@@ -704,7 +825,7 @@ function ToastHost({ children }) {
               <div className="tst__t">{t.title}</div>
               {t.desc ? <div className="tst__d">{t.desc}</div> : null}
             </div>
-            <button className="tst__x" onClick={() => close(t.id)} aria-label="Đóng">
+            <button className="tst__x" onClick={() => close(t.id)} aria-label={TX('Đóng')}>
               <i className="ph-bold ph-x"></i>
             </button>
             {t.life > 0 && (
@@ -723,19 +844,23 @@ function useToast() { return React.useContext(ToastCtx); }
    9. COMPONENT NGUYEN TU
    -------------------------------------------------------------------------- */
 
-/* Anh co khung xuong khi dang tai + tu doi nguon khi loi */
-function Img({ sources, alt, className, imgClass, style, draggable }) {
-  const { src, loaded, onError, onLoad } = useFallbackImg(sources);
+/* Anh co khung xuong khi dang tai + tu doi nguon khi loi.
+   eager = anh chac chan dang nam trong tam nhin (thanh dau, ke dau trang):
+   tai ngay va uu tien cao thay vi cho trinh duyet thong thai quyet dinh. */
+function Img({ sources, alt, className, imgClass, style, draggable, eager }) {
+  const { src, loaded, onError, onLoad, ref } = useFallbackImg(sources);
   return (
     <React.Fragment>
       {!loaded && <div className={'nx-skel ' + (className || '')} style={Object.assign({ position: 'absolute', inset: 0 }, style)} />}
       <img
+        ref={ref}
         src={src}
         alt={alt || ''}
         className={(imgClass || '') + (loaded ? ' is-in' : '')}
         onError={onError}
         onLoad={onLoad}
-        loading="lazy"
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={eager ? 'high' : 'auto'}
         decoding="async"
         draggable={draggable === undefined ? false : draggable}
         style={style}
@@ -744,7 +869,42 @@ function Img({ sources, alt, className, imgClass, style, draggable }) {
   );
 }
 
-/* Vong tron ti le danh gia */
+/* Con so chay tang dan tu 0 len gia tri that */
+function useCountUp(target, ms) {
+  const [v, setV] = useState(function () {
+    if (target === null || target === undefined) return null;
+    return prefersCalm() ? target : 0;
+  });
+  useEffect(function () {
+    if (target === null || target === undefined) { setV(null); return undefined; }
+    if (prefersCalm()) { setV(target); return undefined; }
+    let raf = 0;
+    let t0 = 0;
+    const dur = ms || 950;
+    const step = function (t) {
+      if (!t0) t0 = t;
+      const k = Math.min(1, (t - t0) / dur);
+      setV(target * (1 - Math.pow(1 - k, 3)));
+      if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return function () { cancelAnimationFrame(raf); };
+  }, [target, ms]);
+  return v;
+}
+
+/* ----------------------------------------------------------------------------
+   VONG TRON TI LE DANH GIA
+   Bon lop chong len nhau: quang mo ngoai cung, ranh chim, cung mau chay theo
+   ti le, va mot dau kim sang o cuoi cung. Con so o giua chay tang dan tu 0.
+
+   LOI DA SUA: con so truoc day duoc dat giua bang place-items va dau % thi day
+   len bang vertical-align. Ca hai deu lam lech: vertical-align keo cao hop dong
+   chu nen chu so bi day xuong, con khoang cach chu am (letter-spacing) con cong
+   them mot lan sau ky tu cuoi nen ca nhom bi keo sang trai. Nay dat giua bang
+   flex va tra lai dung khoang thua o ky tu cuoi.
+   -------------------------------------------------------------------------- */
+
 let _ringSeq = 0;
 
 function ScoreRing({ percent, size, thickness }) {
@@ -753,27 +913,37 @@ function ScoreRing({ percent, size, thickness }) {
   const w = thickness || 5;
   const r = (s - w - 3) / 2;
   const c = 2 * Math.PI * r;
-  const off = n === null ? c : c * (1 - Math.max(0, Math.min(100, n)) / 100);
+  const p = n === null ? 0 : Math.max(0, Math.min(100, n));
+  const off = n === null ? c : c * (1 - p / 100);
+  const shown = useCountUp(n);
   /* Moi vong can mot id chuyen sac rieng, neu trung id thi trinh duyet
      dung chung mot dinh nghia va mau se sai o vong thu hai tro di. */
   const gid = useMemo(function () { return 'nxring' + (++_ringSeq); }, []);
+  const mid = s / 2;
   return (
     <div className="rev__ring" style={{ width: s, height: s }}>
       <svg width={s} height={s} aria-hidden="true">
         <defs>
           <linearGradient id={gid} x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%"   stopColor="currentColor" stopOpacity="0.3" />
-            <stop offset="55%"  stopColor="currentColor" stopOpacity="0.82" />
+            <stop offset="0%"   stopColor="currentColor" stopOpacity="0.32" />
+            <stop offset="55%"  stopColor="currentColor" stopOpacity="0.86" />
             <stop offset="100%" stopColor="currentColor" stopOpacity="1" />
           </linearGradient>
         </defs>
-        <circle className="rev__trk" cx={s / 2} cy={s / 2} r={r} strokeWidth={w} />
-        <circle className="rev__val" cx={s / 2} cy={s / 2} r={r} strokeWidth={w}
+        <circle className="rev__halo" cx={mid} cy={mid} r={r + w / 2 + 2.5} />
+        <circle className="rev__trk" cx={mid} cy={mid} r={r} strokeWidth={w} />
+        <circle className="rev__val" cx={mid} cy={mid} r={r} strokeWidth={w}
                 stroke={'url(#' + gid + ')'}
                 strokeDasharray={c} strokeDashoffset={off} />
+        {n !== null && p > 1.5 && (
+          <g className="rev__hand"
+             style={{ transform: 'rotate(' + (p * 3.6) + 'deg)', transformOrigin: mid + 'px ' + mid + 'px' }}>
+            <circle className="rev__end" cx={mid + r} cy={mid} r={w * 0.4} />
+          </g>
+        )}
       </svg>
       <span className="rev__pct">
-        {n === null ? '—' : Math.round(n)}
+        <b>{n === null ? '—' : Math.round(shown === null ? n : shown)}</b>
         {n !== null && <em>%</em>}
       </span>
     </div>
@@ -815,7 +985,7 @@ function Modal({ open, onClose, icon, title, desc, children, footer, wide, varia
               <div className="mo__t">{title}</div>
               {desc && <div className="mo__d">{desc}</div>}
             </div>
-            <button className="nx-icobtn mo__x" onClick={close} aria-label="Đóng">
+            <button className="nx-icobtn mo__x" onClick={close} aria-label={TX('Đóng')}>
               <i className="ph-bold ph-x"></i>
             </button>
           </div>
@@ -873,7 +1043,7 @@ function steamDateVN(text) {
   if (!mon || mon > 12) return s;          /* "Q1 2026" — giu nguyen */
 
   const d = rest.match(/\b(3[01]|[12]\d|0?[1-9])\b/);
-  if (!d) return 'Tháng ' + p2(mon) + '/' + year;
+  if (!d) return TX('Tháng {m}/{y}', { m: p2(mon), y: year });
   return p2(+d[1]) + '/' + p2(mon) + '/' + year;
 }
 
@@ -947,7 +1117,8 @@ window.NX = {
   fetchReleases, mergeRelease, useSteamReleases, steamDateVN,
   prefersCalm, useReveal,
   ToastHost, useToast,
-  Img, ScoreRing, Note, Modal, Empty
+  Img, ScoreRing, useCountUp, Note, Modal, Empty,
+  I18N, TX, useLang, tagTone, markedTone, stripTone
 };
 
 })();

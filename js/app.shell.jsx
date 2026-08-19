@@ -14,7 +14,8 @@
     callApi, hasApi, openExternal,
     ToastHost,
     GameDetail, HomeContent, LibraryContent, NotSupported, IntegrateContent,
-    prefersCalm
+    prefersCalm, useClickOutside, useEscape,
+    I18N, TX, useLang
   } = window.NX;
 
   /* --------------------------------------------------------------------------
@@ -116,17 +117,18 @@
     }, []);
 
     useEffect(function () { probe(); }, [probe]);
+    useLang();
 
     const map = {
-      checking: { c: 'var(--tx-faint)', t: 'Đang kiểm tra Steam' },
-      ok:       { c: 'var(--ok)',       t: 'Steam đã sẵn sàng' },
-      missing:  { c: 'var(--warn)',     t: 'Chưa cài đặt Steam' },
-      offline:  { c: 'var(--tx-faint)', t: 'Chế độ xem trước' }
+      checking: { c: 'var(--tx-faint)', t: TX('Đang kiểm tra Steam') },
+      ok:       { c: 'var(--ok)',       t: TX('Steam đã sẵn sàng') },
+      missing:  { c: 'var(--warn)',     t: TX('Chưa cài đặt Steam') },
+      offline:  { c: 'var(--tx-faint)', t: TX('Chế độ xem trước') }
     };
     const m = map[st] || map.offline;
 
     return (
-      <button className="nx-chip nx-chip--static nx-steam" onClick={probe} title="Bấm để kiểm tra lại">
+      <button className="nx-chip nx-chip--static nx-steam" onClick={probe} title={TX('Bấm để kiểm tra lại')}>
         <span className={'nx-dot' + (st === 'ok' ? ' nx-dot--live' : '')} style={{ background: m.c }} />
         {m.t}
       </button>
@@ -141,9 +143,11 @@
     { id: 'home',      label: 'Trang chủ',  ico: 'ph-fill ph-house' },
     { id: 'library',   label: 'Thư viện',   ico: 'ph-fill ph-game-controller' },
     { id: 'integrate', label: 'Tích hợp',   ico: 'ph-fill ph-puzzle-piece' }
+    /* label la cau tieng Viet goc — dich luc ve bang TX() */
   ];
 
   function Rail({ tab, onTab, counts }) {
+    useLang();
     return (
       <nav className="nx-rail">
         <div className="nx-rail__brand" onClick={function () { onTab('home'); }}>
@@ -152,7 +156,7 @@
         </div>
 
         <div className="nx-rail__body nx-noscroll">
-          <div className="nx-rail__label">Điều hướng</div>
+          <div className="nx-rail__label">{TX('Điều hướng')}</div>
           {TABS.map(function (t) {
             return (
               <button
@@ -161,13 +165,13 @@
                 onClick={function () { onTab(t.id); }}
               >
                 <span className="nx-nav__ico"><i className={t.ico}></i></span>
-                <span className="nx-nav__txt">{t.label}</span>
+                <span className="nx-nav__txt">{TX(t.label)}</span>
                 {counts[t.id] !== undefined && <span className="nx-nav__count">{counts[t.id]}</span>}
               </button>
             );
           })}
 
-          <div className="nx-rail__label">Lối tắt</div>
+          <div className="nx-rail__label">{TX('Lối tắt')}</div>
           <button className="nx-nav" onClick={function () { openExternal('https://store.steampowered.com/'); }}>
             <span className="nx-nav__ico"><i className="fa-brands fa-steam"></i></span>
             <span className="nx-nav__txt">Steam Store</span>
@@ -175,7 +179,7 @@
           </button>
           <button className="nx-nav" onClick={function () { openExternal('https://steamdb.info/'); }}>
             <span className="nx-nav__ico"><i className="ph-bold ph-database"></i></span>
-            <span className="nx-nav__txt">Tra cứu AppID</span>
+            <span className="nx-nav__txt">{TX('Tra cứu AppID')}</span>
             <i className="ph-bold ph-arrow-up-right" style={{ fontSize: 12, opacity: 0.5 }}></i>
           </button>
         </div>
@@ -183,7 +187,7 @@
         <div className="nx-rail__foot">
           <button className="nx-discord" onClick={function () { openExternal(DISCORD_URL); }}>
             <i className="fa-brands fa-discord"></i>
-            <span>Cộng đồng Discord</span>
+            <span>{TX('Cộng đồng Discord')}</span>
           </button>
           <div className="nx-ver">v{APP_VERSION}</div>
         </div>
@@ -202,19 +206,88 @@
     game:      { t: 'Chi tiết',   s: 'Thông tin, hình ảnh và cài đặt',      i: 'ph-fill ph-game-controller' }
   };
 
+  /* --------------------------------------------------------------------------
+     NUT CHON NGON NGU
+     Mot nut nho o goc phai thanh tren. Bam vao mo ra bang nam thu tieng; moi
+     dong viet bang chinh thu tieng do nen ai cung doc duoc dong cua minh ma
+     khong can biet tieng Viet. Chon xong thi ca giao dien doi ngay lap tuc.
+     ------------------------------------------------------------------------ */
+
+  function LangPicker() {
+    const cur = useLang();
+    const [open, setOpen] = useState(false);
+    const box = useRef(null);
+    const now = I18N.info();
+
+    useClickOutside(box, function () { setOpen(false); }, open);
+    useEscape(function () { setOpen(false); }, open);
+
+    const pick = useCallback(function (code) {
+      I18N.set(code);
+      setOpen(false);
+    }, []);
+
+    return (
+      <div className={'nx-lang' + (open ? ' is-open' : '')} ref={box}>
+        <button
+          type="button"
+          className="nx-lang__btn"
+          onClick={function () { setOpen(function (v) { return !v; }); }}
+          title={TX('Ngôn ngữ giao diện')}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+        >
+          <i className="ph-bold ph-translate nx-lang__glyph"></i>
+          <span className="nx-lang__code">{now.short}</span>
+          <i className="ph-bold ph-caret-down nx-lang__caret"></i>
+        </button>
+
+        {open && (
+          <div className="nx-lang__pop" role="listbox" aria-label={TX('Chọn ngôn ngữ')}>
+            <div className="nx-lang__head">
+              <span>{TX('Ngôn ngữ giao diện')}</span>
+              <small>{TX('Toàn bộ giao diện sẽ đổi theo')}</small>
+            </div>
+            {I18N.LANGS.map(function (L) {
+              const on = L.code === cur;
+              return (
+                <button
+                  key={L.code}
+                  type="button"
+                  role="option"
+                  aria-selected={on}
+                  className={'nx-lang__row' + (on ? ' is-on' : '')}
+                  onClick={function () { pick(L.code); }}
+                >
+                  <span className="nx-lang__flag" aria-hidden="true">{L.flag}</span>
+                  <span className="nx-lang__name" lang={L.html}>{L.label}</span>
+                  <span className="nx-lang__tag">{L.short}</span>
+                  <i className="ph-bold ph-check nx-lang__tick"></i>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   function TopBar({ tab }) {
+    useLang();
     const c = TOP_COPY[tab] || TOP_COPY.home;
     return (
       <header className="nx-top">
         <span className="nx-top__ico" aria-hidden="true"><i className={c.i}></i></span>
         <div className="nx-top__head">
-          <div className="nx-top__title">{c.t}</div>
-          <div className="nx-top__sub">{c.s}</div>
+          <div className="nx-top__title">{TX(c.t)}</div>
+          <div className="nx-top__sub">{TX(c.s)}</div>
         </div>
 
         <span className="nx-top__spacer" />
 
         <SteamPill />
+
+        <LangPicker />
 
         <button className="nx-icobtn" onClick={function () { openExternal(DISCORD_URL); }} title="Discord">
           <i className="fa-brands fa-discord"></i>

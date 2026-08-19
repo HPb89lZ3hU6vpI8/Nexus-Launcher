@@ -17,7 +17,8 @@
     coverSources, fetchMedia, buildMedia, fetchTranslation, steamDateVN,
     REV_STATE_CACHE, setRevListener,
     useEscape, useToast,
-    Img, ScoreRing, Note
+    Img, ScoreRing, Note,
+    TX, useLang, tagTone, markedTone, stripTone
   } = window.NX;
 
   /* --------------------------------------------------------------------------
@@ -34,8 +35,12 @@
     'Hoàn Tất', 'Thành Công', 'thành công', 'Bạn Đã Có', 'Đã Tắt', 'Đã đổi', 'Sẵn Sàng'
   ];
 
+  /* Cau nao do minh tu dat thi da co san dau bao mau o dau chuoi — doc dau do
+     truoc, vi sau khi dich sang tieng khac thi do tu khoa se khong con dung. */
   function noteTone(msg) {
     if (!msg) return 'info';
+    const mk = markedTone(msg);
+    if (mk) return mk;
     const s = String(msg);
     for (let i = 0; i < HINT_BAD.length; i++) if (s.indexOf(HINT_BAD[i]) >= 0) return 'bad';
     for (let i = 0; i < HINT_OK.length; i++) if (s.indexOf(HINT_OK[i]) >= 0) return 'ok';
@@ -138,7 +143,12 @@
   const ABOUT_CLAMP = 470;
 
   /* Ten ngon ngu goc cua trang cua hang Steam (Steam chi bao vi / khong-vi) */
-  const LANG_LABEL = { vi: 'Tiếng Việt', en: 'Tiếng Anh' };
+  /* Ten cac thu tieng — de bao cho nguoi doc biet ban goc tren Steam viet bang gi */
+  const LANG_LABEL = {
+    vi: 'Tiếng Việt', en: 'Tiếng Anh', ja: 'Tiếng Nhật',
+    es: 'Tiếng Tây Ban Nha', fr: 'Tiếng Pháp'
+  };
+  function langLabel(c) { return TX(LANG_LABEL[c] || 'ngoại ngữ'); }
 
   /* Anh dong Steam nhung giua bai: chi cho chay khi dang nam trong khung nhin,
      cuon qua la dung — do khong lam nong may khi mo ta co toi 10 video. */
@@ -225,28 +235,28 @@
   }
 
   function AboutBlock({ appId, live, about }) {
+    const lang = useLang();
     const [tr, setTr] = useState(null);     /* null = dang cho, false = khong co */
-    const [orig, setOrig] = useState(false);
     const [open, setOpen] = useState(false);
     const [tall, setTall] = useState(false);
     const body = useRef(null);
 
-    /* Steam khong co trang tieng Viet cho game nay -> nho may chu dich */
+    /* Steam khong co trang cua hang o thu tieng dang chon -> nho may chu dich */
     const srcLang = (live && live.about_lang) || '';
     const hasRaw = !!(live && Array.isArray(live.about_rich) && live.about_rich.length);
-    const needTr = !!(live && srcLang === 'en' && (about || hasRaw));
+    const needTr = !!(live && srcLang && srcLang !== lang && (about || hasRaw));
 
     useEffect(function () {
       if (!needTr || !appId) return undefined;
       let alive = true;
       setTr(null);
-      fetchTranslation(appId).then(function (d) { if (alive) setTr(d || false); });
+      fetchTranslation(appId, lang).then(function (d) { if (alive) setTr(d || false); });
       return function () { alive = false; };
-    }, [needTr, appId]);
+    }, [needTr, appId, lang]);
 
     const viText = tr && tr.about ? tr.about : '';
     const viRich = tr && Array.isArray(tr.about_rich) && tr.about_rich.length ? tr.about_rich : null;
-    const useVi = !orig && (!!viRich || !!viText);
+    const useVi = !!viRich || !!viText;
 
     /* Uu tien mang khoi (giu duoc anh + anh dong Steam chen giua bai);
        chi khi khong co moi tach chu bang bo doan heuristic cu. */
@@ -271,16 +281,31 @@
       setTall(!!el && el.scrollHeight > cap + 90);
     }, [blocks, hasMedia]);
 
-    useEffect(function () { setOpen(false); }, [orig]);
+    useEffect(function () { setOpen(false); }, [appId, lang]);
 
+    /* Vai con so nho thay cho cap nut doi ngon ngu cu — dau trang do khong bi
+       trong, va nguoi doc biet truoc bai dai bao nhieu. */
+    const stat = useMemo(function () {
+      let chars = 0;
+      let shots = 0;
+      blocks.forEach(function (b) {
+        if (b.k === 'img' || b.k === 'vid') { shots++; return; }
+        chars += b.k === 'ul'
+          ? (b.items || []).join(' ').length
+          : String(b.t || '').length;
+      });
+      return { mins: Math.max(1, Math.round(chars / 900)), shots: shots };
+    }, [blocks]);
+
+    const native = srcLang === lang;
     const langChip = srcLang ? (
       <span
-        className={'gd__lang is-' + srcLang}
-        title={srcLang === 'vi'
-          ? 'Nhà phát hành đã viết sẵn bản tiếng Việt trên Steam'
-          : 'Trang Steam của trò chơi này chỉ có ' + (LANG_LABEL[srcLang] || 'ngoại ngữ')}>
-        <i className={'ph-fill ' + (srcLang === 'vi' ? 'ph-seal-check' : 'ph-globe-hemisphere-west')}></i>
-        {LANG_LABEL[srcLang] || srcLang.toUpperCase()}
+        className={'gd__lang is-' + (native ? 'vi' : 'en')}
+        title={native
+          ? TX('Nhà phát hành đã viết sẵn bản này trên Steam')
+          : TX('Trang Steam của trò chơi này chỉ có {lang}', { lang: langLabel(srcLang) })}>
+        <i className={'ph-fill ' + (native ? 'ph-seal-check' : 'ph-globe-hemisphere-west')}></i>
+        {LANG_LABEL[srcLang] ? langLabel(srcLang) : srcLang.toUpperCase()}
       </span>
     ) : null;
 
@@ -288,30 +313,45 @@
       <section className="gd__about">
         <div className="gd__about-h">
           <span className="gd__about-i"><i className="ph-fill ph-article"></i></span>
-          <h3>Giới thiệu</h3>
+          <h3>{TX('Giới thiệu')}</h3>
           {langChip}
           <span className="gd__rule" />
           {needTr && tr === null && (
-            <span className="gd__trwait"><span className="nx-spin" />Đang dịch</span>
+            <span className="gd__trwait"><span className="nx-spin" />{TX('Đang dịch')}</span>
           )}
-          {(!!viRich || !!viText) && (
-            <div className="gd__seg" role="group" aria-label="Ngôn ngữ mô tả">
-              <button type="button" className={orig ? '' : 'is-on'}
-                      onClick={function () { setOrig(false); }}>Tiếng Việt</button>
-              <button type="button" className={orig ? 'is-on' : ''}
-                      onClick={function () { setOrig(true); }}>Bản gốc</button>
+          {hasText && (
+            <div className="gd__meta">
+              <span className="gd__meta__i" title={TX('Thời gian đọc ước tính')}>
+                <i className="ph-fill ph-book-open-text"></i>
+                {TX('{n} phút đọc', { n: stat.mins })}
+              </span>
+              {stat.shots > 0 && (
+                <span className="gd__meta__i" title={TX('Ảnh và video kèm trong bài giới thiệu')}>
+                  <i className="ph-fill ph-images-square"></i>{stat.shots}
+                </span>
+              )}
+              {tr && tr.source === 'steam' && (
+                <span className="gd__meta__i is-ok" title={TX('Bản dịch chính thức của nhà phát hành')}>
+                  <i className="ph-fill ph-seal-check"></i>{TX('Chính chủ')}
+                </span>
+              )}
+              {tr && tr.source === 'auto' && (
+                <span className="gd__meta__i is-tr" title={TX('Bản dịch do máy thực hiện')}>
+                  <i className="ph-fill ph-translate"></i>{TX('Đã dịch')}
+                </span>
+              )}
             </div>
           )}
         </div>
 
         {!hasText && live === null && (
-          <div className="gd__skel" aria-label="Đang tải mô tả">
+          <div className="gd__skel" aria-label={TX('Đang tải mô tả')}>
             <span /><span /><span /><span /><span />
           </div>
         )}
 
         {!hasText && live !== null && (
-          <p className="gd__p gd__p--empty">Chưa có mô tả cho trò chơi này.</p>
+          <p className="gd__p gd__p--empty">{TX('Chưa có mô tả cho trò chơi này.')}</p>
         )}
 
         {hasText && (
@@ -326,16 +366,15 @@
               <button type="button" className="gd__more"
                       onClick={function () { setOpen(!open); }}>
                 <i className={'ph-bold ' + (open ? 'ph-caret-up' : 'ph-caret-down')}></i>
-                {open ? 'Thu gọn' : 'Đọc thêm'}
+                {open ? TX('Thu gọn') : TX('Đọc thêm')}
               </button>
             )}
 
-            {!orig && tr && tr.source === 'auto' && (
+            {tr && tr.source === 'auto' && (
               <div className="gd__trnote">
                 <i className="ph-bold ph-translate"></i>
                 <span>
-                  Bản dịch tự động — bản gốc do nhà phát hành viết bằng{' '}
-                  {LANG_LABEL[srcLang] || 'ngoại ngữ'}.
+                  {TX('Bản dịch tự động — bản gốc do nhà phát hành viết bằng {lang}.', { lang: langLabel(srcLang) })}
                 </span>
               </div>
             )}
@@ -525,7 +564,7 @@
           })}
 
           {cur && cur.type === 'image' && (
-            <button className="gd__zoom" onClick={function () { onZoom(cur.src); }} aria-label="Phóng to">
+            <button className="gd__zoom" onClick={function () { onZoom(cur.src); }} aria-label={TX('Phóng to')}>
               <i className="ph-bold ph-magnifying-glass-plus"></i>
             </button>
           )}
@@ -536,16 +575,16 @@
             <div className="gd__stage-load"
                  style={{ background: 'rgba(5,7,11,0.86)', flexDirection: 'column', gap: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <i className="ph-fill ph-video-camera-slash" style={{ fontSize: 30, color: 'var(--tx-faint)' }}></i>
-              <span style={{ fontSize: 12, color: 'var(--tx-dim)', fontWeight: 600 }}>Không tải được video này</span>
+              <span style={{ fontSize: 12, color: 'var(--tx-dim)', fontWeight: 600 }}>{TX('Không tải được video này')}</span>
             </div>
           )}
 
           {media.length > 1 && (
             <React.Fragment>
-              <button className="gd__arrow gd__arrow--l" onClick={function () { go(-1); }} aria-label="Trước">
+              <button className="gd__arrow gd__arrow--l" onClick={function () { go(-1); }} aria-label={TX('Trước')}>
                 <i className="ph-bold ph-caret-left"></i>
               </button>
-              <button className="gd__arrow gd__arrow--r" onClick={function () { go(1); }} aria-label="Sau">
+              <button className="gd__arrow gd__arrow--r" onClick={function () { go(1); }} aria-label={TX('Sau')}>
                 <i className="ph-bold ph-caret-right"></i>
               </button>
               <div className="gd__counter">{idx + 1} / {media.length}</div>
@@ -570,7 +609,7 @@
                   data-i={i}
                   className={'gd__thumb' + (i === idx ? ' is-on' : '')}
                   onClick={function () { pick(i); }}
-                  aria-label={'Xem mục ' + (i + 1)}
+                  aria-label={TX('Xem mục {n}', { n: i + 1 })}
                 >
                   <img src={m.thumb || m.src} alt="" draggable="false"
                        onError={function (e) { e.target.style.visibility = 'hidden'; }} />
@@ -611,6 +650,7 @@
   }
 
   function InfoSpecs({ game, live }) {
+    useLang();
     const online = isOnlineGame(game);
     const cloud = hasCloudSave(game);
     const plat = PLATFORMS.find(function (p) { return p.id === getGamePlatform(game); }) || PLATFORMS[1];
@@ -620,34 +660,34 @@
 
     return (
       <div className="spec">
-        <SpecRow ico="ph-bold ph-broadcast" k="Chế độ">
+        <SpecRow ico="ph-bold ph-broadcast" k={TX('Chế độ')}>
           <SpecChip tone={online ? 'ok' : 'warn'}>
             <span className="nx-dot nx-dot--live"></span>
-            {online ? 'Trực tuyến' : 'Ngoại tuyến'}
+            {online ? TX('Trực tuyến') : TX('Ngoại tuyến')}
           </SpecChip>
         </SpecRow>
 
-        <SpecRow ico="ph-bold ph-tag" k="Yêu cầu">
-          <SpecChip tone="gold" ico="ph-fill ph-gift">Miễn phí</SpecChip>
+        <SpecRow ico="ph-bold ph-tag" k={TX('Yêu cầu')}>
+          <SpecChip tone="gold" ico="ph-fill ph-gift">{TX('Miễn phí')}</SpecChip>
         </SpecRow>
 
         <SpecRow ico="ph-fill ph-cloud" k="Cloud Save">
           {cloud
-            ? <SpecChip tone="ok" ico="ph-bold ph-check">Có hỗ trợ</SpecChip>
-            : <SpecChip tone="bad" ico="ph-bold ph-x">Không hỗ trợ</SpecChip>}
+            ? <SpecChip tone="ok" ico="ph-bold ph-check">{TX('Có hỗ trợ')}</SpecChip>
+            : <SpecChip tone="bad" ico="ph-bold ph-x">{TX('Không hỗ trợ')}</SpecChip>}
         </SpecRow>
 
         <SpecRow ico="ph-fill ph-floppy-disk" k="Local Save">
-          <SpecChip tone="ok" ico="ph-bold ph-check">Có hỗ trợ</SpecChip>
+          <SpecChip tone="ok" ico="ph-bold ph-check">{TX('Có hỗ trợ')}</SpecChip>
         </SpecRow>
 
-        <SpecRow ico="ph-bold ph-storefront" k="Nền tảng">
-          <SpecChip tone="tint" ico={plat.ico} tint={plat.tone}>{plat.label}</SpecChip>
+        <SpecRow ico="ph-bold ph-storefront" k={TX('Nền tảng')}>
+          <SpecChip tone="tint" ico={plat.ico} tint={plat.tone}>{TX(plat.label)}</SpecChip>
         </SpecRow>
 
-        {dev && <SpecRow ico="ph-bold ph-code" k="Nhà phát triển">{dev}</SpecRow>}
-        {pub && <SpecRow ico="ph-bold ph-buildings" k="Nhà phát hành">{pub}</SpecRow>}
-        {rel && <SpecRow ico="ph-bold ph-calendar-blank" k="Ngày phát hành"><span className="spec__v--num">{rel}</span></SpecRow>}
+        {dev && <SpecRow ico="ph-bold ph-code" k={TX('Nhà phát triển')}>{dev}</SpecRow>}
+        {pub && <SpecRow ico="ph-bold ph-buildings" k={TX('Nhà phát hành')}>{pub}</SpecRow>}
+        {rel && <SpecRow ico="ph-bold ph-calendar-blank" k={TX('Ngày phát hành')}><span className="spec__v--num">{rel}</span></SpecRow>}
 
         <SpecRow ico="ph-bold ph-identification-card" k="App ID">
           <span className="spec__v--num nx-selectable">{game.appId || '—'}</span>
@@ -682,10 +722,10 @@
 
     return (
       <div className="sysg">
-        <div className="sysg__head"><i className={ico}></i>{head}</div>
+        <div className="sysg__head"><i className={ico}></i>{TX(head)}</div>
         <div className="spec">
           {rows.map(function (row) {
-            return <SpecRow key={row[1]} ico={row[0]} k={row[1]}>{row[2]}</SpecRow>;
+            return <SpecRow key={row[1]} ico={row[0]} k={TX(row[1])}>{row[2]}</SpecRow>;
           })}
         </div>
       </div>
@@ -701,7 +741,7 @@
     if (!hasMin && !hasRec) {
       return (
         <div className="spec">
-          <SpecRow ico="ph-bold ph-info" k="Cấu hình">Chưa có dữ liệu cấu hình cho trò chơi này.</SpecRow>
+          <SpecRow ico="ph-bold ph-info" k={TX('Cấu hình')}>{TX('Chưa có dữ liệu cấu hình cho trò chơi này.')}</SpecRow>
         </div>
       );
     }
@@ -755,7 +795,7 @@
               <div className="mo__t">{title}</div>
               {desc && <div className="mo__d">{desc}</div>}
             </div>
-            <button className="nx-icobtn mo__x" onClick={onClose} aria-label="Đóng">
+            <button className="nx-icobtn mo__x" onClick={onClose} aria-label={TX('Đóng')}>
               <i className="ph-bold ph-x"></i>
             </button>
           </div>
@@ -772,6 +812,8 @@
 
   function GameDetail({ game, onBack, backLabel, backIcon }) {
     const toast = useToast();
+    /* Doi ngon ngu -> ve lai ca trang, va hoi lai Steam bang thu tieng moi. */
+    const lang = useLang();
 
     /* ---- Hang so dan xuat: khai bao TRUOC moi effect de khong dinh TDZ ---- */
     const appId = game.appId ? String(game.appId) : '';
@@ -833,9 +875,9 @@
       setIdx(0);
       if (!appId) return undefined;
       /* false = da hoi Steam nhung khong co du lieu -> thoat khoi trang thai dang tai */
-      fetchMedia(appId).then(function (d) { if (alive) setLive(d || false); });
+      fetchMedia(appId, lang).then(function (d) { if (alive) setLive(d || false); });
       return function () { alive = false; };
-    }, [appId]);
+    }, [appId, lang]);
 
     /* Ve dau trang khi doi game */
     useEffect(function () {
@@ -921,7 +963,7 @@
 
         if (st.state === 'error') {
           setRevState('idle');
-          if (st.error) setRevNote('Lỗi: ' + st.error);
+          if (st.error) setRevNote(tagTone('bad', TX('Lỗi: {e}', { e: st.error })));
           return;
         }
 
@@ -964,24 +1006,26 @@
        ------------------------------------------------------------------ */
     const onRedeem = useCallback(async function () {
       const clean = String(code || '').trim().toUpperCase();
-      if (clean.length !== 6) { setRedeemNote('Sai Mã, Vui Lòng Thử Lại'); return; }
+      if (clean.length !== 6) { setRedeemNote(tagTone('bad', TX('Sai mã, vui lòng thử lại'))); return; }
 
       setRedeemState('redeeming');
       setRedeemNote('');
       const r = await callApi('redeem_code', clean, appId);
       setRedeemState('idle');
 
-      if (!r || r.invalid || r.code_not_found) { setRedeemNote('Sai Mã, Vui Lòng Thử Lại'); return; }
-      if (r.not_installed) { setRedeemNote('Bạn Chưa Cài Đặt NexusT'); return; }
-      if (r.wrong_game) { setRedeemNote('Code Này Phải Kích Hoạt Ở Game Khác'); return; }
+      if (!r || r.invalid || r.code_not_found) { setRedeemNote(tagTone('bad', TX('Sai mã, vui lòng thử lại'))); return; }
+      if (r.not_installed) { setRedeemNote(tagTone('bad', TX('Bạn chưa cài đặt NexusT'))); return; }
+      if (r.wrong_game) { setRedeemNote(tagTone('bad', TX('Mã này phải kích hoạt ở trò chơi khác'))); return; }
       if (r.success) {
         setCode('');
-        setRedeemNote('Đã Kích Hoạt Game Thành Công' +
-          (r.uses_remaining !== null && r.uses_remaining !== undefined ? ' (còn ' + r.uses_remaining + ' lượt)' : ''));
-        toast.push({ tone: 'ok', title: 'Kích hoạt thành công', desc: game.title });
+        setRedeemNote(tagTone('ok', TX('Đã kích hoạt trò chơi thành công') +
+          (r.uses_remaining !== null && r.uses_remaining !== undefined
+            ? ' ' + TX('(còn {n} lượt)', { n: r.uses_remaining })
+            : '')));
+        toast.push({ tone: 'ok', title: TX('Kích hoạt thành công'), desc: game.title });
         return;
       }
-      setRedeemNote(r.error || 'Sai Mã, Vui Lòng Thử Lại');
+      setRedeemNote(r.error || tagTone('bad', TX('Sai mã, vui lòng thử lại')));
     }, [code, appId, game.title, toast]);
 
     /* ------------------------------------------------------------------
@@ -994,24 +1038,24 @@
       const steam = await callApi('check_steam');
       if (!steam || !steam.installed) {
         setFixState('idle');
-        setFixNote('Chưa Cài Đặt Steam, Vui Lòng Cài Đặt Steam Trước Khi Fix Game');
+        setFixNote(tagTone('bad', TX('Chưa cài đặt Steam, vui lòng cài Steam trước khi fix game')));
         return;
       }
 
       const r = await callApi('fix_game', steam.path, game.fix, game.appId);
       setFixState('idle');
 
-      if (!r || r.not_installed) { setFixNote('Bạn chưa cài đặt game'); return; }
+      if (!r || r.not_installed) { setFixNote(tagTone('bad', TX('Bạn chưa cài đặt trò chơi này'))); return; }
       if (r.success) {
-        setFixNote('Đã Fix Game Hoàn Tất');
-        toast.push({ tone: 'ok', title: 'Đã fix game hoàn tất', desc: game.title });
+        setFixNote(tagTone('ok', TX('Đã fix game hoàn tất')));
+        toast.push({ tone: 'ok', title: TX('Đã fix game hoàn tất'), desc: game.title });
         if (isPalworld) {
           const p = await callApi('check_palworld_steamfix', steam.path);
           if (p) { setPalHasFix(!!p.has_steamfix); if (p.language) setPalLang(p.language); }
         }
         return;
       }
-      setFixNote(r.error || 'Lỗi: Không fix được game');
+      setFixNote(r.error || tagTone('bad', TX('Lỗi: không fix được game')));
     }, [game.fix, game.appId, game.title, isPalworld, toast]);
 
     /* ------------------------------------------------------------------
@@ -1023,7 +1067,7 @@
       if (!steam || !steam.installed) {
         setLangBusy(false);
         setLangOpen(false);
-        toast.push({ tone: 'bad', title: 'Chưa Cài Đặt Steam', desc: 'Vui lòng cài Steam trước khi đổi ngôn ngữ.' });
+        toast.push({ tone: 'bad', title: TX('Chưa cài đặt Steam'), desc: TX('Vui lòng cài Steam trước khi đổi ngôn ngữ.') });
         return;
       }
 
@@ -1037,12 +1081,12 @@
         setLangOpen(false);
         toast.push({
           tone: 'ok',
-          title: 'Đã đổi ngôn ngữ thành ' + ((found && found.native) || langCode),
-          desc: 'Thay đổi áp dụng khi khởi động lại Palworld.'
+          title: TX('Đã đổi ngôn ngữ thành {lang}', { lang: (found && found.native) || langCode }),
+          desc: TX('Thay đổi áp dụng khi khởi động lại Palworld.')
         });
         return;
       }
-      toast.push({ tone: 'bad', title: 'Không đổi được ngôn ngữ', desc: (r && r.error) || 'Vui lòng thử lại.' });
+      toast.push({ tone: 'bad', title: TX('Không đổi được ngôn ngữ'), desc: (r && r.error) || TX('Vui lòng thử lại.') });
     }, [toast]);
 
     /* ------------------------------------------------------------------
@@ -1055,7 +1099,7 @@
       const steam = await callApi('check_steam');
       if (!steam || !steam.installed) {
         setAccessState('idle');
-        setAccessNote('Chưa Cài Đặt Steam, Vui Lòng Cài Đặt Steam Trước');
+        setAccessNote(tagTone('bad', TX('Chưa cài đặt Steam, vui lòng cài Steam trước')));
         return;
       }
 
@@ -1065,7 +1109,7 @@
         const ins = await callApi('install_nexust', steam.path);
         if (!ins || !ins.success) {
           setAccessState('idle');
-          setAccessNote((ins && ins.error) || 'Lỗi: Không cài đặt được NexusT');
+          setAccessNote((ins && ins.error) || tagTone('bad', TX('Lỗi: không cài đặt được NexusT')));
           return;
         }
       }
@@ -1076,7 +1120,7 @@
         if (rw && rw.warning) {
           setAccessNote(rw.warning);
         } else if (rw && rw.disabled) {
-          setAccessNote('Đã Tắt Windows Update Hoàn Tất');
+          setAccessNote(tagTone('ok', TX('Đã tắt Windows Update hoàn tất')));
         }
       }
 
@@ -1084,14 +1128,14 @@
       const r2 = await callApi('share_game', steam.path, appId);
       setAccessState('idle');
 
-      if (!r2) { setAccessNote('Lỗi: Không nhận được phản hồi'); return; }
-      if (r2.already || r2.already_exists) { setAccessNote('Bạn Đã Có Game Này'); return; }
+      if (!r2) { setAccessNote(tagTone('bad', TX('Lỗi: không nhận được phản hồi'))); return; }
+      if (r2.already || r2.already_exists) { setAccessNote(tagTone('warn', TX('Bạn đã có trò chơi này rồi'))); return; }
       if (r2.success) {
-        setAccessNote('Đã Share Game Qua Tài Khoản Steam Của Bạn Hoàn Tất');
-        toast.push({ tone: 'ok', title: 'Đã thêm game vào Steam', desc: game.title });
+        setAccessNote(tagTone('ok', TX('Đã thêm trò chơi vào tài khoản Steam của bạn')));
+        toast.push({ tone: 'ok', title: TX('Đã thêm trò chơi vào Steam'), desc: game.title });
         return;
       }
-      setAccessNote(r2.error || 'Lỗi: Không share được game');
+      setAccessNote(r2.error || tagTone('bad', TX('Lỗi: không thêm được trò chơi')));
     }, [appId, game.redeem, game.title, toast]);
 
     /* ------------------------------------------------------------------
@@ -1104,7 +1148,7 @@
       const s = await callApi('get_custom_file_size', customAppId);
       if (!s || !s.success) {
         persistRevState('idle');
-        setRevNote('Lỗi: Không lấy được dung lượng file từ Buzzheavier');
+        setRevNote(tagTone('bad', TX('Lỗi: không lấy được dung lượng tệp từ Buzzheavier')));
         return;
       }
 
@@ -1129,8 +1173,8 @@
       const space = await callApi('check_custom_disk_space', revPath, need);
       if (!space || !space.enough) {
         persistRevState('idle');
-        setRevNote('Không Đủ Dung Lượng Hệ Thống');
-        toast.push({ tone: 'bad', title: 'Không Đủ Dung Lượng Hệ Thống', desc: 'Cần khoảng ' + fmtBytes(need * 2) + ' trống.' });
+        setRevNote(tagTone('bad', TX('Ổ đĩa không đủ dung lượng trống')));
+        toast.push({ tone: 'bad', title: TX('Ổ đĩa không đủ dung lượng trống'), desc: TX('Cần khoảng {size} trống.', { size: fmtBytes(need * 2) }) });
         return;
       }
 
@@ -1144,11 +1188,11 @@
         setRevProgress({ percent: 0, downloaded: 0, total: 0 });
         persistRevState('installed');
         REV_STATE_CACHE.delete(customAppId);
-        toast.push({ tone: 'ok', title: 'Cài đặt hoàn tất', desc: game.title });
+        toast.push({ tone: 'ok', title: TX('Cài đặt hoàn tất'), desc: game.title });
         return;
       }
       persistRevState('idle');
-      setRevNote('Lỗi: ' + ((r && r.error) || 'Không cài đặt được game'));
+      setRevNote(tagTone('bad', TX('Lỗi: {e}', { e: (r && r.error) || TX('không cài đặt được trò chơi') })));
     }, [revPath, revSize, customAppId, persistRevState, game.title, toast]);
 
     const onRevCancel = useCallback(function () {
@@ -1157,14 +1201,14 @@
     }, [persistRevState]);
 
     const onRevLaunch = useCallback(async function () {
-      toast.push({ tone: 'info', title: 'Đang Khởi Chạy Game', desc: 'Vui Lòng Đợi...' });
+      toast.push({ tone: 'info', title: TX('Đang khởi chạy trò chơi'), desc: TX('Vui lòng đợi...') });
       const r = await callApi('launch_custom_game', customAppId);
-      if (r && !r.success) toast.push({ tone: 'bad', title: 'Không khởi chạy được', desc: r.error || 'Vui lòng thử lại.' });
+      if (r && !r.success) toast.push({ tone: 'bad', title: TX('Không khởi chạy được'), desc: r.error || TX('Vui lòng thử lại.') });
     }, [customAppId, toast]);
 
     const onRevFolder = useCallback(async function () {
       const r = await callApi('open_custom_folder', customAppId);
-      if (r && !r.success) toast.push({ tone: 'bad', title: 'Không mở được thư mục', desc: r.error || '' });
+      if (r && !r.success) toast.push({ tone: 'bad', title: TX('Không mở được thư mục'), desc: r.error || '' });
     }, [customAppId, toast]);
 
     const onRevUninstall = useCallback(async function () {
@@ -1175,10 +1219,10 @@
         setRevPath('');
         persistRevState('idle');
         REV_STATE_CACHE.delete(customAppId);
-        toast.push({ tone: 'ok', title: 'Đã gỡ cài đặt', desc: game.title });
+        toast.push({ tone: 'ok', title: TX('Đã gỡ cài đặt'), desc: game.title });
         return;
       }
-      toast.push({ tone: 'bad', title: 'Không gỡ được game', desc: (r && r.error) || 'Vui lòng thử lại.' });
+      toast.push({ tone: 'bad', title: TX('Không gỡ được trò chơi'), desc: (r && r.error) || TX('Vui lòng thử lại.') });
     }, [customAppId, persistRevState, game.title, toast]);
 
     /* ------------------------------------------------------------------
@@ -1213,13 +1257,13 @@
 
         <div className="gd__inner">
           <div className="gd__head">
-            <button className="gd__back" onClick={onBack} title="Quay lại (Esc)" aria-label="Quay lại">
+            <button className="gd__back" onClick={onBack} title={TX('Quay lại (Esc)')} aria-label={TX('Quay lại')}>
               <i className="ph-bold ph-arrow-left"></i>
             </button>
-            <nav className="gd__crumb" aria-label="Đường dẫn">
+            <nav className="gd__crumb" aria-label={TX('Đường dẫn')}>
               <button type="button" className="gd__crumb-b" onClick={onBack}>
                 <i className={backIcon || 'ph-fill ph-squares-four'}></i>
-                <span>{backLabel || 'Thư viện'}</span>
+                <span>{TX(backLabel || 'Thư viện')}</span>
               </button>
               <i className="gd__crumb-s ph-bold ph-caret-right" aria-hidden="true"></i>
               <span className="gd__crumb-c" title={game.title}>{game.title}</span>
@@ -1250,7 +1294,7 @@
                   {isUpcoming && (
                     <ActionButton
                       tone="mute" ico="ph-fill ph-clock" arrow={false} disabled
-                      eyebrow="CHƯA CÓ" label="Sắp Ra Mắt"
+                      eyebrow={TX('CHƯA CÓ')} label={TX('Sắp ra mắt')}
                     />
                   )}
 
@@ -1262,8 +1306,8 @@
                         ico="ph-bold ph-key"
                         spinning={revState !== 'idle'}
                         disabled={revState !== 'idle'}
-                        eyebrow="TRUY CẬP GAME"
-                        label={REV_LABEL[revState] || 'Đang Xử Lý...'}
+                        eyebrow={TX('TRUY CẬP GAME')}
+                        label={TX(REV_LABEL[revState] || 'Đang xử lý...')}
                         onClick={onRevStart}
                       />
 
@@ -1286,30 +1330,30 @@
                           <div className="prog__top">
                             <span className="prog__sub">
                               {revState === 'installing'
-                                ? 'Đang giải nén và cài đặt, vui lòng đợi vài phút...'
-                                : 'Đang khởi tạo tiến trình tải...'}
+                                ? TX('Đang giải nén và cài đặt, vui lòng đợi vài phút...')
+                                : TX('Đang khởi tạo tiến trình tải...')}
                             </span>
                           </div>
                           <div className="prog__trk prog__trk--indet"><div className="prog__bar" /></div>
                         </div>
                       )}
 
-                      {revNote && <Note tone={noteTone(revNote)}>{revNote}</Note>}
+                      {revNote && <Note tone={noteTone(revNote)}>{stripTone(revNote)}</Note>}
                     </React.Fragment>
                   )}
 
                   {!isUpcoming && customAppId && revState === 'installed' && (
                     <React.Fragment>
-                      <div className="act__hr"><i className="ph-fill ph-check-circle"></i>Sẵn sàng khởi chạy</div>
+                      <div className="act__hr"><i className="ph-fill ph-check-circle"></i>{TX('Sẵn sàng khởi chạy')}</div>
                       <div className="act__grid">
                         <button className="nx-btn nx-btn--primary act__wide" onClick={onRevLaunch}>
-                          <i className="ph-fill ph-play"></i>Khởi Chạy
+                          <i className="ph-fill ph-play"></i>{TX('Khởi chạy')}
                         </button>
                         <button className="nx-btn nx-btn--ghost" onClick={onRevFolder}>
-                          <i className="ph-fill ph-folder-open"></i>Thư Mục
+                          <i className="ph-fill ph-folder-open"></i>{TX('Thư mục')}
                         </button>
                         <button className="nx-btn nx-btn--bad" onClick={function () { setRevConfirm(true); }}>
-                          <i className="ph-fill ph-trash"></i>Gỡ Cài Đặt
+                          <i className="ph-fill ph-trash"></i>{TX('Gỡ cài đặt')}
                         </button>
                       </div>
                       {revSaved && (
@@ -1328,11 +1372,11 @@
                         ico="ph-bold ph-key"
                         spinning={accessState !== 'idle'}
                         disabled={accessState !== 'idle'}
-                        eyebrow="TRUY CẬP GAME"
-                        label={ACCESS_LABEL[accessState] || 'Đang Xử Lý...'}
+                        eyebrow={TX('TRUY CẬP GAME')}
+                        label={TX(ACCESS_LABEL[accessState] || 'Đang xử lý...')}
                         onClick={onAccess}
                       />
-                      {accessNote && <Note tone={noteTone(accessNote)}>{accessNote}</Note>}
+                      {accessNote && <Note tone={noteTone(accessNote)}>{stripTone(accessNote)}</Note>}
 
                       {hasFix && (isPalworld && palHasFix ? (
                         <ActionButton
@@ -1340,8 +1384,10 @@
                           ico="ph-bold ph-translate"
                           spinning={langBusy}
                           disabled={langBusy}
-                          eyebrow={curLang ? ('ĐANG DÙNG: ' + String(curLang.native).toUpperCase()) : 'THAY ĐỔI NGÔN NGỮ'}
-                          label={langBusy ? 'Đang đổi...' : 'Thay Đổi Ngôn Ngữ'}
+                          eyebrow={curLang
+                            ? TX('ĐANG DÙNG: {lang}', { lang: String(curLang.native).toUpperCase() })
+                            : TX('THAY ĐỔI NGÔN NGỮ')}
+                          label={langBusy ? TX('Đang đổi...') : TX('Thay đổi ngôn ngữ')}
                           onClick={function () { setLangOpen(true); }}
                         />
                       ) : (
@@ -1350,12 +1396,12 @@
                           ico="ph-bold ph-wrench"
                           spinning={fixState !== 'idle'}
                           disabled={fixState !== 'idle'}
-                          eyebrow="SỬA LỖI KẾT NỐI"
-                          label={fixState === 'idle' ? 'Fix Game' : 'Đang Fix Game...'}
+                          eyebrow={TX('SỬA LỖI KẾT NỐI')}
+                          label={fixState === 'idle' ? TX('Fix Game') : TX('Đang fix game...')}
                           onClick={onFix}
                         />
                       ))}
-                      {fixNote && <Note tone={noteTone(fixNote)}>{fixNote}</Note>}
+                      {fixNote && <Note tone={noteTone(fixNote)}>{stripTone(fixNote)}</Note>}
 
                       {hasRedeem && (
                         <React.Fragment>
@@ -1365,7 +1411,7 @@
                               value={code}
                               onChange={function (e) { setCode(e.target.value.toUpperCase().slice(0, 6)); }}
                               onKeyDown={function (e) { if (e.key === 'Enter' && redeemState === 'idle') onRedeem(); }}
-                              placeholder="NHẬP 6 KÝ TỰ"
+                              placeholder={TX('NHẬP 6 KÝ TỰ')}
                               maxLength={6}
                               spellCheck="false"
                               disabled={redeemState !== 'idle'}
@@ -1377,11 +1423,11 @@
                               disabled={redeemState !== 'idle'}
                             >
                               {redeemState === 'idle'
-                                ? <React.Fragment><i className="ph-fill ph-ticket"></i>Kích hoạt</React.Fragment>
-                                : <React.Fragment><span className="nx-spin" />Đang xử lý</React.Fragment>}
+                                ? <React.Fragment><i className="ph-fill ph-ticket"></i>{TX('Kích hoạt')}</React.Fragment>
+                                : <React.Fragment><span className="nx-spin" />{TX('Đang xử lý')}</React.Fragment>}
                             </button>
                           </div>
-                          {redeemNote && <Note tone={noteTone(redeemNote)}>{redeemNote}</Note>}
+                          {redeemNote && <Note tone={noteTone(redeemNote)}>{stripTone(redeemNote)}</Note>}
                         </React.Fragment>
                       )}
                     </React.Fragment>
@@ -1392,7 +1438,7 @@
                       className="nx-btn nx-btn--ghost nx-btn--sm nx-btn--full"
                       onClick={function () { openExternal('https://store.steampowered.com/app/' + appId + '/'); }}
                     >
-                      <i className="fa-brands fa-steam"></i>Xem trên Steam Store
+                      <i className="fa-brands fa-steam"></i>{TX('Xem trên Steam Store')}
                     </button>
                   )}
                 </div>
@@ -1403,15 +1449,15 @@
                   <div className={'rev is-' + tone}>
                     <ScoreRing percent={game.percent} size={62} thickness={4} />
                     <div className="rev__main">
-                      <div className="rev__txt">{game.reviewText || 'Chưa có đánh giá'}</div>
+                      <div className="rev__txt">{TX(game.reviewText || 'Chưa có đánh giá')}</div>
                       <div className="rev__cnt">
                         {revCount > 0 ? (
                           <React.Fragment>
                             <b>{fmtCount(revCount)}</b>
-                            <span>lượt đánh giá trên Steam</span>
+                            <span>{TX('lượt đánh giá trên Steam')}</span>
                           </React.Fragment>
                         ) : (
-                          <span>{game.reviewCount || 'Chưa có dữ liệu'}</span>
+                          <span>{game.reviewCount || TX('Chưa có dữ liệu')}</span>
                         )}
                       </div>
                       {pct !== null && (
@@ -1428,16 +1474,16 @@
                     <span className="nx-tag" style={{ color: 'var(--c-steam)' }}>
                       <i className="fa-brands fa-steam"></i>STEAM
                     </span>
-                    {tags.map(function (t) { return <span className="nx-tag" key={t}>{t}</span>; })}
+                    {tags.map(function (t) { return <span className="nx-tag" key={t}>{TX(t)}</span>; })}
                   </div>
                 )}
 
                 <div className="pt">
                   <button className={'pt__b' + (tab === 'info' ? ' is-on' : '')} onClick={function () { setTab('info'); }}>
-                    <i className="ph-bold ph-info"></i>Thông tin
+                    <i className="ph-bold ph-info"></i>{TX('Thông tin')}
                   </button>
                   <button className={'pt__b' + (tab === 'sys' ? ' is-on' : '')} onClick={function () { setTab('sys'); }}>
-                    <i className="ph-bold ph-desktop-tower"></i>Cấu hình
+                    <i className="ph-bold ph-desktop-tower"></i>{TX('Cấu hình')}
                   </button>
                 </div>
 
@@ -1449,8 +1495,8 @@
               <button className="bn bn--discord" onClick={function () { openExternal(DISCORD_URL); }}>
                 <span className="bn__ico"><i className="fa-brands fa-discord"></i></span>
                 <span style={{ textAlign: 'left' }}>
-                  <span className="bn__t" style={{ display: 'block' }}>HỖ TRỢ &amp; CẬP NHẬT</span>
-                  <span className="bn__d" style={{ display: 'block' }}>Tham gia Discord để nhận thông tin mới nhất</span>
+                  <span className="bn__t" style={{ display: 'block' }}>{TX('HỖ TRỢ & CẬP NHẬT')}</span>
+                  <span className="bn__d" style={{ display: 'block' }}>{TX('Tham gia Discord để nhận thông tin mới nhất')}</span>
                 </span>
                 <i className="bn__go ph-bold ph-arrow-up-right"></i>
               </button>
@@ -1459,13 +1505,13 @@
                 <button className="bn bn--vh" onClick={function () { openExternal(game.viethoaLink); }}>
                   <span className="bn__ico">
                     <img src={game.viethoaLogo || 'https://theredteam.vn/index_files/images/logoRedHome.png'}
-                         alt="Việt hóa"
+                         alt={TX('Việt hóa')}
                          onError={function (e) { e.target.style.display = 'none'; }} />
                   </span>
                   <span style={{ textAlign: 'left' }}>
-                    <span className="bn__t" style={{ display: 'block' }}>HỖ TRỢ VIỆT HÓA</span>
+                    <span className="bn__t" style={{ display: 'block' }}>{TX('HỖ TRỢ VIỆT HÓA')}</span>
                     <span className="bn__d" style={{ display: 'block' }}>
-                      {game.viethoaDesc || 'Tải bản dịch tiếng Việt từ The Red Team'}
+                      {game.viethoaDesc || TX('Tải bản dịch tiếng Việt từ The Red Team')}
                     </span>
                   </span>
                   <i className="bn__go ph-bold ph-arrow-up-right"></i>
@@ -1483,13 +1529,13 @@
           open={revPicker}
           onClose={onRevCancel}
           icon="ph-fill ph-folder-plus"
-          title="Chọn vị trí cài đặt"
-          desc={'Cần tối thiểu ' + (revSize ? (revSize.size_gb * 2).toFixed(2) + ' GB' : '...') + ' dung lượng trống'}
+          title={TX('Chọn vị trí cài đặt')}
+          desc={TX('Cần tối thiểu {size} dung lượng trống', { size: revSize ? (revSize.size_gb * 2).toFixed(2) + ' GB' : '...' })}
           footer={
             <React.Fragment>
-              <button className="nx-btn nx-btn--ghost" onClick={onRevCancel}>Hủy</button>
+              <button className="nx-btn nx-btn--ghost" onClick={onRevCancel}>{TX('Hủy')}</button>
               <button className="nx-btn nx-btn--primary" onClick={onRevSave} disabled={!revPath}>
-                <i className="ph-bold ph-download-simple"></i>Bắt đầu tải
+                <i className="ph-bold ph-download-simple"></i>{TX('Bắt đầu tải')}
               </button>
             </React.Fragment>
           }
@@ -1509,13 +1555,13 @@
               }}
             />
             <button className="nx-btn nx-btn--ghost" style={{ height: 42, flex: 'none' }} onClick={onRevBrowse}>
-              <i className="ph-bold ph-folder-open"></i>Duyệt
+              <i className="ph-bold ph-folder-open"></i>{TX('Duyệt')}
             </button>
           </div>
           {revSize && (
             <div className="prog__sub" style={{ marginTop: 12 }}>
               <i className="ph-bold ph-file-archive" style={{ marginRight: 6 }}></i>
-              Dung lượng tải về: <b style={{ color: 'var(--br-1)' }}>{revSize.size_gb} GB</b>
+              {TX('Dung lượng tải về:')} <b style={{ color: 'var(--br-1)' }}>{revSize.size_gb} GB</b>
             </div>
           )}
         </Sheet>
@@ -1526,13 +1572,13 @@
           onClose={function () { setRevConfirm(false); }}
           icon="ph-fill ph-warning"
           iconTone="var(--bad)"
-          title="Gỡ cài đặt trò chơi?"
-          desc="Toàn bộ thư mục game sẽ bị xóa và không thể hoàn tác."
+          title={TX('Gỡ cài đặt trò chơi?')}
+          desc={TX('Toàn bộ thư mục game sẽ bị xóa và không thể hoàn tác.')}
           footer={
             <React.Fragment>
-              <button className="nx-btn nx-btn--ghost" onClick={function () { setRevConfirm(false); }}>Hủy</button>
+              <button className="nx-btn nx-btn--ghost" onClick={function () { setRevConfirm(false); }}>{TX('Hủy')}</button>
               <button className="nx-btn nx-btn--bad" onClick={onRevUninstall}>
-                <i className="ph-bold ph-trash"></i>Gỡ cài đặt
+                <i className="ph-bold ph-trash"></i>{TX('Gỡ cài đặt')}
               </button>
             </React.Fragment>
           }
@@ -1547,9 +1593,9 @@
           open={langOpen}
           onClose={function () { setLangOpen(false); }}
           icon="ph-fill ph-translate"
-          title="Ngôn ngữ cho Palworld"
-          desc="Thay đổi chỉ áp dụng khi khởi động lại game."
-          footer={<button className="nx-btn nx-btn--ghost" onClick={function () { setLangOpen(false); }}>Đóng</button>}
+          title={TX('Ngôn ngữ cho Palworld')}
+          desc={TX('Thay đổi chỉ áp dụng khi khởi động lại game.')}
+          footer={<button className="nx-btn nx-btn--ghost" onClick={function () { setLangOpen(false); }}>{TX('Đóng')}</button>}
         >
           <div className="lang">
             {langs.map(function (l) {
@@ -1563,7 +1609,7 @@
                   <i className={'lang__f ph-fill ' + (palLang === l.code ? 'ph-check-circle' : 'ph-globe-hemisphere-east')}></i>
                   <span className="lang__n">
                     <span style={{ display: 'block', fontWeight: 750 }}>{l.native}</span>
-                    <span style={{ display: 'block', fontSize: 10.5, color: 'var(--tx-faint)' }}>{l.name}</span>
+                    <span style={{ display: 'block', fontSize: 10.5, color: 'var(--tx-faint)' }}>{TX(l.name)}</span>
                   </span>
                 </button>
               );
@@ -1585,7 +1631,7 @@
         <div className="mo__box">
           <img src={src} alt={alt || ''} onClick={onClose} />
         </div>
-        <button className="nx-icobtn mo__x" onClick={onClose} aria-label="Đóng">
+        <button className="nx-icobtn mo__x" onClick={onClose} aria-label={TX('Đóng')}>
           <i className="ph-bold ph-x"></i>
         </button>
       </div>

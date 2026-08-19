@@ -6,7 +6,8 @@
 //   Nguoi thu hai mo cung mot game se nhan ket qua tuc thi, khong ton lan dich.
 //
 //   GET /api/translate?appid=252490
-//   -> { appid, lang: 'vi', about, desc, source: 'auto' }
+//   /api/translate?appid=1245620&to=ja
+//   -> { appid, lang: 'ja', about, about_rich, desc, source: 'auto' }
 //
 // Khong can API key. Neu dich that bai thi tra ve ban goc kem lang:'en'
 // de giao dien van hien duoc chu, khong bao gio de trong.
@@ -195,11 +196,61 @@ function clampRich(blocks, limit) {
 const VI_MARK =
   /[ăâđêôơưĂÂĐÊÔƠƯáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]/g;
 
-function isVietnamese(s) {
-  if (!s) return false;
-  const hits = String(s).match(VI_MARK);
-  return !!hits && hits.length >= 3;
+// Hiragana + katakana: chi tieng Nhat moi co, gap la chac chan.
+const JA_KANA = /[\u3040-\u30ff]/g;
+
+// Hu tu dac trung — dem xem chiem bao nhieu phan tram so tu trong bai.
+const ES_SET = new Set(
+  ('el la los las un una unos unas del al que de en y con por para como mas pero ' +
+   'tambien su sus este esta estos estas juego jugador jugadores mundo puedes ' +
+   'tus donde cuando todo todos ser hacer').split(' ')
+);
+const FR_SET = new Set(
+  ('le la les des une un du au aux de et en que qui pour avec dans est sur plus ' +
+   'vous votre vos ce cette ces son ses par ne pas tout tous jeu joueur joueurs ' +
+   'monde pouvez ou etre faire').split(' ')
+);
+
+function hits(s, re) {
+  const m = String(s).match(re);
+  return m ? m.length : 0;
 }
+
+// Bo dau roi cat thanh tu — de doi chieu voi hai bang hu tu o tren.
+function bareWords(s) {
+  return (
+    String(s)
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .match(/[a-z]+/g) || []
+  );
+}
+
+// Tra ve ma ngon ngu cua doan van, gioi han trong 5 thu tieng giao dien dang co.
+function detectLang(s) {
+  const t = String(s || '');
+  if (!t) return '';
+  if (hits(t, JA_KANA) >= 3) return 'ja';
+  if (hits(t, VI_MARK) >= 3) return 'vi';
+
+  const w = bareWords(t);
+  if (w.length >= 25) {
+    let es = 0;
+    let fr = 0;
+    for (const x of w) {
+      if (ES_SET.has(x)) es++;
+      if (FR_SET.has(x)) fr++;
+    }
+    if (es > fr && es / w.length >= 0.06) return 'es';
+    if (fr > es && fr / w.length >= 0.06) return 'fr';
+  }
+  return 'en';
+}
+
+// Ma ngon ngu cua Steam va cua Google khong giong nhau nen phai co bang doi.
+const STEAM_LANG = { vi: 'vietnamese', en: 'english', ja: 'japanese', es: 'spanish', fr: 'french' };
 
 // Cat van ban thanh tung mieng <= LIMIT ky tu, uu tien cat o cho xuong dong
 // roi moi den dau cham -> cau khong bi dut giua chung khi dich.
@@ -220,9 +271,11 @@ function chunk(text) {
   return out;
 }
 
-async function translateChunk(text, signal) {
+async function translateChunk(text, signal, tl) {
   const r = await fetch(
-    'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t',
+    'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' +
+      (tl || 'vi') +
+      '&dt=t',
     {
       method: 'POST',
       signal,
@@ -239,11 +292,11 @@ async function translateChunk(text, signal) {
   return j[0].map((seg) => (seg && seg[0]) || '').join('');
 }
 
-async function translate(text, signal) {
+async function translate(text, signal, tl) {
   if (!text) return '';
   const parts = chunk(text);
   const done = [];
-  for (const p of parts) done.push(await translateChunk(p, signal));
+  for (const p of parts) done.push(await translateChunk(p, signal, tl));
   return done
     .join('')
     .replace(/[ \t]+\n/g, '\n')
@@ -260,7 +313,7 @@ async function translate(text, signal) {
 // nao dich hong thi giu nguyen ban goc chu khong bao gio de trong.
 // ---------------------------------------------------------------------------
 
-async function translateLines(lines, signal) {
+async function translateLines(lines, signal, tl) {
   const out = new Array(lines.length);
 
   const one = async (idx) => {
@@ -268,8 +321,8 @@ async function translateLines(lines, signal) {
     try {
       const t =
         src.length > 4000
-          ? await translate(src, signal)
-          : await translateChunk(src, signal);
+          ? await translate(src, signal, tl)
+          : await translateChunk(src, signal, tl);
       out[idx] = String(t || '').replace(/\s*\n+\s*/g, ' ').trim() || src;
     } catch (e) {
       out[idx] = src;
@@ -291,7 +344,7 @@ async function translateLines(lines, signal) {
       let ok = false;
       try {
         const got = String(
-          (await translateChunk(lines.slice(i, j).join('\n'), signal)) || ''
+          (await translateChunk(lines.slice(i, j).join('\n'), signal, tl)) || ''
         ).split('\n');
         if (got.length === j - i && got.every((x) => x.trim())) {
           for (let k = i; k < j; k++) out[k] = got[k - i].trim();
@@ -309,7 +362,7 @@ async function translateLines(lines, signal) {
   return out;
 }
 
-async function translateRich(blocks, signal) {
+async function translateRich(blocks, signal, tl) {
   const segs = [];
   const at = [];
 
@@ -328,7 +381,7 @@ async function translateRich(blocks, signal) {
 
   if (!segs.length) return blocks;
 
-  const done = await translateLines(segs, signal);
+  const done = await translateLines(segs, signal, tl);
   const copy = blocks.map((b) =>
     b.k === 'ul'
       ? { k: 'ul', items: (b.items || []).slice() }
@@ -373,14 +426,19 @@ module.exports = async (req, res) => {
     return;
   }
 
+  // ?to=vi|en|ja|es|fr — thieu hoac la thi ve tieng Viet.
+  const want = String((req.query && req.query.to) || 'vi').toLowerCase();
+  const to = STEAM_LANG[want] ? want : 'vi';
+
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 18000);
 
   try {
-    // 1. Lay ban tieng Viet cua Steam truoc — neu nha phat hanh da dich san
-    //    thi dung luon, chat luong hon may dich.
+    // 1. Lay trang Steam dung thu tieng dang can truoc — neu nha phat hanh da
+    //    dich san thi dung luon, chat luong hon may dich.
     const viRes = await fetch(
-      'https://store.steampowered.com/api/appdetails?appids=' + appId + '&l=vietnamese&cc=us',
+      'https://store.steampowered.com/api/appdetails?appids=' + appId +
+        '&l=' + STEAM_LANG[to] + '&cc=us',
       { signal: ctrl.signal, headers: { 'User-Agent': UA, Accept: 'application/json' } }
     );
     if (!viRes.ok) throw new Error('steam ' + viRes.status);
@@ -411,29 +469,30 @@ module.exports = async (req, res) => {
     );
     if (richChars < 40 && desc) rich.unshift({ k: 'p', t: desc });
 
-    // 2. Steam chua dich -> tu dich.
-    if (!isVietnamese(about)) {
-      rich = await translateRich(rich, ctrl.signal);
+    // 2. Steam chua co thu tieng nay -> tu dich.
+    if (detectLang(about) !== to) {
+      rich = await translateRich(rich, ctrl.signal, to);
       // Dich mang khoi da bao tron noi dung -> khoi goi Google them lan nua.
       const flat = richToText(rich);
-      about = flat || (await translate(about.slice(0, 4200), ctrl.signal));
+      about = flat || (await translate(about.slice(0, 4200), ctrl.signal, to));
       source = 'auto';
     }
-    if (!isVietnamese(desc)) {
-      desc = await translate(desc, ctrl.signal);
+    if (detectLang(desc) !== to) {
+      desc = await translate(desc, ctrl.signal, to);
       source = source === 'steam' ? 'auto' : source;
     }
 
     clearTimeout(timer);
 
-    // Cache manh: ban dich cua mot game khong doi theo tung nguoi dung.
+    // Cache manh: ban dich cua mot game khong doi theo tung nguoi dung,
+    // nhung doi theo ?to= nen phai bao proxy tach kho theo dia chi day du.
     res.setHeader(
       'Cache-Control',
       'public, max-age=21600, s-maxage=604800, stale-while-revalidate=2592000'
     );
     res.status(200).json({
       appid: appId,
-      lang: isVietnamese(about) ? 'vi' : 'en',
+      lang: to,
       source,
       about: about.length > 4000 ? about.slice(0, 4000).trim() + '…' : about,
       // Khuon co cau truc: giu tieu de, danh sach VA anh/video chen giua bai.
@@ -442,12 +501,12 @@ module.exports = async (req, res) => {
     });
   } catch (err) {
     clearTimeout(timer);
-    // Dich hong khong duoc lam vo trang -> tra 200 kem lang:'en' de giao dien
+    // Dich hong khong duoc lam vo trang -> tra 200 kem lang:'' de giao dien
     // im lang giu nguyen ban goc.
     res.setHeader('Cache-Control', 'public, max-age=60');
     res.status(200).json({
       appid: appId,
-      lang: 'en',
+      lang: '',
       source: 'none',
       about: '',
       about_rich: [],

@@ -18,24 +18,33 @@
   cursor: pointer;
   text-align: left;
   width: 100%;
-  transform: translateZ(0);
+  /* NGUYEN NHAN ANH DEN (da sua): truoc day moi the bi ep giu rieng mot lop
+     tren card man hinh (translateZ). Thu vien co gan 300 the, moi lan doi qua
+     lai la card man hinh phai cap lai tung ay lop kem anh 460x215 — het cho
+     thi trinh duyet bo trong nhung o chua ve kip, tuc la the den si.
+     Nay khong ep lop nua; the nao chua troi toi tam nhin thi bo han khong ve,
+     nen cuon bao nhieu, doi tab bao nhieu lan cung khong con den anh. */
+  content-visibility: auto;
+  contain-intrinsic-size: 202px;
+  contain-intrinsic-size: auto 202px;
   transition:
     transform var(--t-base) var(--e-out),
     box-shadow var(--t-base) var(--e-out),
     border-color var(--t-base) var(--e-out),
     background var(--t-base) var(--e-out);
 }
-/* Hover: vien sang deu tren ca bon canh (dung border + box-shadow nen khong
-   bao gio bi overflow:hidden cat mat canh tren nhu ky thuat mask cu),
-   nang the len rat nhe va them quang sang lanh. Khong phong to anh. */
+/* Hover: khong con vien xanh dam vien quanh the — mau bao hoa vien kin bon canh
+   nhin re va lam roi mat khi ca luoi cung sang. Nay chi con mot duong vien trang
+   rat nhat, bong do sau hon de the noi len, va mot vet sang lanh RAT mo hat ra
+   tu duoi. Diem nhan mau doi ve mot vach mong o canh tren. */
 .gc:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
   background: var(--bg-raised);
-  border-color: rgba(58, 216, 255, 0.58);
+  border-color: rgba(255, 255, 255, 0.15);
   box-shadow:
-    0 0 0 1px rgba(58, 216, 255, 0.18),
-    0 18px 38px -14px rgba(0, 0, 0, 0.78),
-    0 0 30px -8px rgba(58, 216, 255, 0.28);
+    0 24px 46px -20px rgba(0, 0, 0, 0.88),
+    0 4px 14px -8px rgba(0, 0, 0, 0.6),
+    0 14px 40px -26px rgba(90, 168, 255, 0.4);
   z-index: 2;
 }
 .gc:active { transform: translateY(-2px); }
@@ -45,11 +54,12 @@
   content: '';
   position: absolute;
   left: 0; right: 0; top: 0;
-  height: 2px;
+  height: 1.5px;
   background: var(--grad-brand);
+  opacity: 0.85;
   transform: scaleX(0);
   transform-origin: 50% 50%;
-  transition: transform 420ms var(--e-out);
+  transition: transform 460ms var(--e-out);
   pointer-events: none;
   z-index: 4;
 }
@@ -87,29 +97,6 @@
 
 .gc__skel { position: absolute; inset: 0; }
 
-/* Nut PHAT hien ra giua anh khi hover */
-.gc__play {
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 46px; height: 46px;
-  margin: -23px 0 0 -23px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.13);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
-  font-size: 16px;
-  opacity: 0;
-  transform: scale(0.65);
-  transition: opacity var(--t-base) var(--e-out), transform var(--t-base) var(--e-spring);
-  pointer-events: none;
-  z-index: 2;
-}
-.gc:hover .gc__play { opacity: 1; transform: scale(1); }
-
 /* Dai huy hieu goc tren-trai */
 .gc__flags {
   position: absolute;
@@ -128,9 +115,9 @@
   width: 26px; height: 26px;
   display: grid; place-items: center;
   border-radius: 8px;
-  background: rgba(5, 7, 11, 0.62);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* Truoc day co lam mo nen phia sau. Moi the mot cai, gan 300 the la gan 300
+     lan chup lai nen — rat ton. Nen dam hon mot chut cho ket qua nhin y het. */
+  background: rgba(5, 7, 11, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.13);
   font-size: 13px;
   color: var(--tx-hi);
@@ -138,60 +125,88 @@
 }
 
 /* Diem danh gia noi tren anh, goc duoi-phai.
-   Truoc day dung emoji mat cuoi/mat meu — nhin roi va thieu nghiem tuc.
-   Nay chi con con so, mau y nghia nam o vach doc ben trai. */
+
+   LOI DA SUA: khung cao co dinh 22px + align-items:baseline. Kieu canh theo
+   duong chan chu dat nhom chu sao cho chan chu trung nhau, chu khong dua vao
+   giua khung — nen con so bi day len sat mep tren, chua ke con thua mot khoang
+   trong o duoi. Do dung la cai "dinh len tran" nhin thay tren the.
+
+   Nay: khung canh GIUA, con so va dau % gom thanh mot nhom rieng (chi trong
+   nhom do moi canh theo chan chu), va them mot vong cung nho ben trai thay cho
+   vach mau cu — doc duoc ty le ngay ca khi khong doc con so.
+   -------------------------------------------------------------------------- */
 .gc__score {
   position: absolute;
-  right: 9px; bottom: 9px;
+  right: 10px; bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 25px;
+  padding: 0 9px 0 6px;
+  border-radius: var(--r-pill);
+  /* Cung ly do nhu tren: bo lam mo nen, tang do dam de nhin khong khac. */
+  background: linear-gradient(180deg, rgba(14, 19, 28, 0.93), rgba(6, 9, 14, 0.97));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 3px 12px rgba(0, 0, 0, 0.5);
+  color: var(--tx-hi);
+  z-index: 2;
+  transition: border-color var(--t-base), box-shadow var(--t-base), transform var(--t-base) var(--e-out);
+}
+.gc__gauge { display: block; flex: none; transform: rotate(-90deg); overflow: visible; }
+.gc__gauge circle { fill: none; stroke-width: 2.1; stroke-linecap: round; }
+.gc__gauge-t { stroke: rgba(255, 255, 255, 0.14); }
+/* Quang sang: mot ban sao cua chinh cung do, to hon va mo hon, ve nam duoi.
+   Truoc day dung bo loc drop-shadow — moi the mot cai, gan 300 the la gan 300
+   vung dem ve rieng, cuon la giat. Cach nay nhin nhu nhau ma khong ton gi. */
+.gc__gauge-h {
+  stroke: currentColor;
+  stroke-width: 4.6;
+  opacity: 0.24;
+  transition: stroke-dashoffset 900ms var(--e-out);
+}
+.gc__gauge-v {
+  stroke: currentColor;
+  transition: stroke-dashoffset 900ms var(--e-out);
+}
+.gc__score-n {
   display: inline-flex;
   align-items: baseline;
-  gap: 1px;
-  height: 22px;
-  padding: 0 8px 0 9px;
-  border-radius: var(--r-xs);
-  background: rgba(5, 7, 11, 0.72);
-  backdrop-filter: blur(12px) saturate(1.2);
-  -webkit-backdrop-filter: blur(12px) saturate(1.2);
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-  color: var(--tx-hi);
-  overflow: hidden;
-  z-index: 2;
-  transition: border-color var(--t-base), box-shadow var(--t-base);
+  line-height: 1;
 }
-/* Vach mau doc — thay cho emoji, doc duoc muc danh gia trong mot cai liec */
-.gc__score::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: currentColor;
-  box-shadow: 0 0 8px currentColor;
-}
-.gc__score b {
+.gc__score-n b {
   font-family: var(--f-num);
   font-size: 12.5px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.028em;
+  letter-spacing: -0.03em;
+  /* Khoang cach chu am con cong them mot lan sau ky tu cuoi -> nhom chu bi
+     keo lech sang trai. Tra lai dung khoang thua do. */
+  margin-right: 0.03em;
   line-height: 1;
   color: var(--tx-hi);
 }
-.gc__score em {
+.gc__score-n em {
   font-family: var(--f-num);
   font-style: normal;
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 750;
   line-height: 1;
-  color: var(--tx-faint);
+  margin-left: 1.5px;
+  color: currentColor;
+  opacity: 0.72;
 }
 .gc__score--pos { color: var(--ok); }
 .gc__score--mix { color: var(--warn); }
 .gc__score--neg { color: var(--bad); }
 .gc:hover .gc__score {
-  border-color: color-mix(in srgb, currentColor 34%, transparent);
-  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.5),
-              0 0 0 1px color-mix(in srgb, currentColor 12%, transparent);
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, currentColor 30%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 4px 16px rgba(0, 0, 0, 0.55),
+    0 0 0 3px color-mix(in srgb, currentColor 9%, transparent);
 }
 /* Con so trong hang danh sach */
 .gc__rev__n {
@@ -210,7 +225,17 @@
   flex: 1;
   min-height: 0;
 }
+/* Hang tieu de: ten tro choi ben trai, nhan the loai ben phai.
+   Ten ngan thi ca nua hang ben phai bo trong, bo cuc nhin hong. Nhan the loai
+   vua lap cho trong vua them mot thong tin doc duoc ngay tren the. */
+.gc__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
 .gc__title {
+  flex: 1;
+  min-width: 0;
   font-family: var(--f-display);
   font-size: 14px;
   font-weight: 700;
@@ -221,6 +246,31 @@
   transition: color var(--t-fast);
 }
 .gc:hover .gc__title { color: #fff; }
+.gc__gen {
+  flex: none;
+  max-width: 44%;
+  margin-top: 1px;
+  padding: 3px 7px;
+  border-radius: var(--r-xs);
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--line);
+  font-family: var(--f-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: var(--tx-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--t-base), border-color var(--t-base), background var(--t-base);
+}
+.gc:hover .gc__gen {
+  color: var(--tx-dim);
+  border-color: var(--line-mid);
+  background: rgba(255, 255, 255, 0.06);
+}
 
 .gc__meta {
   display: flex;
@@ -851,9 +901,15 @@
   box-shadow:
     0 2px 10px rgba(0, 0, 0, 0.5),
     inset 0 0 0 999px color-mix(in srgb, currentColor 11%, transparent);
+}
+/* Chi 13 the sap ra mat nen giu duoc lop kinh mo o day */
+.uc__tag .nx-badge {
   -webkit-backdrop-filter: blur(8px) saturate(130%);
   backdrop-filter: blur(8px) saturate(130%);
 }
+/* Huy hieu tren the game thi khong: gan 300 the x may huy hieu = qua nang.
+   Bu lai bang nen dam hon, mat thuong khong phan biet duoc. */
+.gc__flags .nx-badge { background: rgba(6, 10, 18, 0.92); }
 
 /* Nut bang rong het khung — the <button> mac dinh chi rong bang noi dung */
 .bn { width: 100%; }

@@ -17,7 +17,7 @@
     useClickOutside, useReveal,
     GameCard, GameRow, UpcomingCard, Shelf, GENRES, GenreCard,
     useSteamReleases,
-    Empty
+    Empty, TX, useLang
   } = window.NX;
 
   /* --------------------------------------------------------------------------
@@ -80,6 +80,7 @@
   }
 
   function Hero({ picks, onOpen, onLibrary }) {
+    const lang = useLang();
     const [i, setI] = useState(0);
     const [hold, setHold] = useState(false);
 
@@ -97,14 +98,14 @@
       setDesc('');
       if (!appId) return undefined;
 
-      fetchMedia(appId).then(function (d) {
+      fetchMedia(appId, lang).then(function (d) {
         if (!alive || !d) return;
         const s = clipDesc(plain(d.desc) || plain(d.about));
         if (s) setDesc(s);
 
-        const lang = String(d.desc_lang || d.about_lang || '').toLowerCase();
-        if (lang === 'vi') return;
-        fetchTranslation(appId).then(function (t) {
+        const have = String(d.desc_lang || d.about_lang || '').toLowerCase();
+        if (have === lang) return;
+        fetchTranslation(appId, lang).then(function (t) {
           if (!alive || !t) return;
           const v = clipDesc(plain(t.desc) || plain(t.about));
           if (v) setDesc(v);
@@ -112,7 +113,7 @@
       });
 
       return function () { alive = false; };
-    }, [appId]);
+    }, [appId, lang]);
 
     /* Dem gio con lai cua slide. Ro chuot vao la dung, roi chuot ra thi chay
        tiep dung cho vua dung — thanh chay duoi cham cung theo nhip nay. */
@@ -157,7 +158,7 @@
         <div className="hero__in" key={'in-' + appId}>
           <div className="hero__eyebrow">
             <i className="ph-fill ph-flame"></i>
-            <span>Nổi bật hôm nay</span>
+            <span>{TX('Nổi bật hôm nay')}</span>
           </div>
 
           <h1 className="hero__title">{g.title}</h1>
@@ -167,7 +168,7 @@
             {pct !== null && (
               <span className="hero__cell hero__cell--score">
                 <b className="hero__pct">{Math.round(pct)}<em>%</em></b>
-                <span className="hero__tone">{g.reviewText}</span>
+                <span className="hero__tone">{TX(g.reviewText)}</span>
               </span>
             )}
             {pct !== null && cnt > 0 && <i className="hero__sep" />}
@@ -178,11 +179,11 @@
             )}
             {tags.length > 0 && <i className="hero__sep" />}
             {tags.map(function (t) {
-              return <span className="hero__cell hero__cell--tag" key={t}>{t}</span>;
+              return <span className="hero__cell hero__cell--tag" key={t}>{TX(t)}</span>;
             })}
             {g.viethoa && (
               <span className="hero__chip hero__chip--vi">
-                <i className="ph-fill ph-translate"></i>Việt hoá
+                <i className="ph-fill ph-translate"></i>{TX('Việt hoá')}
               </span>
             )}
             {isOnlineGame(g) && (
@@ -193,15 +194,15 @@
           </div>
 
           <p className="hero__desc nx-clamp-3">
-            {desc || 'Thư viện Nexus tổng hợp trò chơi bản quyền — truy cập nhanh, cài đặt gọn, không quảng cáo.'}
+            {desc || TX('Thư viện Nexus tổng hợp trò chơi bản quyền — truy cập nhanh, cài đặt gọn, không quảng cáo.')}
           </p>
 
           <div className="hero__acts">
             <button className="nx-btn nx-btn--primary nx-btn--lg hero__cta" onClick={function () { onOpen(g); }}>
-              <i className="ph-fill ph-play"></i>Xem chi tiết
+              <i className="ph-fill ph-play"></i>{TX('Xem chi tiết')}
             </button>
             <button className="nx-btn nx-btn--ghost nx-btn--lg" onClick={onLibrary}>
-              <i className="ph-bold ph-squares-four"></i>Toàn bộ thư viện
+              <i className="ph-bold ph-squares-four"></i>{TX('Toàn bộ thư viện')}
             </button>
           </div>
         </div>
@@ -244,13 +245,14 @@
         <div className="stat__ico" style={{ background: tint.bg, color: tint.fg }}><i className={ico}></i></div>
         <div>
           <div className="stat__n">{n}</div>
-          <div className="stat__l">{label}</div>
+          <div className="stat__l">{TX(label)}</div>
         </div>
       </div>
     );
   }
 
   function HomeContent({ games, upcoming, onOpen, onGenre, onLibrary }) {
+    useLang();
     /* Doi chieu lich ra mat voi Steam — game bi doi ngay se tu cap nhat */
     const rel = useSteamReleases(upcoming);
 
@@ -313,7 +315,7 @@
     const seeAll = function (label) {
       return (
         <button className="nx-btn nx-btn--ghost nx-btn--sm" onClick={onLibrary}>
-          {label || 'Xem tất cả'}<i className="ph-bold ph-arrow-right"></i>
+          {label || TX('Xem tất cả')}<i className="ph-bold ph-arrow-right"></i>
         </button>
       );
     };
@@ -331,25 +333,26 @@
                 tint={{ bg: 'var(--warn-soft)', fg: 'var(--warn)' }} />
           <Stat ico="ph-fill ph-hourglass-high" n={stats.soon} label="Sắp ra mắt"
                 tint={{ bg: 'var(--br-3-soft)', fg: 'var(--br-3)' }} />
+          {/* nhan la cau tieng Viet goc — Stat tu dich bang TX() */}
         </div>
 
         {trending.length > 0 && (
-          <Shelf title="Đang thịnh hành" icon="ph-fill ph-trend-up"
-                 sub="Nhiều lượt đánh giá nhất trên Steam" action={seeAll()}>
-            {trending.map(function (g) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} />; })}
+          <Shelf title={TX('Đang thịnh hành')} icon="ph-fill ph-trend-up"
+                 sub={TX('Nhiều lượt đánh giá nhất trên Steam')} action={seeAll()}>
+            {trending.map(function (g, i) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} eager={i < 6} />; })}
           </Shelf>
         )}
 
         {fresh.length > 0 && (
-          <Shelf title="Mới cập nhật" icon="ph-fill ph-sparkle"
-                 sub="Vừa được thêm vào thư viện" action={seeAll()}>
-            {fresh.map(function (g) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} />; })}
+          <Shelf title={TX('Mới cập nhật')} icon="ph-fill ph-sparkle"
+                 sub={TX('Vừa được thêm vào thư viện')} action={seeAll()}>
+            {fresh.map(function (g, i) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} eager={i < 6} />; })}
           </Shelf>
         )}
 
         {(upcoming && upcoming.length > 0) && (
-          <Shelf title="Sắp ra mắt" icon="ph-fill ph-rocket-launch"
-                 sub="Đếm ngược tới ngày phát hành">
+          <Shelf title={TX('Sắp ra mắt')} icon="ph-fill ph-rocket-launch"
+                 sub={TX('Đếm ngược tới ngày phát hành')}>
             {upcoming.map(function (g) {
               return <UpcomingCard key={g.id || g.appId} game={g}
                                     steam={rel[String(g.appId)]} />;
@@ -358,23 +361,23 @@
         )}
 
         {topRated.length > 0 && (
-          <Shelf title="Đánh giá cao nhất" icon="ph-fill ph-star"
-                 sub="Người chơi Steam chấm điểm tốt nhất" action={seeAll()}>
-            {topRated.map(function (g) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} />; })}
+          <Shelf title={TX('Đánh giá cao nhất')} icon="ph-fill ph-star"
+                 sub={TX('Người chơi Steam chấm điểm tốt nhất')} action={seeAll()}>
+            {topRated.map(function (g, i) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} eager={i < 6} />; })}
           </Shelf>
         )}
 
         {viet.length > 0 && (
-          <Shelf title="Có Việt hóa" icon="ph-fill ph-translate"
-                 sub="Bản dịch tiếng Việt sẵn sàng" action={seeAll()}>
-            {viet.map(function (g) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} />; })}
+          <Shelf title={TX('Có Việt hóa')} icon="ph-fill ph-translate"
+                 sub={TX('Bản dịch tiếng Việt sẵn sàng')} action={seeAll()}>
+            {viet.map(function (g, i) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} eager={i < 6} />; })}
           </Shelf>
         )}
 
         <section className="nx-sec">
           <div className="nx-sec__head">
-            <h2 className="nx-sec__title"><i className="ph-fill ph-squares-four"></i>Duyệt theo thể loại</h2>
-            <span className="nx-sec__sub">Chọn nhanh phong cách bạn thích</span>
+            <h2 className="nx-sec__title"><i className="ph-fill ph-squares-four"></i>{TX('Duyệt theo thể loại')}</h2>
+            <span className="nx-sec__sub">{TX('Chọn nhanh phong cách bạn thích')}</span>
           </div>
           <div className="gen__grid">
             {GENRES.map(function (x) {
@@ -388,9 +391,9 @@
             <button className="bn bn--discord" onClick={function () { openExternal(DISCORD_URL); }}>
               <span className="bn__ico"><i className="fa-brands fa-discord"></i></span>
               <span style={{ textAlign: 'left' }}>
-                <span className="bn__t" style={{ display: 'block' }}>CỘNG ĐỒNG NEXUS</span>
+                <span className="bn__t" style={{ display: 'block' }}>{TX('CỘNG ĐỒNG NEXUS')}</span>
                 <span className="bn__d" style={{ display: 'block' }}>
-                  Tham gia Discord để nhận game mới, bản vá và hỗ trợ trực tiếp
+                  {TX('Tham gia Discord để nhận game mới, bản vá và hỗ trợ trực tiếp')}
                 </span>
               </span>
               <i className="bn__go ph-bold ph-arrow-up-right"></i>
@@ -422,6 +425,7 @@
   ];
 
   function Dropdown({ value, options, onPick, icon }) {
+    useLang();
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
     const close = useCallback(function () { setOpen(false); }, []);
@@ -433,7 +437,7 @@
       <div className={'dd' + (open ? ' is-open' : '')} ref={ref}>
         <button className="dd__btn" onClick={function () { setOpen(function (v) { return !v; }); }}>
           <i className={icon || cur.ico}></i>
-          {cur.label}
+          {TX(cur.label)}
           <i className="ph-bold ph-caret-down"></i>
         </button>
         {open && (
@@ -446,7 +450,7 @@
                   onClick={function () { onPick(o.id); setOpen(false); }}
                 >
                   <i className={o.ico}></i>
-                  {o.label}
+                  {TX(o.label)}
                   {o.id === value && <i className="dd__tick ph-bold ph-check"></i>}
                 </button>
               );
@@ -458,6 +462,7 @@
   }
 
   function LibraryContent({ games, onOpen, genre, onClearGenre }) {
+    useLang();
     const [q, setQ] = useState('');
     const [filter, setFilter] = useState('all');
     const [sort, setSort] = useState('az');
@@ -525,12 +530,12 @@
               type="text"
               value={q}
               onChange={function (e) { setQ(e.target.value); }}
-              placeholder="Tìm trò chơi, thẻ, App ID…"
+              placeholder={TX('Tìm trò chơi, thẻ, App ID…')}
               spellCheck="false"
             />
             <i className="nx-search__ico ph-bold ph-magnifying-glass"></i>
             {q && (
-              <button className="nx-search__clear" onClick={function () { setQ(''); }} aria-label="Xóa">
+              <button className="nx-search__clear" onClick={function () { setQ(''); }} aria-label={TX('Xóa')}>
                 <i className="ph-bold ph-x"></i>
               </button>
             )}
@@ -543,14 +548,14 @@
                 className={'nx-chip' + (filter === f.id ? ' is-on' : '')}
                 onClick={function () { setFilter(f.id); }}
               >
-                <i className={f.ico}></i>{f.label}
+                <i className={f.ico}></i>{TX(f.label)}
               </button>
             );
           })}
 
           {genre && (
-            <button className="nx-chip is-on" onClick={onClearGenre} title="Bỏ lọc thể loại">
-              <i className="ph-fill ph-tag"></i>{genre}
+            <button className="nx-chip is-on" onClick={onClearGenre} title={TX('Bỏ lọc thể loại')}>
+              <i className="ph-fill ph-tag"></i>{TX(genre)}
               <i className="ph-bold ph-x" style={{ marginLeft: 2, fontSize: 10 }}></i>
             </button>
           )}
@@ -558,22 +563,22 @@
           <span className="lib__spacer" />
 
           <div className="lib__right">
-            <span className="lib__count"><b>{list.length}</b> / {games.length} trò chơi</span>
+            <span className="lib__count"><b>{list.length}</b> / {TX('{n} trò chơi', { n: games.length })}</span>
 
             <Dropdown value={sort} options={SORTS} onPick={setSort} />
 
-            <div className="lib__view" role="group" aria-label="Kiểu hiển thị">
+            <div className="lib__view" role="group" aria-label={TX('Kiểu hiển thị')}>
               <button
                 className={'nx-icobtn' + (view === 'grid' ? ' is-on' : '')}
                 onClick={function () { setView('grid'); }}
-                title="Hiển thị dạng lưới"
+                title={TX('Hiển thị dạng lưới')}
               >
                 <i className="ph-bold ph-squares-four"></i>
               </button>
               <button
                 className={'nx-icobtn' + (view === 'list' ? ' is-on' : '')}
                 onClick={function () { setView('list'); }}
-                title="Hiển thị dạng danh sách"
+                title={TX('Hiển thị dạng danh sách')}
               >
                 <i className="ph-bold ph-rows"></i>
               </button>
@@ -584,13 +589,13 @@
         {list.length === 0 ? (
           <Empty
             icon="ph-bold ph-magnifying-glass"
-            title="Không tìm thấy trò chơi nào"
-            desc="Thử đổi từ khóa hoặc bỏ bớt bộ lọc đang bật."
-            action={<button className="nx-btn nx-btn--ghost" onClick={reset}><i className="ph-bold ph-arrow-counter-clockwise"></i>Đặt lại bộ lọc</button>}
+            title={TX('Không tìm thấy trò chơi nào')}
+            desc={TX('Thử đổi từ khóa hoặc bỏ bớt bộ lọc đang bật.')}
+            action={<button className="nx-btn nx-btn--ghost" onClick={reset}><i className="ph-bold ph-arrow-counter-clockwise"></i>{TX('Đặt lại bộ lọc')}</button>}
           />
         ) : view === 'grid' ? (
           <div className="nx-grid">
-            {list.map(function (g) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} />; })}
+            {list.map(function (g, i) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} eager={i < 12} />; })}
           </div>
         ) : (
           <div className="nx-list">
@@ -606,18 +611,18 @@
      ========================================================================== */
 
   function NotSupported({ width }) {
+    useLang();
     return (
       <div className="ns">
         <div className="ns__ico"><i className="ph-fill ph-arrows-out-line-horizontal"></i></div>
-        <div className="ns__t">Cửa sổ đang quá hẹp</div>
+        <div className="ns__t">{TX('Cửa sổ đang quá hẹp')}</div>
         <div className="ns__d">
-          Nexus Launcher cần chiều ngang tối thiểu <b>820px</b> để hiển thị đầy đủ thanh điều hướng,
-          kệ trò chơi và bảng thông tin. Hãy phóng to cửa sổ hoặc giảm mức thu phóng bằng
-          <b> Ctrl và dấu trừ</b>.
-          {width ? <span> (hiện tại: {width}px)</span> : null}
+          {TX('Nexus Launcher cần chiều ngang tối thiểu 820px để hiển thị đầy đủ thanh điều hướng, kệ trò chơi và bảng thông tin. Hãy phóng to cửa sổ hoặc giảm mức thu phóng bằng')}
+          <b> {TX('Ctrl và dấu trừ')}</b>.
+          {width ? <span> {TX('(hiện tại: {w}px)', { w: width })}</span> : null}
         </div>
         <button className="nx-btn nx-btn--ghost" onClick={function () { openExternal(DISCORD_URL); }}>
-          <i className="fa-brands fa-discord"></i>Cần hỗ trợ? Vào Discord
+          <i className="fa-brands fa-discord"></i>{TX('Cần hỗ trợ? Vào Discord')}
         </button>
       </div>
     );

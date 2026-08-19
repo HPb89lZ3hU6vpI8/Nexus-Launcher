@@ -9,7 +9,10 @@
   'use strict';
 
   const { useState, useEffect, useCallback } = React;
-  const { callApi, hasApi, apiProp, openExternal, DISCORD_URL, Note, useToast } = window.NX;
+  const {
+    callApi, hasApi, apiProp, openExternal, DISCORD_URL, Note, useToast,
+    TX, useLang, tagTone, markedTone, stripTone
+  } = window.NX;
 
   /* --------------------------------------------------------------------------
      DU LIEU THE
@@ -125,7 +128,18 @@
     }
   ];
 
-  const NO_APP = 'Vui lòng mở bằng ứng dụng Nexus Launcher.';
+  /* Phai viet thanh ham chu khong phai hang so — neu chot cung luc nap trang
+     thi doi ngon ngu xong cau nay van dung o thu tieng cu. */
+  function noApp() {
+    return tagTone('bad', TX('Vui lòng mở bằng ứng dụng Nexus Launcher.'));
+  }
+
+  /* Mot cau thong bao -> o mau dung sac thai. Sac thai doc tu dau vo hinh gan
+     san o dau cau; cau nao khong co dau (loi tu ban Python bao ve) thi coi la loi. */
+  function noteBox(note) {
+    if (!note) return null;
+    return <Note tone={markedTone(note) || 'bad'}>{stripTone(note)}</Note>;
+  }
 
   /* --------------------------------------------------------------------------
      KHUNG THE
@@ -137,8 +151,8 @@
         <header className="sc__head">
           <div className="sc__ico"><i className={card.ico}></i></div>
           <div>
-            <div className="sc__ttl">{card.title}</div>
-            <div className="sc__sub">{card.badge}</div>
+            <div className="sc__ttl">{TX(card.title)}</div>
+            <div className="sc__sub">{TX(card.badge)}</div>
           </div>
         </header>
 
@@ -148,7 +162,7 @@
               return (
                 <div className="sc__feat" key={i}>
                   <i className="ph-fill ph-check-circle"></i>
-                  <span>{f}</span>
+                  <span>{TX(f)}</span>
                 </div>
               );
             })}
@@ -156,12 +170,12 @@
 
           {card.info && (
             <div className="sc__info">
-              <div className="sc__info-h">{card.infoHead}</div>
+              <div className="sc__info-h">{TX(card.infoHead)}</div>
               <div className="sc__info-b">
                 {card.info.map(function (kv) {
                   return (
                     <div className="sc__kv" key={kv[0]}>
-                      <b>{kv[0]}</b><span>{kv[1]}</span>
+                      <b>{TX(kv[0])}</b><span>{TX(kv[1])}</span>
                     </div>
                   );
                 })}
@@ -171,15 +185,15 @@
 
           {card.unsup && (
             <div className="sc__unsup">
-              <div className="sc__unsup-h"><i className="ph-fill ph-prohibit"></i>{card.unsupHead}</div>
+              <div className="sc__unsup-h"><i className="ph-fill ph-prohibit"></i>{TX(card.unsupHead)}</div>
               <div className="sc__unsup-tags">
-                {card.unsup.map(function (u) { return <span className="nx-tag" key={u}>{u}</span>; })}
+                {card.unsup.map(function (u) { return <span className="nx-tag" key={u}>{TX(u)}</span>; })}
               </div>
             </div>
           )}
 
           {card.note && (
-            <div className="sc__note"><i className="ph-fill ph-info"></i><span>{card.note}</span></div>
+            <div className="sc__note"><i className="ph-fill ph-info"></i><span>{TX(card.note)}</span></div>
           )}
         </div>
 
@@ -223,39 +237,39 @@
 
     const install = useCallback(async function () {
       if (st !== 'idle') return;
-      if (!hasApi('install_cloud_save')) { setNote(NO_APP); return; }
+      if (!hasApi('install_cloud_save')) { setNote(noApp()); return; }
       setNote('');
       setSt('installing');
       const r = await callApi('install_cloud_save');
       if (r && r.already) { setSt('installed'); return; }
       if (r && r.success) {
         setSt('installed');
-        setNote('Đã cài đặt Cloud Save thành công! Steam đã tự khởi chạy lại.');
-        toast.push({ tone: 'ok', title: 'Cloud Save đã sẵn sàng', desc: 'Steam đã tự khởi chạy lại.' });
+        setNote(tagTone('ok', TX('Đã cài đặt Cloud Save thành công! Steam đã tự khởi chạy lại.')));
+        toast.push({ tone: 'ok', title: TX('Cloud Save đã sẵn sàng'), desc: TX('Steam đã tự khởi chạy lại.') });
         return;
       }
       setSt('idle');
-      setNote((r && r.error) || 'Lỗi không xác định.');
+      setNote((r && r.error) || tagTone('bad', TX('Lỗi không xác định.')));
     }, [st, toast]);
 
     const uninstall = useCallback(async function () {
-      if (!hasApi('uninstall_cloud_save')) { setNote(NO_APP); return; }
+      if (!hasApi('uninstall_cloud_save')) { setNote(noApp()); return; }
       setNote('');
       setSt('uninstalling');
       const r = await callApi('uninstall_cloud_save');
-      if (r && r.success) { setSt('idle'); setNote('Đã gỡ cài đặt Cloud Save thành công!'); return; }
+      if (r && r.success) { setSt('idle'); setNote(tagTone('ok', TX('Đã gỡ cài đặt Cloud Save thành công!'))); return; }
       setSt('installed');
-      setNote((r && r.error) || 'Lỗi khi gỡ cài đặt Cloud Save.');
+      setNote((r && r.error) || tagTone('bad', TX('Lỗi khi gỡ cài đặt Cloud Save.')));
     }, []);
 
     const reinstall = useCallback(async function () {
-      if (!hasApi('uninstall_cloud_save') || !hasApi('install_cloud_save')) { setNote(NO_APP); return; }
+      if (!hasApi('uninstall_cloud_save') || !hasApi('install_cloud_save')) { setNote(noApp()); return; }
       setNote('');
       setSt('uninstalling');
       const un = await callApi('uninstall_cloud_save');
       if (!un || !un.success) {
         setSt('installed');
-        setNote((un && un.error) || 'Lỗi khi gỡ file cũ.');
+        setNote((un && un.error) || tagTone('bad', TX('Lỗi khi gỡ file cũ.')));
         return;
       }
       setSt('installing');
@@ -264,35 +278,35 @@
         : await callApi('install_cloud_save', true);
       if (re && re.success) {
         setSt('installed');
-        setNote('Đã cài đặt lại Cloud Save thành công! Steam đã tự khởi chạy lại.');
+        setNote(tagTone('ok', TX('Đã cài đặt lại Cloud Save thành công! Steam đã tự khởi chạy lại.')));
         return;
       }
       setSt('idle');
-      setNote((re && re.error) || 'Lỗi cài đặt lại Cloud Save.');
+      setNote((re && re.error) || tagTone('bad', TX('Lỗi cài đặt lại Cloud Save.')));
     }, []);
 
     const busy = st === 'installing' || st === 'uninstalling' || st === 'checking';
 
     return (
-      <ServiceCard card={card} note={note ? <Note tone={/Lỗi|lỗi|Vui lòng/.test(note) ? 'bad' : 'ok'}>{note}</Note> : null}>
+      <ServiceCard card={card} note={noteBox(note)}>
         {st === 'installed' ? (
           <div className="act__grid">
             <button className="nx-btn nx-btn--ghost" onClick={reinstall} disabled={busy}>
-              <i className="ph-bold ph-arrows-clockwise"></i>Cài lại
+              <i className="ph-bold ph-arrows-clockwise"></i>{TX('Cài lại')}
             </button>
             <button className="nx-btn nx-btn--bad" onClick={uninstall} disabled={busy}>
-              <i className="ph-bold ph-trash"></i>Gỡ bỏ
+              <i className="ph-bold ph-trash"></i>{TX('Gỡ bỏ')}
             </button>
             <div className="act__wide nx-badge nx-badge--ok" style={{ justifyContent: 'center', padding: '7px 0' }}>
-              <i className="ph-fill ph-check-circle"></i>ĐANG BẬT
+              <i className="ph-fill ph-check-circle"></i>{TX('ĐANG BẬT')}
             </div>
           </div>
         ) : (
           <button className="nx-btn nx-btn--accent nx-btn--full nx-btn--lg" onClick={install} disabled={busy}>
-            {st === 'checking' ? <Busy label="Đang kiểm tra..." />
-              : st === 'installing' ? <Busy label="Đang cài đặt..." />
-              : st === 'uninstalling' ? <Busy label="Đang gỡ..." />
-              : <React.Fragment><i className="ph-fill ph-lightning"></i>KÍCH HOẠT NGAY</React.Fragment>}
+            {st === 'checking' ? <Busy label={TX('Đang kiểm tra...')} />
+              : st === 'installing' ? <Busy label={TX('Đang cài đặt...')} />
+              : st === 'uninstalling' ? <Busy label={TX('Đang gỡ...')} />
+              : <React.Fragment><i className="ph-fill ph-lightning"></i>{TX('KÍCH HOẠT NGAY')}</React.Fragment>}
           </button>
         )}
       </ServiceCard>
@@ -326,32 +340,32 @@
       if (st === 'checking' || st === 'installing') return;
 
       if (st === 'installed') {
-        if (!hasApi('launch_integration')) { setNote(NO_APP); return; }
+        if (!hasApi('launch_integration')) { setNote(noApp()); return; }
         const r = await callApi('launch_integration', card.id);
-        if (!r || !r.success) setNote((r && r.error) || 'Không thể khởi chạy tool.');
+        if (!r || !r.success) setNote((r && r.error) || tagTone('bad', TX('Không thể khởi chạy tool.')));
         return;
       }
 
-      if (!hasApi('activate_integration')) { setNote(NO_APP); return; }
+      if (!hasApi('activate_integration')) { setNote(noApp()); return; }
       setNote('');
       setSt('installing');
       const r = await callApi('activate_integration', card.id);
       if (r && (r.success || r.already)) { setSt('installed'); return; }
       setSt('idle');
-      setNote((r && r.error) || 'Lỗi cài đặt tool.');
+      setNote((r && r.error) || tagTone('bad', TX('Lỗi cài đặt tool.')));
     }, [st, card.id]);
 
     return (
-      <ServiceCard card={card} note={note ? <Note tone="bad">{note}</Note> : null}>
+      <ServiceCard card={card} note={noteBox(note)}>
         <button
           className={'nx-btn nx-btn--full nx-btn--lg ' + (st === 'installed' ? 'nx-btn--ok' : 'nx-btn--accent')}
           onClick={click}
           disabled={st === 'checking' || st === 'installing'}
         >
-          {st === 'checking' ? <Busy label="Đang kiểm tra..." />
-            : st === 'installing' ? <Busy label="Đang cài đặt..." />
-            : st === 'installed' ? <React.Fragment><i className="ph-fill ph-play"></i>MỞ CÔNG CỤ</React.Fragment>
-            : <React.Fragment><i className="ph-fill ph-lightning"></i>KÍCH HOẠT NGAY</React.Fragment>}
+          {st === 'checking' ? <Busy label={TX('Đang kiểm tra...')} />
+            : st === 'installing' ? <Busy label={TX('Đang cài đặt...')} />
+            : st === 'installed' ? <React.Fragment><i className="ph-fill ph-play"></i>{TX('MỞ CÔNG CỤ')}</React.Fragment>
+            : <React.Fragment><i className="ph-fill ph-lightning"></i>{TX('KÍCH HOẠT NGAY')}</React.Fragment>}
         </button>
       </ServiceCard>
     );
@@ -376,7 +390,7 @@
     const click = useCallback(async function () {
       if (st === 'activating') return;
       const clean = String(appid || '').trim();
-      if (!clean) { setSt('error'); setNote('Vui lòng nhập AppID game.'); return; }
+      if (!clean) { setSt('error'); setNote(TX('Vui lòng nhập AppID game.')); return; }
 
       setSt('activating');
       setNote('');
@@ -384,17 +398,17 @@
       const r = await callApi('activate_easy_install_game', clean);
 
       if (r && r.success) {
-        if (r.already_exists) { setSt('already'); setNote('Bạn Đã Có Game Này'); return; }
+        if (r.already_exists) { setSt('already'); setNote(TX('Bạn đã có trò chơi này rồi')); return; }
         setSt('success');
-        setNote(r.message || ('Đã Kích Hoạt Thành Công Game Có AppID Là: ' + clean));
-        toast.push({ tone: 'ok', title: 'Đã kích hoạt AppID ' + clean, desc: 'Mở lại Steam để thấy game.' });
+        setNote(r.message || TX('Đã kích hoạt thành công trò chơi có AppID {id}', { id: clean }));
+        toast.push({ tone: 'ok', title: TX('Đã kích hoạt AppID {id}', { id: clean }), desc: TX('Mở lại Steam để thấy game.') });
         return;
       }
 
       setSt('error');
       const err = (r && r.error) ? String(r.error) : '';
       if (!err || /404|Không tìm thấy|file Lua|Server/i.test(err)) {
-        setNote('Trên Server Hiện Giờ Không Có Game Nào Có AppID Là: ' + clean);
+        setNote(TX('Máy chủ hiện chưa có trò chơi nào mang AppID {id}', { id: clean }));
       } else {
         setNote(err);
       }
@@ -403,7 +417,7 @@
     const tone = st === 'success' ? 'ok' : st === 'already' ? 'warn' : 'bad';
 
     return (
-      <ServiceCard card={card} note={note ? <Note tone={tone}>{note}</Note> : null}>
+      <ServiceCard card={card} note={note ? <Note tone={tone}>{stripTone(note)}</Note> : null}>
         <div className="sc__appid">
           <input
             type="text"
@@ -411,20 +425,20 @@
             value={appid}
             onChange={function (e) { setAppid(e.target.value.replace(/[^0-9]/g, '').slice(0, 10)); }}
             onKeyDown={function (e) { if (e.key === 'Enter') click(); }}
-            placeholder="Nhập AppID, ví dụ 1245620"
+            placeholder={TX('Nhập AppID, ví dụ 1245620')}
             spellCheck="false"
             disabled={st === 'activating'}
           />
           <button className="nx-btn nx-btn--ghost" style={{ height: 40, flex: 'none' }}
                   onClick={function () { openExternal('https://store.steampowered.com/search/?term=' + encodeURIComponent(appid || '')); }}
-                  title="Tra AppID trên Steam">
+                  title={TX('Tra AppID trên Steam')}>
             <i className="ph-bold ph-magnifying-glass"></i>
           </button>
         </div>
         <button className="nx-btn nx-btn--accent nx-btn--full nx-btn--lg" onClick={click} disabled={st === 'activating'}>
           {st === 'activating'
-            ? <Busy label="Đang kích hoạt..." />
-            : <React.Fragment><i className="ph-fill ph-lightning"></i>KÍCH HOẠT NGAY</React.Fragment>}
+            ? <Busy label={TX('Đang kích hoạt...')} />
+            : <React.Fragment><i className="ph-fill ph-lightning"></i>{TX('KÍCH HOẠT NGAY')}</React.Fragment>}
         </button>
       </ServiceCard>
     );
@@ -460,44 +474,44 @@
       setNote('');
 
       if (st === 'installed') {
-        if (!hasApi('uninstall_fluenty')) { setNote(NO_APP); return; }
+        if (!hasApi('uninstall_fluenty')) { setNote(noApp()); return; }
         setSt('uninstalling');
         const r = await callApi('uninstall_fluenty');
-        if (r && r.success) { setSt('idle'); setNote('Đã gỡ Fluenty UI thành công!'); return; }
+        if (r && r.success) { setSt('idle'); setNote(tagTone('ok', TX('Đã gỡ Fluenty UI thành công!'))); return; }
         setSt('installed');
-        setNote((r && r.error) || 'Lỗi gỡ cài đặt Fluenty UI.');
+        setNote((r && r.error) || tagTone('bad', TX('Lỗi gỡ cài đặt Fluenty UI.')));
         return;
       }
 
       if (st !== 'idle') return;
-      if (!hasApi('install_fluenty')) { setNote(NO_APP); return; }
+      if (!hasApi('install_fluenty')) { setNote(noApp()); return; }
       setSt('installing');
       const r = await callApi('install_fluenty');
       if (r && r.already) { setSt('installed'); return; }
       if (r && r.success) {
         setSt('installed');
-        setNote('Đã cài đặt Fluenty UI thành công! Steam đã tự khởi chạy lại.');
-        toast.push({ tone: 'ok', title: 'Fluenty UI đã bật', desc: 'Steam đã tự khởi chạy lại.' });
+        setNote(tagTone('ok', TX('Đã cài đặt Fluenty UI thành công! Steam đã tự khởi chạy lại.')));
+        toast.push({ tone: 'ok', title: TX('Fluenty UI đã bật'), desc: TX('Steam đã tự khởi chạy lại.') });
         return;
       }
       setSt('idle');
-      setNote((r && r.error) || 'Lỗi cài đặt Fluenty UI.');
+      setNote((r && r.error) || tagTone('bad', TX('Lỗi cài đặt Fluenty UI.')));
     }, [st, toast]);
 
     const busy = st === 'checking' || st === 'installing' || st === 'uninstalling';
 
     return (
-      <ServiceCard card={card} note={note ? <Note tone={/Lỗi|lỗi|Vui lòng/.test(note) ? 'bad' : 'ok'}>{note}</Note> : null}>
+      <ServiceCard card={card} note={noteBox(note)}>
         <button
           className={'nx-btn nx-btn--full nx-btn--lg ' + (st === 'installed' ? 'nx-btn--bad' : 'nx-btn--accent')}
           onClick={click}
           disabled={busy}
         >
-          {st === 'checking' ? <Busy label="Đang kiểm tra..." />
-            : st === 'installing' ? <Busy label="Đang cài đặt..." />
-            : st === 'uninstalling' ? <Busy label="Đang gỡ..." />
-            : st === 'installed' ? <React.Fragment><i className="ph-bold ph-trash"></i>GỠ CÀI ĐẶT</React.Fragment>
-            : <React.Fragment><i className="ph-fill ph-lightning"></i>KÍCH HOẠT NGAY</React.Fragment>}
+          {st === 'checking' ? <Busy label={TX('Đang kiểm tra...')} />
+            : st === 'installing' ? <Busy label={TX('Đang cài đặt...')} />
+            : st === 'uninstalling' ? <Busy label={TX('Đang gỡ...')} />
+            : st === 'installed' ? <React.Fragment><i className="ph-bold ph-trash"></i>{TX('GỠ CÀI ĐẶT')}</React.Fragment>
+            : <React.Fragment><i className="ph-fill ph-lightning"></i>{TX('KÍCH HOẠT NGAY')}</React.Fragment>}
         </button>
       </ServiceCard>
     );
@@ -508,16 +522,16 @@
      ========================================================================== */
 
   function IntegrateContent() {
+    useLang();
     const byId = {};
     CARDS.forEach(function (c) { byId[c.id] = c; });
 
     return (
       <div className="nx-page">
         <header className="ig__hero">
-          <h1 className="ig__title">Hệ thống dịch vụ tích hợp</h1>
+          <h1 className="ig__title">{TX('Hệ thống dịch vụ tích hợp')}</h1>
           <p className="ig__sub">
-            Năm tiện ích chạy trực tiếp trên máy bạn: đồng bộ save, cài bản Việt hóa,
-            mở khóa game bằng AppID và thay giao diện Steam — tất cả chỉ một lần bấm.
+            {TX('Năm tiện ích chạy trực tiếp trên máy bạn: đồng bộ save, cài bản Việt hóa, mở khóa game bằng AppID và thay giao diện Steam — tất cả chỉ một lần bấm.')}
           </p>
         </header>
 
@@ -533,9 +547,9 @@
           <button className="bn bn--discord" onClick={function () { openExternal(DISCORD_URL); }}>
             <span className="bn__ico"><i className="fa-brands fa-discord"></i></span>
             <span style={{ textAlign: 'left' }}>
-              <span className="bn__t" style={{ display: 'block' }}>CẦN THÊM GAME HOẶC GẶP LỖI?</span>
+              <span className="bn__t" style={{ display: 'block' }}>{TX('CẦN THÊM GAME HOẶC GẶP LỖI?')}</span>
               <span className="bn__d" style={{ display: 'block' }}>
-                Gửi yêu cầu trong Discord, đội hỗ trợ sẽ xử lý trực tiếp
+                {TX('Gửi yêu cầu trong Discord, đội hỗ trợ sẽ xử lý trực tiếp')}
               </span>
             </span>
             <i className="bn__go ph-bold ph-arrow-up-right"></i>

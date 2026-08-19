@@ -214,3 +214,38 @@
   .hero__bg { opacity: 1 !important; transform: none !important; }
   .hero__dot i { width: 100% !important; }
 }
+
+/* ============================================================================
+   BO CHU THEO NGON NGU
+   Moi thu tieng co mot bo chu hop mat rieng. Tieng Viet giu nguyen Be Vietnam
+   Pro vi no ve dau thanh dep nhat. Tieng Anh / Tay Ban Nha / Phap doi sang
+   Inter cho phan chu chay va Outfit cho tieu de — net hon, khoang chu chat hon
+   khi khong con dau. Tieng Nhat dung Noto Sans JP, chi duoc tai ve khi nguoi
+   dung thuc su chon tieng Nhat nen khong lam cham luc mo ung dung.
+   ========================================================================== */
+
+html[data-lang="en"],
+html[data-lang="es"],
+html[data-lang="fr"] {
+  --f-display: 'Outfit', 'Inter', system-ui, sans-serif;
+  --f-ui:      'Inter', 'Be Vietnam Pro', system-ui, sans-serif;
+  --f-num:     'Inter', system-ui, sans-serif;
+}
+
+html[data-lang="ja"] {
+  --f-display: 'Outfit', 'Noto Sans JP', 'Be Vietnam Pro', system-ui, sans-serif;
+  --f-ui:      'Noto Sans JP', 'Inter', system-ui, sans-serif;
+  --f-num:     'Inter', 'Noto Sans JP', system-ui, sans-serif;
+}
+
+/* Chu Nhat khong co chu hoa nen cac nhan viet hoa toan bo phai bo gian chu
+   rong, neu khong cac ky tu se roi rac ra trong rat te. */
+html[data-lang="ja"] .gc__gen,
+html[data-lang="ja"] .gc__flag,
+html[data-lang="ja"] .sh__sub,
+html[data-lang="ja"] .gd__eyebrow,
+html[data-lang="ja"] .isvc__badge,
+html[data-lang="ja"] .uc__state,
+html[data-lang="ja"] .uc__unit {
+  letter-spacing: 0.02em;
+}

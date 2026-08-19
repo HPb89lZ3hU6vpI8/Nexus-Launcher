@@ -253,14 +253,62 @@ function parseSysreq(htmlStr) {
   return Object.keys(out).length ? out : null;
 }
 
-// Dau thanh + nguyen am rieng cua tieng Viet -> doan xem Steam da dich chua.
+// Dau thanh + nguyen am rieng cua tieng Viet.
 const VI_MARK =
   /[ăâđêôơưĂÂĐÊÔƠƯáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]/g;
 
-function isVietnamese(s) {
-  if (!s) return false;
-  const hits = String(s).match(VI_MARK);
-  return !!hits && hits.length >= 3;
+// Hiragana + katakana: chi tieng Nhat moi co, gap la chac chan.
+const JA_KANA = /[\u3040-\u30ff]/g;
+
+// Hu tu dac trung — dem xem chiem bao nhieu phan tram so tu trong bai.
+const ES_SET = new Set(
+  ('el la los las un una unos unas del al que de en y con por para como mas pero ' +
+   'tambien su sus este esta estos estas juego jugador jugadores mundo puedes ' +
+   'tus donde cuando todo todos ser hacer').split(' ')
+);
+const FR_SET = new Set(
+  ('le la les des une un du au aux de et en que qui pour avec dans est sur plus ' +
+   'vous votre vos ce cette ces son ses par ne pas tout tous jeu joueur joueurs ' +
+   'monde pouvez ou etre faire').split(' ')
+);
+
+function markHits(s, re) {
+  const m = String(s).match(re);
+  return m ? m.length : 0;
+}
+
+// Bo dau roi cat thanh tu — de doi chieu voi hai bang hu tu o tren.
+function bareWords(s) {
+  return (
+    String(s)
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .match(/[a-z]+/g) || []
+  );
+}
+
+// Tra ve ma ngon ngu cua doan van, gioi han trong 5 thu tieng giao dien dang co.
+// Giao dien dua vao ket qua nay de biet co can goi /api/translate hay khong.
+function detectLang(s) {
+  const t = String(s || '');
+  if (!t) return '';
+  if (markHits(t, JA_KANA) >= 3) return 'ja';
+  if (markHits(t, VI_MARK) >= 3) return 'vi';
+
+  const w = bareWords(t);
+  if (w.length >= 25) {
+    let es = 0;
+    let fr = 0;
+    for (const x of w) {
+      if (ES_SET.has(x)) es++;
+      if (FR_SET.has(x)) fr++;
+    }
+    if (es > fr && es / w.length >= 0.06) return 'es';
+    if (fr > es && fr / w.length >= 0.06) return 'fr';
+  }
+  return 'en';
 }
 
 // Steam tra hls_h264 (chuoi .m3u8) hoac mp4/webm (chuoi HOAC object {480, max}).
@@ -397,10 +445,10 @@ module.exports = async (req, res) => {
       about: about.length > 4000 ? about.slice(0, 4000).trim() + '…' : about,
       // Khuon co cau truc: giu tieu de, danh sach VA anh chen giua bai.
       about_rich: aboutRich,
-      // Nhieu game khong co trang cua hang tieng Viet -> Steam van tra tieng Anh.
-      // Giao dien dua vao co nay de goi /api/translate.
-      about_lang: isVietnamese(about) ? 'vi' : 'en',
-      desc_lang: isVietnamese(short) ? 'vi' : 'en',
+      // Nhieu game khong co trang cua hang o thu tieng dang chon -> Steam tra
+      // tieng Anh. Giao dien so ma nay voi ngon ngu dang dung de goi /api/translate.
+      about_lang: detectLang(about),
+      desc_lang: detectLang(short),
 
       developers: Array.isArray(d.developers) ? d.developers.slice(0, 6) : [],
       publishers: Array.isArray(d.publishers) ? d.publishers.slice(0, 6) : [],

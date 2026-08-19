@@ -14,7 +14,7 @@ const {
   getGamePlatform, isOnlineGame, customAppIdOf,
   coverSources, useCountdown, useReveal, prefersCalm,
   vnDate, vnTime, vnWeekday, mergeRelease,
-  Img
+  Img, TX, useLang
 } = window.NX;
 
 /* ----------------------------------------------------------------------------
@@ -24,8 +24,36 @@ const {
 function PlatformMark({ platform }) {
   const p = PLATFORMS.find(x => x.id === platform) || PLATFORMS[1];
   return (
-    <div className="gc__plat" title={p.label} style={{ color: p.tone }}>
+    <div className="gc__plat" title={TX(p.label)} style={{ color: p.tone }}>
       <i className={p.ico}></i>
+    </div>
+  );
+}
+
+/* ----------------------------------------------------------------------------
+   HUY HIEU DIEM DANH GIA TREN ANH
+   Truoc day la mot the chu canh theo duong chan chu (baseline) trong mot khung
+   cao co dinh — kieu canh do day chu len sat mep tren, nen nhin nhu bi lech len
+   tran. Nay khung canh giua, con so va dau % nam trong mot nhom rieng, va them
+   mot vong cung nho doc duoc ty le chi bang mot cai liec.
+   -------------------------------------------------------------------------- */
+
+function ScoreChip({ percent, tone, label }) {
+  const n = pctNum(percent);
+  if (n === null) return null;
+  const p = Math.max(0, Math.min(100, n));
+  const R = 5.4;
+  const C = 2 * Math.PI * R;
+  return (
+    <div className={'gc__score gc__score--' + tone} title={label || ''}>
+      <svg className="gc__gauge" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+        <circle className="gc__gauge-t" cx="7" cy="7" r={R} />
+        <circle className="gc__gauge-h" cx="7" cy="7" r={R}
+                strokeDasharray={C} strokeDashoffset={C * (1 - p / 100)} />
+        <circle className="gc__gauge-v" cx="7" cy="7" r={R}
+                strokeDasharray={C} strokeDashoffset={C * (1 - p / 100)} />
+      </svg>
+      <span className="gc__score-n"><b>{Math.round(p)}</b><em>%</em></span>
     </div>
   );
 }
@@ -34,53 +62,51 @@ function PlatformMark({ platform }) {
    THE GAME (luoi)
    -------------------------------------------------------------------------- */
 
-function GameCard({ game, onOpen }) {
+function GameCard({ game, onOpen, eager }) {
+  useLang();
   const tone = reviewTone(game.percent, game.reviewText);
-  const n = pctNum(game.percent);
   const count = reviewCountNum(game.reviewCount);
   const isCustom = !!customAppIdOf(game);
   const sources = useMemo(() => coverSources(game.appId), [game.appId]);
+  /* The loai dau tien lam nhan phu — lap khoang trong ben phai ten tro choi */
+  const genre = (game.tags && game.tags[0]) || '';
 
   return (
     <button className="gc" onClick={() => onOpen(game)} title={game.title}>
       <div className="gc__shot">
-        <Img sources={sources} alt={game.title} imgClass="gc__img" />
+        <Img sources={sources} alt={game.title} imgClass="gc__img" eager={eager} />
 
         <div className="gc__flags">
           {game.redeem && (
             <span className="nx-badge nx-badge--ok">
-              <i className="ph-fill ph-key"></i>KÍCH HOẠT
+              <i className="ph-fill ph-key"></i>{TX('KÍCH HOẠT')}
             </span>
           )}
           {isCustom && (
             <span className="nx-badge nx-badge--warn">
-              <i className="ph-fill ph-hard-drives"></i>NGUỒN RIÊNG
+              <i className="ph-fill ph-hard-drives"></i>{TX('NGUỒN RIÊNG')}
             </span>
           )}
           {game.viethoa && (
             <span className="nx-badge nx-badge--gold">
-              <i className="ph-fill ph-translate"></i>VIỆT HÓA
+              <i className="ph-fill ph-translate"></i>{TX('VIỆT HÓA')}
             </span>
           )}
         </div>
 
         <PlatformMark platform={getGamePlatform(game)} />
 
-        <div className="gc__play"><i className="ph-fill ph-caret-right"></i></div>
-
-        {n !== null && (
-          <div className={'gc__score gc__score--' + tone}
-               title={game.reviewText || ''}>
-            <b>{Math.round(n)}</b><em>%</em>
-          </div>
-        )}
+        <ScoreChip percent={game.percent} tone={tone} label={TX(game.reviewText)} />
       </div>
 
       <div className="gc__body">
-        <div className="gc__title nx-clamp-2">{game.title}</div>
+        <div className="gc__head">
+          <div className="gc__title nx-clamp-2">{game.title}</div>
+          {genre && <span className="gc__gen">{TX(genre)}</span>}
+        </div>
         <div className="gc__meta">
-          <span className={'gc__rev gc__rev--dot gc__rev--' + tone}>{game.reviewText}</span>
-          {count > 0 && <span className="gc__revn">{fmtCount(count)}<em>đánh giá</em></span>}
+          <span className={'gc__rev gc__rev--dot gc__rev--' + tone}>{TX(game.reviewText)}</span>
+          {count > 0 && <span className="gc__revn">{fmtCount(count)}<em>{TX('đánh giá')}</em></span>}
         </div>
       </div>
     </button>
@@ -92,6 +118,7 @@ function GameCard({ game, onOpen }) {
    -------------------------------------------------------------------------- */
 
 function GameRow({ game, onOpen }) {
+  useLang();
   const tone = reviewTone(game.percent, game.reviewText);
   const n = pctNum(game.percent);
   const count = reviewCountNum(game.reviewCount);
@@ -105,19 +132,19 @@ function GameRow({ game, onOpen }) {
         <div className="glr__title">{game.title}</div>
         <div className="glr__sub">
           <span className="nx-tag" style={{ color: plat.tone }}>
-            <i className={plat.ico}></i>{plat.label}
+            <i className={plat.ico}></i>{TX(plat.label)}
           </span>
           {n !== null && (
             <span className={'gc__rev gc__rev--dot gc__rev--' + tone}>
-              <b className="gc__rev__n">{Math.round(n)}%</b> · {game.reviewText}
+              <b className="gc__rev__n">{Math.round(n)}%</b> · {TX(game.reviewText)}
             </span>
           )}
-          {count > 0 && <span className="gc__revn">{fmtCount(count)}<em>đánh giá</em></span>}
+          {count > 0 && <span className="gc__revn">{fmtCount(count)}<em>{TX('đánh giá')}</em></span>}
         </div>
       </div>
       <div className="glr__side">
-        {game.viethoa && <span className="nx-badge nx-badge--gold"><i className="ph-fill ph-translate"></i>VIỆT HÓA</span>}
-        {game.redeem && <span className="nx-badge nx-badge--ok"><i className="ph-fill ph-key"></i>KÍCH HOẠT</span>}
+        {game.viethoa && <span className="nx-badge nx-badge--gold"><i className="ph-fill ph-translate"></i>{TX('VIỆT HÓA')}</span>}
+        {game.redeem && <span className="nx-badge nx-badge--ok"><i className="ph-fill ph-key"></i>{TX('KÍCH HOẠT')}</span>}
         {isOnlineGame(game) && <span className="nx-badge nx-badge--info"><i className="ph-fill ph-globe"></i>ONLINE</span>}
         <i className="ph-bold ph-caret-right glr__go"></i>
       </div>
@@ -135,7 +162,7 @@ function GameRow({ game, onOpen }) {
 /* "18/08/2026 · 22:00" theo gio Viet Nam, bat ke may dang o mui gio nao */
 function fmtReleaseDate(iso) {
   const d = vnDate(iso);
-  return d ? d + ' · ' + vnTime(iso) : 'Đang cập nhật';
+  return d ? d + ' · ' + vnTime(iso) : TX('Đang cập nhật');
 }
 
 /* Bao nhieu phan tram chang duong tu luc cong bo den ngay ra mat da di qua.
@@ -143,6 +170,7 @@ function fmtReleaseDate(iso) {
 const LEAD_MS = 120 * 86400000;   /* quy uoc: dem lui 120 ngay */
 
 function UpcomingCard({ game, steam }) {
+  useLang();
   const rel = useMemo(function () { return mergeRelease(game, steam); }, [game, steam]);
   const t = useCountdown(rel.target);
   const done = t.done || rel.released;
@@ -163,15 +191,15 @@ function UpcomingCard({ game, steam }) {
         <Img sources={sources} alt={game.title} imgClass="gc__img" />
         <div className="uc__tag">
           {done
-            ? <span className="nx-badge nx-badge--ok"><i className="ph-fill ph-rocket-launch"></i>ĐÃ RA MẮT</span>
+            ? <span className="nx-badge nx-badge--ok"><i className="ph-fill ph-rocket-launch"></i>{TX('ĐÃ RA MẮT')}</span>
             : soon
-              ? <span className="nx-badge nx-badge--warn"><i className="ph-fill ph-fire"></i>SẮP TỚI</span>
-              : <span className="nx-badge nx-badge--br"><i className="ph-fill ph-hourglass-high"></i>SẮP RA MẮT</span>}
+              ? <span className="nx-badge nx-badge--warn"><i className="ph-fill ph-fire"></i>{TX('SẮP TỚI')}</span>
+              : <span className="nx-badge nx-badge--br"><i className="ph-fill ph-hourglass-high"></i>{TX('SẮP RA MẮT')}</span>}
         </div>
         {rel.moved !== 0 && (
-          <div className="uc__moved" title={'Steam đã dời lịch ' + Math.abs(rel.moved) + ' ngày'}>
+          <div className="uc__moved" title={TX('Steam đã dời lịch {n} ngày', { n: Math.abs(rel.moved) })}>
             <i className="ph-bold ph-arrows-clockwise"></i>
-            {rel.moved > 0 ? 'DỜI LẠI' : 'SỚM HƠN'}
+            {rel.moved > 0 ? TX('DỜI LẠI') : TX('SỚM HƠN')}
           </div>
         )}
         <div className="uc__glow" aria-hidden="true" />
@@ -185,13 +213,13 @@ function UpcomingCard({ game, steam }) {
             <i className="ph-bold ph-calendar-blank"></i>
             {fmtReleaseDate(rel.target)}
           </span>
-          <span className="uc__tz" title="Múi giờ Việt Nam (UTC+7)">GMT+7</span>
+          <span className="uc__tz" title={TX('Múi giờ Việt Nam (UTC+7)')}>GMT+7</span>
         </div>
-        {wd && <div className="uc__wd">{wd}{rel.source === 'steam' ? ' · theo Steam' : ''}</div>}
+        {wd && <div className="uc__wd">{wd}{rel.source === 'steam' ? ' · ' + TX('theo Steam') : ''}</div>}
 
         {done ? (
           <div className="cd--done">
-            <i className="ph-fill ph-check-circle"></i>ĐÃ PHÁT HÀNH
+            <i className="ph-fill ph-check-circle"></i>{TX('ĐÃ PHÁT HÀNH')}
           </div>
         ) : (
           <React.Fragment>
@@ -199,7 +227,7 @@ function UpcomingCard({ game, steam }) {
               {[['NGÀY', t.d], ['GIỜ', t.h], ['PHÚT', t.m], ['GIÂY', t.s]].map(([l, v], i) => (
                 <div className="cd__cell" key={l} style={{ '--i': i }}>
                   <span className="cd__n" key={l + v}>{String(v).padStart(2, '0')}</span>
-                  <span className="cd__l">{l}</span>
+                  <span className="cd__l">{TX(l)}</span>
                 </div>
               ))}
             </div>
@@ -342,7 +370,7 @@ function Shelf({ title, icon, sub, children, action }) {
       <div className={'shelf' + (edge.start ? ' at-start' : '') + (edge.end ? ' at-end' : '')}
            style={{ marginLeft: 'calc(var(--pad-page) * -1)', marginRight: 'calc(var(--pad-page) * -1)' }}>
         <button className="shelf__nav shelf__nav--l" onClick={() => nudge(-1)}
-                disabled={edge.start} aria-label="Lùi lại">
+                disabled={edge.start} aria-label={TX('Lùi lại')}>
           <i className="ph-bold ph-caret-left"></i>
         </button>
         <div className={'shelf__track' + (grab ? ' is-grab' : '')}
@@ -355,7 +383,7 @@ function Shelf({ title, icon, sub, children, action }) {
           {children}
         </div>
         <button className="shelf__nav shelf__nav--r" onClick={() => nudge(1)}
-                disabled={edge.end} aria-label="Tiến tới">
+                disabled={edge.end} aria-label={TX('Tiến tới')}>
           <i className="ph-bold ph-caret-right"></i>
         </button>
       </div>
@@ -377,12 +405,13 @@ const GENRES = [
 ];
 
 function GenreCard({ genre, count, onPick }) {
+  useLang();
   return (
     <button className="gen" style={{ '--gen-grad': genre.grad }} onClick={() => onPick(genre.tag)}>
       <i className={'gen__ico ' + genre.ico}></i>
       <div className="gen__txt">
-        <div className="gen__t">{genre.tag}</div>
-        <div className="gen__n">{count} trò chơi</div>
+        <div className="gen__t">{TX(genre.tag)}</div>
+        <div className="gen__n">{TX('{n} trò chơi', { n: count })}</div>
       </div>
     </button>
   );
@@ -393,7 +422,7 @@ function GenreCard({ genre, count, onPick }) {
    -------------------------------------------------------------------------- */
 
 Object.assign(window.NX, {
-  PlatformMark, GameCard, GameRow, UpcomingCard, Shelf, GENRES, GenreCard
+  PlatformMark, ScoreChip, GameCard, GameRow, UpcomingCard, Shelf, GENRES, GenreCard
 });
 
 })();

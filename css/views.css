@@ -769,30 +769,45 @@
   background: linear-gradient(90deg, var(--line-mid), transparent);
 }
 
-/* Nut chuyen tieng Viet / ban goc */
-.gd__seg {
+/* Dai so lieu ve bai gioi thieu: dai bao nhieu, kem may anh, dich tu dau ra.
+   Thay cho cap nut "Tieng Viet / Ban goc" cu — gio ngon ngu chon o thanh tren. */
+.gd__meta {
   flex: none;
   display: inline-flex;
-  gap: 2px;
+  align-items: center;
   padding: 3px;
   border-radius: var(--r-pill);
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.28);
   border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
-.gd__seg button {
+.gd__meta__i {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   height: 24px;
   padding: 0 11px;
   border-radius: var(--r-pill);
+  font-family: var(--f-ui);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 720;
+  letter-spacing: 0.008em;
+  white-space: nowrap;
   color: var(--tx-faint);
-  transition: color var(--t-fast), background var(--t-fast), box-shadow var(--t-fast);
+  cursor: default;
+  transition: color var(--t-fast), background var(--t-fast);
 }
-.gd__seg button:hover { color: var(--tx); }
-.gd__seg button.is-on {
-  color: #05121b;
-  background: var(--grad-brand);
-  box-shadow: 0 2px 9px var(--br-1-soft);
+.gd__meta__i i { font-size: 12.5px; opacity: 0.82; }
+.gd__meta__i + .gd__meta__i { box-shadow: inset 1px 0 0 var(--line); }
+.gd__meta__i:hover { color: var(--tx); background: rgba(255, 255, 255, 0.05); }
+.gd__meta__i.is-tr { color: var(--br-1); }
+.gd__meta__i.is-ok { color: var(--ok); }
+.gd__meta__i.is-tr i,
+.gd__meta__i.is-ok i { opacity: 1; }
+
+/* Khung hep thi bo dai so lieu cho tieu de tho */
+@media (max-width: 900px) {
+  .gd__meta { display: none; }
 }
 .gd__trwait {
   flex: none;
@@ -1073,34 +1088,66 @@ video.gd__media.is-on { opacity: 1; }
 .rev__ring {
   position: relative;
   flex: none;
-  display: grid;
-  place-items: center;
-  filter: drop-shadow(0 2px 9px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5));
 }
-.rev__ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.rev__ring svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+  overflow: visible;
+}
 .rev__ring circle { fill: none; stroke-linecap: round; }
-.rev__ring .rev__trk { stroke: rgba(255, 255, 255, 0.07); }
-.rev__ring .rev__trk { stroke: rgba(255, 255, 255, 0.09); }
-.rev__ring .rev__val {
-  transition: stroke-dashoffset 1.1s var(--e-out);
+/* Quang mo ngoai cung — tao chieu sau, khong doc duoc thanh mot vong rieng */
+.rev__ring .rev__halo {
+  stroke: currentColor;
+  stroke-width: 1;
+  opacity: 0.16;
 }
+.rev__ring .rev__trk { stroke: rgba(255, 255, 255, 0.085); }
+.rev__ring .rev__val {
+  transition: stroke-dashoffset 1.15s var(--e-out);
+  filter: drop-shadow(0 0 5px color-mix(in srgb, currentColor 55%, transparent));
+}
+/* Dau kim sang o cuoi cung — quay cung nhip voi cung mau */
+.rev__hand { transition: transform 1.15s var(--e-out); }
+.rev__ring .rev__end {
+  fill: #fff;
+  stroke: none;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+/* Con so o giua: dat giua bang flex, khong dung vertical-align nua */
 .rev__pct {
-  position: relative;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--f-num);
-  font-size: 20px;
+  line-height: 1;
+  pointer-events: none;
+}
+.rev__pct b {
+  font-size: 21px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.045em;
+  /* Khoang cach chu am con duoc cong them mot lan SAU ky tu cuoi cung, khien
+     ca nhom chu bi keo lech sang trai. Tra lai dung khoang thua do. */
+  margin-right: 0.045em;
+  line-height: 1;
   color: var(--tx-hi);
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+  text-shadow: 0 1px 7px rgba(0, 0, 0, 0.6);
 }
 .rev__pct em {
+  align-self: flex-start;
+  margin-top: 0.28em;
+  margin-left: 1.5px;
   font-style: normal;
-  font-size: 10px;
-  font-weight: 700;
-  margin-left: 1px;
-  vertical-align: 5px;
-  opacity: 0.5;
+  font-size: 9.5px;
+  font-weight: 750;
+  line-height: 1;
+  color: currentColor;
+  opacity: 0.62;
 }
 .rev__main { position: relative; flex: 1; min-width: 0; }
 .rev__txt {
