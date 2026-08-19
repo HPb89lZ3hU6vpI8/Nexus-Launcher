@@ -1,0 +1,582 @@
+/* ============================================================================
+   NEXUS LAUNCHER — THE GAME, KE NGANG, LUOI THU VIEN, THE SAP RA MAT
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   THE GAME (dung chung cho luoi thu vien va ke ngang)
+   Ti le anh header Steam = 460x215 (~2.14:1). Giu dung ti le, khong bao gio meo.
+   -------------------------------------------------------------------------- */
+
+.gc {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transform: translateZ(0);
+  transition:
+    transform var(--t-base) var(--e-out),
+    box-shadow var(--t-base) var(--e-out),
+    border-color var(--t-base) var(--e-out),
+    background var(--t-base) var(--e-out);
+}
+.gc:hover {
+  transform: translateY(-6px);
+  background: var(--bg-raised);
+  border-color: var(--line-strong);
+  box-shadow: var(--sh-3);
+  z-index: 2;
+}
+
+/* Vien sang chay quanh the khi hover — lop gradient duoi mask */
+.gc::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(58, 216, 255, 0.85), rgba(139, 108, 255, 0.55) 42%, transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--t-base) var(--e-out);
+  pointer-events: none;
+  z-index: 3;
+}
+.gc:hover::before { opacity: 1; }
+
+.gc__shot {
+  position: relative;
+  aspect-ratio: 460 / 215;
+  overflow: hidden;
+  background: var(--bg-sunken);
+  flex: none;
+}
+.gc__img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transform: scale(1.03);
+  transition: opacity 480ms var(--e-out), transform 620ms var(--e-out);
+}
+.gc__img.is-in { opacity: 1; transform: scale(1); }
+.gc:hover .gc__img { transform: scale(1.075); }
+
+/* Lop phu chuyen sang khi hover */
+.gc__shot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(5, 7, 11, 0.9) 0%, rgba(5, 7, 11, 0.12) 46%, transparent 72%);
+  opacity: 0.72;
+  transition: opacity var(--t-base) var(--e-out);
+  pointer-events: none;
+}
+.gc:hover .gc__shot::after { opacity: 0.95; }
+
+.gc__skel { position: absolute; inset: 0; }
+
+/* Nut PHAT hien ra giua anh khi hover */
+.gc__play {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 46px; height: 46px;
+  margin: -23px 0 0 -23px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  font-size: 16px;
+  opacity: 0;
+  transform: scale(0.65);
+  transition: opacity var(--t-base) var(--e-out), transform var(--t-base) var(--e-spring);
+  pointer-events: none;
+  z-index: 2;
+}
+.gc:hover .gc__play { opacity: 1; transform: scale(1); }
+
+/* Dai huy hieu goc tren-trai */
+.gc__flags {
+  position: absolute;
+  left: 9px; top: 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  z-index: 2;
+}
+
+/* Huy hieu nen tang goc tren-phai */
+.gc__plat {
+  position: absolute;
+  right: 9px; top: 9px;
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  border-radius: 8px;
+  background: rgba(5, 7, 11, 0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  font-size: 13px;
+  color: var(--tx-hi);
+  z-index: 2;
+}
+
+/* Dai danh gia noi tren anh, goc duoi-phai */
+.gc__score {
+  position: absolute;
+  right: 9px; bottom: 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: var(--r-xs);
+  background: rgba(5, 7, 11, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: var(--f-num);
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  z-index: 2;
+}
+.gc__score i { font-size: 11px; }
+.gc__score--pos { color: var(--ok); }
+.gc__score--mix { color: var(--warn); }
+.gc__score--neg { color: var(--bad); }
+
+.gc__body {
+  padding: 12px 13px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+.gc__title {
+  font-family: var(--f-display);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--tx-hi);
+  letter-spacing: -0.01em;
+  min-height: 2.6em;
+  transition: color var(--t-fast);
+}
+.gc:hover .gc__title { color: #fff; }
+
+.gc__meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+.gc__rev {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.gc__rev--pos { color: var(--ok); }
+.gc__rev--mix { color: var(--warn); }
+.gc__rev--neg { color: var(--bad); }
+.gc__revn {
+  font-family: var(--f-num);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--tx-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------------------------
+   LUOI THU VIEN
+   -------------------------------------------------------------------------- */
+
+.nx-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  gap: 20px;
+  padding: 0 var(--pad-page) 48px;
+}
+.nx-grid > * { animation: nx-rise 460ms var(--e-out) both; }
+/* Do tre theo vi tri — tao hieu ung do vao man hinh */
+.nx-grid > *:nth-child(1)  { animation-delay: 0ms; }
+.nx-grid > *:nth-child(2)  { animation-delay: 26ms; }
+.nx-grid > *:nth-child(3)  { animation-delay: 52ms; }
+.nx-grid > *:nth-child(4)  { animation-delay: 78ms; }
+.nx-grid > *:nth-child(5)  { animation-delay: 104ms; }
+.nx-grid > *:nth-child(6)  { animation-delay: 130ms; }
+.nx-grid > *:nth-child(7)  { animation-delay: 156ms; }
+.nx-grid > *:nth-child(8)  { animation-delay: 182ms; }
+.nx-grid > *:nth-child(9)  { animation-delay: 208ms; }
+.nx-grid > *:nth-child(10) { animation-delay: 234ms; }
+.nx-grid > *:nth-child(11) { animation-delay: 260ms; }
+.nx-grid > *:nth-child(12) { animation-delay: 286ms; }
+.nx-grid > *:nth-child(n+13) { animation-delay: 300ms; }
+
+/* Che do danh sach */
+.nx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 0 var(--pad-page) 48px;
+}
+.nx-list > * { animation: nx-rise 380ms var(--e-out) both; }
+
+.glr {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 9px 15px 9px 9px;
+  border-radius: var(--r-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background var(--t-base) var(--e-out), border-color var(--t-base), transform var(--t-fast) var(--e-out);
+}
+.glr:hover { background: var(--bg-raised); border-color: var(--line-strong); transform: translateX(4px); }
+.glr__shot {
+  width: 132px;
+  flex: none;
+  aspect-ratio: 460 / 215;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--bg-sunken);
+  position: relative;
+}
+.glr__shot img { width: 100%; height: 100%; object-fit: cover; }
+.glr__main { flex: 1; min-width: 0; }
+.glr__title {
+  font-family: var(--f-display);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--tx-hi);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.glr__sub { display: flex; align-items: center; gap: 9px; margin-top: 4px; flex-wrap: wrap; }
+.glr__side { flex: none; display: flex; align-items: center; gap: 9px; }
+.glr__go { color: var(--tx-faint); font-size: 17px; transition: color var(--t-fast), transform var(--t-fast) var(--e-out); }
+.glr:hover .glr__go { color: var(--br-1); transform: translateX(3px); }
+
+/* ----------------------------------------------------------------------------
+   KE NGANG CO CUON (SHELF)
+   -------------------------------------------------------------------------- */
+
+.shelf { position: relative; }
+
+.shelf__track {
+  display: grid;
+  grid-auto-flow: column;
+  /* Chieu rong the tu tinh theo khung: luon thay dung N the + nua the ke tiep
+     -> nguoi dung biet ngay con noi dung, khong bao gio bi cat le vai pixel. */
+  --cols: 4;
+  grid-auto-columns: calc((100% - var(--cols) * 18px) / (var(--cols) + 0.5));
+  gap: 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--pad-page);
+  padding: 4px var(--pad-page) 18px;
+  scrollbar-width: none;
+}
+.shelf__track::-webkit-scrollbar { height: 0; }
+.shelf__track > * { scroll-snap-align: start; }
+
+/* Mo dan hai canh de bao con noi dung */
+.shelf::before,
+.shelf::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 18px;
+  width: 56px;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity var(--t-base);
+}
+.shelf::before { left: 0;  background: linear-gradient(90deg, var(--bg-app), transparent); }
+.shelf::after  { right: 0; background: linear-gradient(270deg, var(--bg-app), transparent); }
+.shelf.at-start::before { opacity: 0; }
+.shelf.at-end::after    { opacity: 0; }
+
+.shelf__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: rgba(11, 15, 23, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--line-mid);
+  color: var(--tx-hi);
+  font-size: 15px;
+  z-index: 4;
+  opacity: 0;
+  box-shadow: var(--sh-2);
+  transition: opacity var(--t-base) var(--e-out), transform var(--t-base) var(--e-out), background var(--t-fast);
+}
+.shelf:hover .shelf__nav { opacity: 1; }
+.shelf__nav:hover { background: var(--bg-raised); transform: translateY(-50%) scale(1.09); }
+.shelf__nav:disabled { opacity: 0 !important; pointer-events: none; }
+.shelf__nav--l { left: calc(var(--pad-page) - 19px); }
+.shelf__nav--r { right: calc(var(--pad-page) - 19px); }
+
+@media (max-width: 1400px) { .shelf__track { --cols: 3; } }
+@media (max-width: 1080px) { .shelf__track { --cols: 2; } }
+
+/* ----------------------------------------------------------------------------
+   THE SAP RA MAT + DEM NGUOC
+   -------------------------------------------------------------------------- */
+
+.uc {
+  position: relative;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--bg-surface);
+  border: 1px solid var(--line);
+  cursor: default;
+  transition: transform var(--t-base) var(--e-out), box-shadow var(--t-base), border-color var(--t-base);
+}
+.uc:hover { transform: translateY(-5px); border-color: var(--line-strong); box-shadow: var(--sh-3); }
+
+.uc__shot { position: relative; aspect-ratio: 460 / 215; overflow: hidden; background: var(--bg-sunken); }
+.uc__shot img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: saturate(0.72) brightness(0.66);
+  transition: filter var(--t-slow) var(--e-out), transform 700ms var(--e-out);
+}
+.uc:hover .uc__shot img { filter: saturate(1) brightness(0.86); transform: scale(1.06); }
+.uc__shot::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(5, 7, 11, 0.95), rgba(5, 7, 11, 0.2) 55%, transparent);
+}
+
+.uc__tag {
+  position: absolute;
+  left: 10px; top: 10px;
+  z-index: 2;
+}
+
+.uc__body { padding: 13px 14px 15px; }
+.uc__title {
+  font-family: var(--f-display);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--tx-hi);
+  line-height: 1.3;
+  min-height: 2.6em;
+}
+.uc__date {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tx-faint);
+}
+
+/* Dong ho dem nguoc */
+.cd { display: flex; gap: 7px; margin-top: 12px; }
+.cd__cell {
+  flex: 1;
+  text-align: center;
+  padding: 7px 3px 6px;
+  border-radius: var(--r-sm);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+  transition: border-color var(--t-base), background var(--t-base);
+}
+.uc:hover .cd__cell { border-color: rgba(58, 216, 255, 0.22); background: rgba(58, 216, 255, 0.05); }
+.cd__n {
+  display: block;
+  font-family: var(--f-num);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--tx-hi);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.cd__l {
+  display: block;
+  margin-top: 4px;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  color: var(--tx-faint);
+  text-transform: uppercase;
+}
+
+/* Da phat hanh — thay cho dong ho 00:00:00 dung im */
+.cd--done {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  border-radius: var(--r-sm);
+  background: var(--ok-soft);
+  border: 1px solid rgba(47, 224, 164, 0.3);
+  color: var(--ok);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.cd--done i { font-size: 15px; }
+
+/* ----------------------------------------------------------------------------
+   THE THE LOAI (HOME)
+   -------------------------------------------------------------------------- */
+
+.gen {
+  position: relative;
+  height: 112px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  padding: 15px;
+  text-align: left;
+  transition: transform var(--t-base) var(--e-out), box-shadow var(--t-base), border-color var(--t-base);
+}
+.gen:hover { transform: translateY(-5px) scale(1.015); border-color: var(--line-strong); box-shadow: var(--sh-3); }
+.gen::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--gen-grad, var(--grad-brand));
+  opacity: 0.22;
+  transition: opacity var(--t-base) var(--e-out), transform 700ms var(--e-out);
+  z-index: 0;
+}
+.gen:hover::before { opacity: 0.4; transform: scale(1.12); }
+.gen::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(5, 7, 11, 0.86), transparent 70%);
+  z-index: 1;
+}
+.gen__ico {
+  position: absolute;
+  right: 12px; top: 10px;
+  font-size: 42px;
+  color: rgba(255, 255, 255, 0.13);
+  z-index: 1;
+  transition: transform var(--t-base) var(--e-spring), color var(--t-base);
+}
+.gen:hover .gen__ico { transform: scale(1.16) rotate(-7deg); color: rgba(255, 255, 255, 0.25); }
+.gen__txt { position: relative; z-index: 2; }
+.gen__t {
+  font-family: var(--f-display);
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.gen__n {
+  font-family: var(--f-num);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.62);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Luoi the loai */
+.gen__grid {
+  display: grid;
+  /* Dung 6 the loai -> chia chan 6 / 3 / 2 cot, khong bao gio bo lai 1 the le */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+  padding: 0 var(--pad-page);
+}
+@media (max-width: 1560px) { .gen__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 1040px) { .gen__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.gen__grid > * { animation: nx-rise 480ms var(--e-out) both; }
+.gen__grid > *:nth-child(2) { animation-delay: 55ms; }
+.gen__grid > *:nth-child(3) { animation-delay: 110ms; }
+.gen__grid > *:nth-child(4) { animation-delay: 165ms; }
+.gen__grid > *:nth-child(5) { animation-delay: 220ms; }
+.gen__grid > *:nth-child(6) { animation-delay: 275ms; }
+
+/* Dai bang thong ke tren trang chu */
+.stat__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 14px;
+  padding: 0 var(--pad-page) 6px;
+}
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 15px 17px;
+  border-radius: var(--r-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--line);
+  transition: transform var(--t-base) var(--e-out), border-color var(--t-base), box-shadow var(--t-base);
+}
+.stat:hover { transform: translateY(-3px); border-color: var(--line-strong); box-shadow: var(--sh-2); }
+.stat__ico {
+  width: 40px; height: 40px; flex: none;
+  display: grid; place-items: center;
+  border-radius: var(--r-sm);
+  font-size: 19px;
+}
+.stat__n {
+  font-family: var(--f-num);
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--tx-hi);
+  font-variant-numeric: tabular-nums;
+}
+.stat__l {
+  margin-top: 5px;
+  font-size: 10.5px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tx-faint);
+}
+
+
+/* ----------------------------------------------------------------------------
+   HUY HIEU DAT TREN ANH GAME
+   Anh bia sang mau (vd Atomic Heart) lam chu bi chim. Dat mot lop nen toi mo
+   ben duoi, giu nguyen mau chu va vien -> luon doc duoc tren moi anh.
+   -------------------------------------------------------------------------- */
+.gc__flags .nx-badge,
+.uc__tag .nx-badge {
+  background: rgba(6, 10, 18, 0.8);
+  border-color: color-mix(in srgb, currentColor 42%, transparent);
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 999px color-mix(in srgb, currentColor 11%, transparent);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+  backdrop-filter: blur(8px) saturate(130%);
+}
+
+/* Nut bang rong het khung — the <button> mac dinh chi rong bang noi dung */
+.bn { width: 100%; }

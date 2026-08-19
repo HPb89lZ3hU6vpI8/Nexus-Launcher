@@ -1,0 +1,29 @@
+# =============================================================================
+# Nexus Launcher — repo nay CHI chua phan web ma Vercel can build/serve.
+# Moi thu khac (ma nguon Python, cookie, cache, ban dung thu) deu bi chan.
+# =============================================================================
+
+# 1) Chan tat ca
+/*
+
+# 2) Mo lai dung nhung thu can cho Vercel
+!/.gitignore
+!/index.html
+!/package.json
+!/Logo_NexusT.png
+!/README.md
+
+!/css/
+!/js/
+!/api/
+
+# 3) Trong tung thu muc cung chi cho phep dung loai file
+css/*
+!css/*.css
+
+js/*
+!js/*.js
+!js/*.jsx
+
+api/*
+!api/*.js

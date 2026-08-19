@@ -1,0 +1,453 @@
+/* ============================================================================
+   NEXUS LAUNCHER — KHUNG UNG DUNG
+   Rail trai · thanh tren · dieu huong · thu phong · phim tat · man hinh khoi dong
+   File nay chay CUOI CUNG. Phu thuoc: window.NX (core, cards, detail, views, integrate)
+   ========================================================================== */
+
+(function () {
+  'use strict';
+
+  const { useState, useEffect, useMemo, useCallback, useRef } = React;
+
+  const {
+    APP_VERSION, DISCORD_URL,
+    callApi, hasApi, openExternal,
+    ToastHost,
+    GameDetail, HomeContent, LibraryContent, NotSupported, IntegrateContent
+  } = window.NX;
+
+  /* --------------------------------------------------------------------------
+     THU PHONG — dat tren documentElement (ban cu dat tren body nen khong an)
+     ------------------------------------------------------------------------ */
+
+  const ZOOM_KEY = 'nx.zoom';
+  const ZOOM_MIN = 0.7;
+  const ZOOM_MAX = 1.4;
+  const ZOOM_STEP = 0.05;
+
+  function readZoom() {
+    try {
+      const v = parseFloat(localStorage.getItem(ZOOM_KEY));
+      if (!isNaN(v) && v >= ZOOM_MIN && v <= ZOOM_MAX) return v;
+    } catch (e) {}
+    return 1;
+  }
+
+  function clampZoom(v) {
+    return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(v * 100) / 100));
+  }
+
+  function useZoom() {
+    const [zoom, setZoom] = useState(readZoom);
+
+    useEffect(function () {
+      document.documentElement.style.zoom = zoom === 1 ? '' : String(zoom);
+      try { localStorage.setItem(ZOOM_KEY, String(zoom)); } catch (e) {}
+    }, [zoom]);
+
+    const bump = useCallback(function (d) {
+      setZoom(function (v) { return clampZoom(v + d * ZOOM_STEP); });
+    }, []);
+    const reset = useCallback(function () { setZoom(1); }, []);
+
+    useEffect(function () {
+      const onKey = function (e) {
+        if (!e.ctrlKey && !e.metaKey) return;
+        if (e.key === '+' || e.key === '=' || e.code === 'NumpadAdd') { e.preventDefault(); bump(1); }
+        else if (e.key === '-' || e.key === '_' || e.code === 'NumpadSubtract') { e.preventDefault(); bump(-1); }
+        else if (e.key === '0' || e.code === 'Numpad0') { e.preventDefault(); reset(); }
+      };
+      const onWheel = function (e) {
+        if (!e.ctrlKey && !e.metaKey) return;
+        e.preventDefault();
+        bump(e.deltaY < 0 ? 1 : -1);
+      };
+      window.addEventListener('keydown', onKey);
+      window.addEventListener('wheel', onWheel, { passive: false });
+      return function () {
+        window.removeEventListener('keydown', onKey);
+        window.removeEventListener('wheel', onWheel);
+      };
+    }, [bump, reset]);
+
+    return { zoom: zoom, bump: bump, reset: reset };
+  }
+
+  /* --------------------------------------------------------------------------
+     KHOA CAC PHIM CUA TRINH DUYET KHI CHAY TRONG UNG DUNG
+     ------------------------------------------------------------------------ */
+
+  function useDesktopLock() {
+    useEffect(function () {
+      const inApp = !!(window.pywebview);
+
+      const onCtx = function (e) {
+        if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+        e.preventDefault();
+      };
+      const onKey = function (e) {
+        if (!inApp) return;
+        const k = (e.key || '').toLowerCase();
+        if (k === 'f5' || ((e.ctrlKey || e.metaKey) && k === 'r')) { e.preventDefault(); }
+        if ((e.ctrlKey || e.metaKey) && k === 'p') { e.preventDefault(); }
+      };
+      const onDrop = function (e) { e.preventDefault(); };
+
+      document.addEventListener('contextmenu', onCtx);
+      window.addEventListener('keydown', onKey);
+      window.addEventListener('dragover', onDrop);
+      window.addEventListener('drop', onDrop);
+      return function () {
+        document.removeEventListener('contextmenu', onCtx);
+        window.removeEventListener('keydown', onKey);
+        window.removeEventListener('dragover', onDrop);
+        window.removeEventListener('drop', onDrop);
+      };
+    }, []);
+  }
+
+  /* --------------------------------------------------------------------------
+     KICH THUOC CUA SO
+     ------------------------------------------------------------------------ */
+
+  function useViewport() {
+    const [w, setW] = useState(function () { return window.innerWidth; });
+    useEffect(function () {
+      let raf = 0;
+      const on = function () {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(function () { setW(window.innerWidth); });
+      };
+      window.addEventListener('resize', on);
+      return function () { window.removeEventListener('resize', on); cancelAnimationFrame(raf); };
+    }, []);
+    return w;
+  }
+
+  /* --------------------------------------------------------------------------
+     TRANG THAI STEAM TREN THANH TREN
+     ------------------------------------------------------------------------ */
+
+  function SteamPill() {
+    const [st, setSt] = useState('checking');
+
+    const probe = useCallback(function () {
+      if (!hasApi('check_steam')) { setSt('offline'); return; }
+      setSt('checking');
+      callApi('check_steam').then(function (r) {
+        setSt(r && r.installed ? 'ok' : 'missing');
+      });
+    }, []);
+
+    useEffect(function () { probe(); }, [probe]);
+
+    const map = {
+      checking: { c: 'var(--tx-faint)', t: 'Đang kiểm tra Steam' },
+      ok:       { c: 'var(--ok)',       t: 'Steam đã sẵn sàng' },
+      missing:  { c: 'var(--warn)',     t: 'Chưa cài đặt Steam' },
+      offline:  { c: 'var(--tx-faint)', t: 'Chế độ xem trước' }
+    };
+    const m = map[st] || map.offline;
+
+    return (
+      <button className="nx-chip nx-chip--static nx-steam" onClick={probe} title="Bấm để kiểm tra lại">
+        <span className={'nx-dot' + (st === 'ok' ? ' nx-dot--live' : '')} style={{ background: m.c }} />
+        {m.t}
+      </button>
+    );
+  }
+
+  /* --------------------------------------------------------------------------
+     RAIL TRAI
+     ------------------------------------------------------------------------ */
+
+  const TABS = [
+    { id: 'home',      label: 'Trang chủ',  ico: 'ph-fill ph-house' },
+    { id: 'library',   label: 'Thư viện',   ico: 'ph-fill ph-game-controller' },
+    { id: 'integrate', label: 'Tích hợp',   ico: 'ph-fill ph-puzzle-piece' }
+  ];
+
+  function Rail({ tab, onTab, counts }) {
+    return (
+      <nav className="nx-rail">
+        <div className="nx-rail__brand" onClick={function () { onTab('home'); }}>
+          <div className="nx-rail__logo"><i className="ph-fill ph-lightning"></i></div>
+          <div className="nx-rail__word">NEXUS<span>LAUNCHER</span></div>
+        </div>
+
+        <div className="nx-rail__body nx-noscroll">
+          <div className="nx-rail__label">Điều hướng</div>
+          {TABS.map(function (t) {
+            return (
+              <button
+                key={t.id}
+                className={'nx-nav' + (tab === t.id ? ' is-on' : '')}
+                onClick={function () { onTab(t.id); }}
+              >
+                <span className="nx-nav__ico"><i className={t.ico}></i></span>
+                <span className="nx-nav__txt">{t.label}</span>
+                {counts[t.id] !== undefined && <span className="nx-nav__count">{counts[t.id]}</span>}
+              </button>
+            );
+          })}
+
+          <div className="nx-rail__label">Lối tắt</div>
+          <button className="nx-nav" onClick={function () { openExternal('https://store.steampowered.com/'); }}>
+            <span className="nx-nav__ico"><i className="fa-brands fa-steam"></i></span>
+            <span className="nx-nav__txt">Steam Store</span>
+            <i className="ph-bold ph-arrow-up-right" style={{ fontSize: 12, opacity: 0.5 }}></i>
+          </button>
+          <button className="nx-nav" onClick={function () { openExternal('https://steamdb.info/'); }}>
+            <span className="nx-nav__ico"><i className="ph-bold ph-database"></i></span>
+            <span className="nx-nav__txt">Tra cứu AppID</span>
+            <i className="ph-bold ph-arrow-up-right" style={{ fontSize: 12, opacity: 0.5 }}></i>
+          </button>
+        </div>
+
+        <div className="nx-rail__foot">
+          <button className="nx-discord" onClick={function () { openExternal(DISCORD_URL); }}>
+            <i className="fa-brands fa-discord"></i>
+            <span>Cộng đồng Discord</span>
+          </button>
+          <div className="nx-ver">v{APP_VERSION}</div>
+        </div>
+      </nav>
+    );
+  }
+
+  /* --------------------------------------------------------------------------
+     THANH TREN
+     ------------------------------------------------------------------------ */
+
+  const TOP_COPY = {
+    home:      { t: 'Trang chủ',  s: 'Trò chơi nổi bật và mới cập nhật' },
+    library:   { t: 'Thư viện',   s: 'Toàn bộ trò chơi có trong Nexus' },
+    integrate: { t: 'Tích hợp',   s: 'Dịch vụ chạy trực tiếp trên máy bạn' },
+    game:      { t: 'Chi tiết',   s: 'Thông tin, hình ảnh và cài đặt' }
+  };
+
+  function TopBar({ tab, zoom, onZoom, onResetZoom }) {
+    const c = TOP_COPY[tab] || TOP_COPY.home;
+    return (
+      <header className="nx-top">
+        <div className="nx-top__head">
+          <div className="nx-top__title">{c.t}</div>
+          <div className="nx-top__sub">{c.s}</div>
+        </div>
+
+        <span className="nx-top__spacer" />
+
+        <SteamPill />
+
+        <div className="nx-top__zoom">
+          <button className="nx-icobtn" onClick={function () { onZoom(-1); }} title="Thu nhỏ (Ctrl -)">
+            <i className="ph-bold ph-minus"></i>
+          </button>
+          <button
+            className="nx-chip nx-chip--static"
+            onClick={onResetZoom}
+            title="Đặt lại 100% (Ctrl 0)"
+            style={{ cursor: 'pointer', minWidth: 58, justifyContent: 'center' }}
+          >
+            {Math.round(zoom * 100)}%
+          </button>
+          <button className="nx-icobtn" onClick={function () { onZoom(1); }} title="Phóng to (Ctrl +)">
+            <i className="ph-bold ph-plus"></i>
+          </button>
+        </div>
+
+        <button className="nx-icobtn" onClick={function () { openExternal(DISCORD_URL); }} title="Discord">
+          <i className="fa-brands fa-discord"></i>
+        </button>
+      </header>
+    );
+  }
+
+  /* --------------------------------------------------------------------------
+     MAN HINH KHOI DONG — the tinh nam san trong index.html, chi go bo o day
+     ------------------------------------------------------------------------ */
+
+  function dismissBoot() {
+    const el = document.getElementById('nx-boot');
+    if (!el) return;
+    el.classList.add('is-gone');
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 700);
+  }
+
+  /* --------------------------------------------------------------------------
+     DUONG DAN — cho phep mo thang mot tab hoac mot game bang dau thang
+     vi du: #library · #integrate · #game=1623730
+     ------------------------------------------------------------------------ */
+
+  function initialRoute(games) {
+    let h = '';
+    try { h = decodeURIComponent((window.location.hash || '').replace(/^#/, '')); } catch (e) { h = ''; }
+    if (h.indexOf('game=') === 0) {
+      const id = h.slice(5).trim();
+      const g = games.filter(function (x) {
+        return String(x.appId) === id || String(x.id) === id;
+      })[0];
+      if (g) return { tab: 'library', game: g };
+    }
+    if (h === 'library' || h === 'integrate' || h === 'home') return { tab: h, game: null };
+    return { tab: 'home', game: null };
+  }
+
+  /* ==========================================================================
+     UNG DUNG
+     ========================================================================== */
+
+  function App() {
+    const games = useMemo(function () {
+      const raw = Array.isArray(window.GAME_DATA) ? window.GAME_DATA : [];
+      return raw.filter(function (g) { return g && g.title; });
+    }, []);
+    const upcoming = useMemo(function () {
+      return Array.isArray(window.UPCOMING_GAMES) ? window.UPCOMING_GAMES : [];
+    }, []);
+
+    const route = useMemo(function () { return initialRoute(games); }, [games]);
+
+    const [tab, setTab] = useState(route.tab);
+    const [active, setActive] = useState(route.game);
+    const [genre, setGenre] = useState('');
+
+    const backTab = useRef(route.tab);
+    const scrollRef = useRef(null);
+    const memo = useRef({});
+
+    const z = useZoom();
+    const vw = useViewport();
+    useDesktopLock();
+
+    useEffect(function () {
+      const t = setTimeout(dismissBoot, 420);
+      return function () { clearTimeout(t); };
+    }, []);
+
+    /* Nho vi tri cuon cua tung tab */
+    const view = active ? 'game' : tab;
+
+    const remember = useCallback(function () {
+      const el = scrollRef.current;
+      if (el) memo.current[view] = el.scrollTop;
+    }, [view]);
+
+    useEffect(function () {
+      const el = scrollRef.current;
+      if (!el) return;
+      el.scrollTop = view === 'game' ? 0 : (memo.current[view] || 0);
+    }, [view]);
+
+    const goTab = useCallback(function (id) {
+      remember();
+      setActive(null);
+      setTab(id);
+    }, [remember]);
+
+    const openGame = useCallback(function (g) {
+      remember();
+      backTab.current = tab;
+      setActive(g);
+    }, [remember, tab]);
+
+    const closeGame = useCallback(function () {
+      setActive(null);
+      setTab(backTab.current || 'home');
+    }, []);
+
+    const pickGenre = useCallback(function (tag) {
+      remember();
+      setGenre(tag);
+      setActive(null);
+      setTab('library');
+    }, [remember]);
+
+    const goLibrary = useCallback(function () {
+      remember();
+      setGenre('');
+      setActive(null);
+      setTab('library');
+    }, [remember]);
+
+    /* Alt + mui ten / Backspace de quay lai tu trang chi tiet */
+    useEffect(function () {
+      if (!active) return undefined;
+      const h = function (e) {
+        const inField = e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName);
+        if (inField) return;
+        if ((e.altKey && e.key === 'ArrowLeft') || e.key === 'Backspace') { e.preventDefault(); closeGame(); }
+      };
+      window.addEventListener('keydown', h);
+      return function () { window.removeEventListener('keydown', h); };
+    }, [active, closeGame]);
+
+    const counts = useMemo(function () {
+      return { library: games.length, integrate: 5 };
+    }, [games.length]);
+
+    const narrow = vw < 820;
+
+    let body;
+    if (narrow) {
+      body = <NotSupported width={vw} />;
+    } else if (active) {
+      body = <GameDetail key={active.id || active.appId} game={active} onBack={closeGame} />;
+    } else if (tab === 'library') {
+      body = (
+        <LibraryContent
+          games={games}
+          onOpen={openGame}
+          genre={genre}
+          onClearGenre={function () { setGenre(''); }}
+        />
+      );
+    } else if (tab === 'integrate') {
+      body = <IntegrateContent />;
+    } else {
+      body = (
+        <HomeContent
+          games={games}
+          upcoming={upcoming}
+          onOpen={openGame}
+          onGenre={pickGenre}
+          onLibrary={goLibrary}
+        />
+      );
+    }
+
+    return (
+      <div className="nx-shell">
+        <Rail tab={active ? backTab.current : tab} onTab={goTab} counts={counts} />
+        <main className="nx-main">
+          <TopBar tab={view} zoom={z.zoom} onZoom={z.bump} onResetZoom={z.reset} />
+          <div className="nx-scroll" ref={scrollRef} onScroll={remember}>
+            {body}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  /* --------------------------------------------------------------------------
+     GAN VAO DOM
+     ------------------------------------------------------------------------ */
+
+  const mount = document.getElementById('root');
+
+  function Root() {
+    return (
+      <ToastHost>
+        <App />
+      </ToastHost>
+    );
+  }
+
+  if (ReactDOM.createRoot) {
+    ReactDOM.createRoot(mount).render(<Root />);
+  } else {
+    ReactDOM.render(<Root />, mount);
+  }
+
+  Object.assign(window.NX, { App, Rail, TopBar, useZoom, dismissBoot });
+})();

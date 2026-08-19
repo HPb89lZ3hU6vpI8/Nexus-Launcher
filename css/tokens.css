@@ -1,0 +1,159 @@
+/* ============================================================================
+   NEXUS LAUNCHER — DESIGN TOKENS
+   Mot nguon su that duy nhat cho mau, chu, khoang cach, bo goc, do bong, easing.
+   Moi file CSS khac CHI duoc dung bien o day, khong hardcode mau.
+   ========================================================================== */
+
+:root {
+  /* ---- NEN: xanh muc rat sau, hoi ngA tim. Khong dung den tuyen doi ---- */
+  --bg-void:      #05070b;   /* nen ngoai cung, sau nhat */
+  --bg-rail:      #090c13;   /* thanh dieu huong trai */
+  --bg-app:       #0b0f17;   /* nen vung noi dung */
+  --bg-surface:   #111725;   /* the / panel */
+  --bg-raised:    #161d2e;   /* the khi hover / lop noi len */
+  --bg-sunken:    #080b12;   /* o input, vung lom */
+  --bg-overlay:   rgba(5, 7, 11, 0.78);
+
+  /* ---- DUONG VIEN ---- */
+  --line:         rgba(255, 255, 255, 0.065);
+  --line-mid:     rgba(255, 255, 255, 0.11);
+  --line-strong:  rgba(255, 255, 255, 0.18);
+
+  /* ---- CHU ---- */
+  --tx-hi:        #f2f5fb;   /* tieu de */
+  --tx:           #ccd4e4;   /* body */
+  --tx-dim:       #8e99b3;   /* phu */
+  --tx-faint:     #5d6880;   /* rat phu / disabled */
+
+  /* ---- NHAN DIEN CHINH: cyan -> tim. Giu ADN cyan cu, them doi tac tim ---- */
+  --br-1:         #3ad8ff;   /* cyan sang */
+  --br-2:         #5aa8ff;   /* xanh duong chuyen tiep */
+  --br-3:         #8b6cff;   /* tim */
+  --br-1-soft:    rgba(58, 216, 255, 0.14);
+  --br-3-soft:    rgba(139, 108, 255, 0.14);
+  --grad-brand:   linear-gradient(115deg, var(--br-1) 0%, var(--br-2) 48%, var(--br-3) 100%);
+  --grad-brand-r: linear-gradient(115deg, var(--br-3) 0%, var(--br-2) 52%, var(--br-1) 100%);
+
+  /* ---- MAU TRANG THAI ---- */
+  --ok:           #2fe0a4;
+  --ok-soft:      rgba(47, 224, 164, 0.13);
+  --warn:         #ffb545;
+  --warn-soft:    rgba(255, 181, 69, 0.13);
+  --bad:          #ff4f6d;
+  --bad-soft:     rgba(255, 79, 109, 0.13);
+  --gold:         #ffcf5c;
+  --gold-soft:    rgba(255, 207, 92, 0.13);
+  --info:         #5aa8ff;
+  --info-soft:    rgba(90, 168, 255, 0.13);
+
+  /* ---- MAU NEN TANG (dung cho icon thuong hieu) ---- */
+  --c-steam:      #d8e2ee;
+  --c-epic:       #f2f4f7;
+  --c-ea:         #ff5a4d;
+  --c-battle:     #4aa2ff;
+  --c-uplay:      #dfe6f0;
+  --c-discord:    #5865f2;
+
+  /* ---- CHU ---- */
+  --f-display: 'Outfit', 'Be Vietnam Pro', system-ui, sans-serif;
+  --f-ui:      'Be Vietnam Pro', 'Inter', system-ui, sans-serif;
+  --f-num:     'Inter', 'Be Vietnam Pro', system-ui, sans-serif;
+
+  /* ---- BO GOC ---- */
+  --r-xs: 6px;
+  --r-sm: 9px;
+  --r-md: 13px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-pill: 999px;
+
+  /* ---- DO BONG (mem, nhieu lop — khong dung 1 lop cung) ---- */
+  --sh-1: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --sh-2: 0 4px 14px rgba(0, 0, 0, 0.34), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --sh-3: 0 14px 38px rgba(0, 0, 0, 0.46), 0 3px 10px rgba(0, 0, 0, 0.32);
+  --sh-4: 0 30px 74px rgba(0, 0, 0, 0.58), 0 8px 22px rgba(0, 0, 0, 0.38);
+  --sh-brand: 0 10px 34px rgba(58, 216, 255, 0.22), 0 3px 10px rgba(139, 108, 255, 0.18);
+
+  /* ---- CHUYEN DONG: 1 bo easing dung chung, khong moi cho 1 kieu ---- */
+  --e-out:    cubic-bezier(0.22, 1, 0.36, 1);      /* giam toc, mac dinh */
+  --e-inout:  cubic-bezier(0.65, 0, 0.35, 1);
+  --e-spring: cubic-bezier(0.34, 1.46, 0.64, 1);   /* nay nhe, dung cho modal/toast */
+  --t-fast:   140ms;
+  --t-base:   240ms;
+  --t-slow:   420ms;
+
+  /* ---- KICH THUOC KHUNG ---- */
+  --rail-w:   232px;
+  --rail-w-sm: 76px;
+  --top-h:    62px;
+  --pad-page: 34px;
+  --detail-panel-w: 428px;
+}
+
+/* ============================================================================
+   KEYFRAMES DUNG CHUNG
+   ========================================================================== */
+
+@keyframes nx-spin      { to { transform: rotate(360deg); } }
+
+@keyframes nx-rise {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes nx-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes nx-pop {
+  0%   { opacity: 0; transform: scale(0.94) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes nx-slide-in-right {
+  from { opacity: 0; transform: translate3d(40px, 0, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Vet sang chay qua khung — dung cho skeleton va vien the khi hover */
+@keyframes nx-shimmer {
+  from { background-position: -220% 0; }
+  to   { background-position: 320% 0; }
+}
+
+/* Thanh tien trinh khong xac dinh */
+@keyframes nx-indeterminate {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(320%); }
+}
+
+/* Nhip tho rat nhe cho cham trang thai */
+@keyframes nx-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.82); }
+}
+
+/* Nen aurora troi cham o hero — bien do nho, khong gay nhieu mat */
+@keyframes nx-aurora-a {
+  0%,100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%     { transform: translate3d(6%, -4%, 0) scale(1.14); }
+}
+@keyframes nx-aurora-b {
+  0%,100% { transform: translate3d(0, 0, 0) scale(1.08); }
+  50%     { transform: translate3d(-7%, 5%, 0) scale(1); }
+}
+
+/* Thanh dem nguoc toast */
+@keyframes nx-countdown-bar {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
