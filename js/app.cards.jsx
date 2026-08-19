@@ -10,9 +10,10 @@ const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
 const {
   PLATFORMS,
-  pctNum, reviewTone, TONE_ICON, reviewCountNum, fmtCount,
+  pctNum, reviewTone, reviewCountNum, fmtCount,
   getGamePlatform, isOnlineGame, customAppIdOf,
-  coverSources, useCountdown,
+  coverSources, useCountdown, useReveal, prefersCalm,
+  vnDate, vnTime, vnWeekday, mergeRelease,
   Img
 } = window.NX;
 
@@ -68,9 +69,9 @@ function GameCard({ game, onOpen }) {
         <div className="gc__play"><i className="ph-fill ph-caret-right"></i></div>
 
         {n !== null && (
-          <div className={'gc__score gc__score--' + tone}>
-            <i className={TONE_ICON[tone]}></i>
-            {Math.round(n)}%
+          <div className={'gc__score gc__score--' + tone}
+               title={game.reviewText || ''}>
+            <b>{Math.round(n)}</b><em>%</em>
           </div>
         )}
       </div>
@@ -107,9 +108,8 @@ function GameRow({ game, onOpen }) {
             <i className={plat.ico}></i>{plat.label}
           </span>
           {n !== null && (
-            <span className={'gc__rev gc__rev--' + tone}>
-              <i className={TONE_ICON[tone]} style={{ marginRight: 4 }}></i>
-              {Math.round(n)}% · {game.reviewText}
+            <span className={'gc__rev gc__rev--dot gc__rev--' + tone}>
+              <b className="gc__rev__n">{Math.round(n)}%</b> · {game.reviewText}
             </span>
           )}
           {count > 0 && <span className="gc__revn">{fmtCount(count)}<em>đánh giá</em></span>}
@@ -127,54 +127,86 @@ function GameRow({ game, onOpen }) {
 
 /* ----------------------------------------------------------------------------
    THE SAP RA MAT + DEM NGUOC
+   Moc gio luon quy ve gio Viet Nam (xem vnParts trong app.core.jsx), va duoc
+   doi chieu voi ngay Steam dang niem yet — game bi doi lich se tu cap nhat.
    Het gio -> hien "DA PHAT HANH" thay vi dung im o 00 ngay 00:00:00.
    -------------------------------------------------------------------------- */
 
+/* "18/08/2026 · 22:00" theo gio Viet Nam, bat ke may dang o mui gio nao */
 function fmtReleaseDate(iso) {
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return 'Đang cập nhật';
-  const p = n => String(n).padStart(2, '0');
-  return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() +
-         ' · ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  const d = vnDate(iso);
+  return d ? d + ' · ' + vnTime(iso) : 'Đang cập nhật';
 }
 
-function UpcomingCard({ game }) {
-  const t = useCountdown(game.targetDate);
+/* Bao nhieu phan tram chang duong tu luc cong bo den ngay ra mat da di qua.
+   Dung lam thanh tien do — nhin la biet con xa hay sap toi. */
+const LEAD_MS = 120 * 86400000;   /* quy uoc: dem lui 120 ngay */
+
+function UpcomingCard({ game, steam }) {
+  const rel = useMemo(function () { return mergeRelease(game, steam); }, [game, steam]);
+  const t = useCountdown(rel.target);
+  const done = t.done || rel.released;
+
   const sources = useMemo(
     () => (game.cover ? [game.cover] : []).concat(coverSources(game.appId)),
     [game.appId, game.cover]
   );
 
+  const left = t.d * 86400000 + t.h * 3600000 + t.m * 60000 + t.s * 1000;
+  const pct = done ? 100 : Math.max(2, Math.min(100, Math.round((1 - left / LEAD_MS) * 100)));
+  const wd = vnWeekday(rel.target);
+  const soon = !done && t.d <= 7;
+
   return (
-    <div className="uc">
+    <div className={'uc' + (done ? ' is-done' : '') + (soon ? ' is-soon' : '')}>
       <div className="uc__shot">
         <Img sources={sources} alt={game.title} imgClass="gc__img" />
         <div className="uc__tag">
-          {t.done
+          {done
             ? <span className="nx-badge nx-badge--ok"><i className="ph-fill ph-rocket-launch"></i>ĐÃ RA MẮT</span>
-            : <span className="nx-badge nx-badge--br"><i className="ph-fill ph-hourglass-high"></i>SẮP RA MẮT</span>}
+            : soon
+              ? <span className="nx-badge nx-badge--warn"><i className="ph-fill ph-fire"></i>SẮP TỚI</span>
+              : <span className="nx-badge nx-badge--br"><i className="ph-fill ph-hourglass-high"></i>SẮP RA MẮT</span>}
         </div>
+        {rel.moved !== 0 && (
+          <div className="uc__moved" title={'Steam đã dời lịch ' + Math.abs(rel.moved) + ' ngày'}>
+            <i className="ph-bold ph-arrows-clockwise"></i>
+            {rel.moved > 0 ? 'DỜI LẠI' : 'SỚM HƠN'}
+          </div>
+        )}
+        <div className="uc__glow" aria-hidden="true" />
       </div>
+
       <div className="uc__body">
         <div className="uc__title nx-clamp-2">{game.title}</div>
-        <div className="uc__date">
-          <i className="ph-bold ph-calendar-blank"></i>
-          {fmtReleaseDate(game.targetDate)}
-        </div>
 
-        {t.done ? (
+        <div className="uc__when">
+          <span className="uc__date">
+            <i className="ph-bold ph-calendar-blank"></i>
+            {fmtReleaseDate(rel.target)}
+          </span>
+          <span className="uc__tz" title="Múi giờ Việt Nam (UTC+7)">GMT+7</span>
+        </div>
+        {wd && <div className="uc__wd">{wd}{rel.source === 'steam' ? ' · theo Steam' : ''}</div>}
+
+        {done ? (
           <div className="cd--done">
             <i className="ph-fill ph-check-circle"></i>ĐÃ PHÁT HÀNH
           </div>
         ) : (
-          <div className="cd">
-            {[['NGÀY', t.d], ['GIỜ', t.h], ['PHÚT', t.m], ['GIÂY', t.s]].map(([l, v]) => (
-              <div className="cd__cell" key={l}>
-                <span className="cd__n">{String(v).padStart(2, '0')}</span>
-                <span className="cd__l">{l}</span>
-              </div>
-            ))}
-          </div>
+          <React.Fragment>
+            <div className="cd">
+              {[['NGÀY', t.d], ['GIỜ', t.h], ['PHÚT', t.m], ['GIÂY', t.s]].map(([l, v], i) => (
+                <div className="cd__cell" key={l} style={{ '--i': i }}>
+                  <span className="cd__n" key={l + v}>{String(v).padStart(2, '0')}</span>
+                  <span className="cd__l">{l}</span>
+                </div>
+              ))}
+            </div>
+            <div className="cd__rail" aria-hidden="true">
+              <i style={{ width: pct + '%' }} />
+            </div>
+          </React.Fragment>
         )}
       </div>
     </div>
@@ -182,12 +214,30 @@ function UpcomingCard({ game }) {
 }
 
 /* ----------------------------------------------------------------------------
-   KE NGANG CO CUON — mui ten hien khi hover, tu an khi cham dau/cuoi
+   KE NGANG CO CUON
+   Mui ten hien khi hover (tu an khi cham dau/cuoi) VA nam keo bang chuot trai.
+   Keo qua nguong DRAG_MIN moi tinh la keo — duoi nguong van la mot cu bam,
+   nen bam vao the game khong bao gio bi hieu nham thanh keo.
    -------------------------------------------------------------------------- */
+
+const DRAG_MIN = 6;
 
 function Shelf({ title, icon, sub, children, action }) {
   const ref = useRef(null);
+  const secRef = useReveal();
   const [edge, setEdge] = useState({ start: true, end: false });
+  const [grab, setGrab] = useState(false);
+  const drag = useRef({
+    down: false, moved: false, cap: false,
+    x: 0, left: 0, id: 0, px: 0, t: 0, v: 0
+  });
+
+  /* Cu truot theo da sau khi tha tay */
+  const glide = useRef(0);
+  const stopGlide = useCallback(() => {
+    if (glide.current) { cancelAnimationFrame(glide.current); glide.current = 0; }
+  }, []);
+  useEffect(() => stopGlide, [stopGlide]);
 
   const measure = useCallback(() => {
     const el = ref.current;
@@ -212,8 +262,77 @@ function Shelf({ title, icon, sub, children, action }) {
     el.scrollBy({ left: dir * Math.max(280, el.clientWidth * 0.82), behavior: 'smooth' });
   };
 
+  /* --- nam & keo --------------------------------------------------------- */
+
+  const onDown = e => {
+    const el = ref.current;
+    if (!el || e.button !== 0 || e.pointerType === 'touch') return;   /* cham: de trinh duyet tu lo */
+    stopGlide();
+    drag.current = {
+      down: true, moved: false, cap: false,
+      x: e.clientX, left: el.scrollLeft, id: e.pointerId,
+      px: e.clientX, t: performance.now(), v: 0
+    };
+  };
+
+  const onMove = e => {
+    const el = ref.current;
+    const d = drag.current;
+    if (!el || !d.down) return;
+
+    const dx = e.clientX - d.x;
+    if (!d.moved) {
+      if (Math.abs(dx) <= DRAG_MIN) return;
+      d.moved = true;
+      setGrab(true);
+      /* Bat con tro SAU khi da vuot nguong, neu khong Chromium se nuot mat
+         cu click vao the game ben trong. */
+      try { el.setPointerCapture(e.pointerId); d.cap = true; } catch (err) {}
+    }
+    /* Van toc tuc thoi (px moi ms) — lam min de mot khung hinh giat khong
+       lam hong cu truot theo da phia sau. */
+    const now = performance.now();
+    const dt = Math.max(1, now - d.t);
+    d.v = d.v * 0.7 + ((e.clientX - d.px) / dt) * 0.3;
+    d.px = e.clientX;
+    d.t = now;
+
+    el.scrollLeft = d.left - dx;
+  };
+
+  const onUp = () => {
+    const el = ref.current;
+    const d = drag.current;
+    if (d.cap && el) { try { el.releasePointerCapture(d.id); } catch (err) {} }
+    d.down = false;
+    d.cap = false;
+    if (!d.moved) return;
+    setGrab(false);
+
+    /* Tha tay van con da: truot tiep roi cham dan lai, giong lat trang tren
+       dien thoai. Nguoi dung tat hieu ung chuyen dong thi dung ngay. */
+    let v = d.v;
+    if (Math.abs(v) < 0.09 || prefersCalm()) return;
+    const step = () => {
+      const n = ref.current;
+      if (!n) { glide.current = 0; return; }
+      v *= 0.93;
+      n.scrollLeft -= v * 16;
+      glide.current = Math.abs(v) > 0.02 ? requestAnimationFrame(step) : 0;
+    };
+    glide.current = requestAnimationFrame(step);
+  };
+
+  /* Vua keo xong thi chan cu click de khong lo mo nham game */
+  const onClickCapture = e => {
+    if (!drag.current.moved) return;
+    drag.current.moved = false;
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
-    <section className="nx-sec">
+    <section className="nx-sec nx-reveal" ref={secRef}>
       <div className="nx-sec__head">
         <h2 className="nx-sec__title">{icon && <i className={icon}></i>}{title}</h2>
         {sub && <span className="nx-sec__sub">{sub}</span>}
@@ -226,7 +345,15 @@ function Shelf({ title, icon, sub, children, action }) {
                 disabled={edge.start} aria-label="Lùi lại">
           <i className="ph-bold ph-caret-left"></i>
         </button>
-        <div className="shelf__track" ref={ref}>{children}</div>
+        <div className={'shelf__track' + (grab ? ' is-grab' : '')}
+             ref={ref}
+             onPointerDown={onDown}
+             onPointerMove={onMove}
+             onPointerUp={onUp}
+             onPointerCancel={onUp}
+             onClickCapture={onClickCapture}>
+          {children}
+        </div>
         <button className="shelf__nav shelf__nav--r" onClick={() => nudge(1)}
                 disabled={edge.end} aria-label="Tiến tới">
           <i className="ph-bold ph-caret-right"></i>

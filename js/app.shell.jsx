@@ -13,7 +13,8 @@
     APP_VERSION, DISCORD_URL,
     callApi, hasApi, openExternal,
     ToastHost,
-    GameDetail, HomeContent, LibraryContent, NotSupported, IntegrateContent
+    GameDetail, HomeContent, LibraryContent, NotSupported, IntegrateContent,
+    prefersCalm
   } = window.NX;
 
   /* --------------------------------------------------------------------------
@@ -253,6 +254,54 @@
   }
 
   /* ==========================================================================
+     CHUYEN TRANG
+     Doi trang khong cat phut mot nua: trang cu mo dan va nhich len roi moi
+     nhuong cho, trang moi troi len thay the. Trang cu duoc giu nguyen trong
+     mot ref suot thoi gian do — co doi state gi ben ngoai cung khong lam
+     no nhay ra giua chung.
+     ========================================================================== */
+
+  const SWAP_MS = 180;
+
+  function ViewSwap({ vkey, children }) {
+    const cur = useRef({ k: vkey, el: children });
+    const pend = useRef(null);
+    /* Khoa nam trong state chu khong chi rieng pha: dat lai dung mot gia tri
+       cu thi React coi nhu khong doi va bo qua lan ve lai — khi tat hieu ung
+       chuyen dong, trang moi se khong bao gio duoc dua ra man hinh. */
+    const [st, setSt] = useState({ k: vkey, phase: 'in' });
+
+    /* Con o lai trang cu thi cu cap nhat noi dung moi nhat cua chinh no */
+    if (vkey === cur.current.k) cur.current.el = children;
+    pend.current = { k: vkey, el: children };
+
+    useEffect(function () {
+      if (vkey === cur.current.k) {
+        /* Bam nguoc lai dung trang dang o giua chung: huy pha di ra,
+           khong de trang nam lai o trang thai tang hinh. */
+        setSt(function (s) { return s.phase === 'out' ? { k: s.k, phase: 'in' } : s; });
+        return undefined;
+      }
+
+      const swap = function () {
+        cur.current = { k: pend.current.k, el: pend.current.el };
+        setSt({ k: pend.current.k, phase: 'in' });
+      };
+      if (prefersCalm()) { swap(); return undefined; }
+
+      setSt(function (s) { return { k: s.k, phase: 'out' }; });
+      const t = setTimeout(swap, SWAP_MS);
+      return function () { clearTimeout(t); };
+    }, [vkey]);
+
+    return (
+      <div className={'nx-view is-' + st.phase} key={cur.current.k}>
+        {cur.current.el}
+      </div>
+    );
+  }
+
+  /* ==========================================================================
      UNG DUNG
      ========================================================================== */
 
@@ -292,10 +341,14 @@
       if (el) memo.current[view] = el.scrollTop;
     }, [view]);
 
+    /* Doi trang cu tien ra het roi moi tra vi tri cuon — dat ngay bay gio
+       thi thay ca trang dang mo dan bi giat mot cai. */
     useEffect(function () {
-      const el = scrollRef.current;
-      if (!el) return;
-      el.scrollTop = view === 'game' ? 0 : (memo.current[view] || 0);
+      const t = setTimeout(function () {
+        const el = scrollRef.current;
+        if (el) el.scrollTop = view === 'game' ? 0 : (memo.current[view] || 0);
+      }, SWAP_MS);
+      return function () { clearTimeout(t); };
     }, [view]);
 
     const goTab = useCallback(function (id) {
@@ -389,7 +442,9 @@
         <main className="nx-main">
           <TopBar tab={view} />
           <div className="nx-scroll" ref={scrollRef} onScroll={remember}>
-            {body}
+            <ViewSwap vkey={narrow ? 'narrow' : (active ? 'game:' + (active.id || active.appId) : tab)}>
+              {body}
+            </ViewSwap>
           </div>
         </main>
       </div>
@@ -416,5 +471,5 @@
     ReactDOM.render(<Root />, mount);
   }
 
-  Object.assign(window.NX, { App, Rail, TopBar, dismissBoot });
+  Object.assign(window.NX, { App, Rail, TopBar, ViewSwap, dismissBoot });
 })();

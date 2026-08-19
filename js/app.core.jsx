@@ -216,7 +216,7 @@ function heroSources(appId) {
    Gop cac loi goi trung appId (inflight) de khong ban 2 request cung luc.
    -------------------------------------------------------------------------- */
 
-const SS_PREFIX = 'nx_media_v4_';
+const SS_PREFIX = 'nx_media_v5_';
 const memMedia = new Map();
 const inflight = new Map();
 
@@ -255,6 +255,8 @@ function normalizeMedia(raw) {
     sysreq_rec:   raw.sysreq_rec || null,
     desc:         raw.short_description || raw.desc || '',
     about:        raw.about || '',
+    // Mang khoi co cau truc (tieu de / doan / danh sach / anh / anh dong)
+    about_rich:   Array.isArray(raw.about_rich) ? raw.about_rich : null,
     about_lang:   raw.about_lang || '',
     desc_lang:    raw.desc_lang || '',
     developers:   Array.isArray(raw.developers) ? raw.developers : [],
@@ -318,7 +320,7 @@ function fetchMedia(appId) {
    cua bat ky ai cung gan nhu tuc thi. Hong mang thi im lang giu ban goc.
    -------------------------------------------------------------------------- */
 
-const TR_PREFIX = 'nx_tr_v1_';
+const TR_PREFIX = 'nx_tr_v2_';
 const memTr = new Map();
 const trInflight = new Map();
 
@@ -344,7 +346,7 @@ function fetchTranslation(appId) {
       clearTimeout(to);
       if (res.ok) {
         const d = await res.json();
-        if (d && d.lang === 'vi' && d.about) {
+        if (d && d.lang === 'vi' && (d.about || (d.about_rich && d.about_rich.length))) {
           memTr.set(key, d);
           try { sessionStorage.setItem(TR_PREFIX + key, JSON.stringify(d)); } catch (e) {}
           return d;
@@ -425,6 +427,189 @@ function useFallbackImg(sources) {
   const onError = useCallback(() => setIdx(i => (i < list.length - 1 ? i + 1 : i)), [list]);
   const onLoad  = useCallback(() => setLoaded(true), []);
   return { src: list[idx], loaded, onError, onLoad };
+}
+
+/* ----------------------------------------------------------------------------
+   LICH RA MAT THEO GIO VIET NAM
+   Moc gio trong danh sach da co san mui gio +07:00, nhung new Date().getHours()
+   lai doc theo dong ho cua may. May cai lech mui gio -> ngay gio hien sai.
+   Nen o day luon dinh mui gio Asia/Ho_Chi_Minh, bat ke may dang o dau.
+   -------------------------------------------------------------------------- */
+
+const VN_TZ = 'Asia/Ho_Chi_Minh';
+
+const VN_FMT = (function () {
+  try {
+    return new Intl.DateTimeFormat('en-GB', {
+      timeZone: VN_TZ,
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    });
+  } catch (e) { return null; }
+})();
+
+/* -> { y, m, d, hh, mm, wd } theo gio VN; hong thi tra ve null */
+function vnParts(input) {
+  const dt = input instanceof Date ? input : new Date(input);
+  if (isNaN(dt.getTime())) return null;
+
+  if (!VN_FMT) {
+    /* May qua cu, khong co Intl -> tu doi bang tay: UTC+7 */
+    const s = new Date(dt.getTime() + 7 * 3600000);
+    return {
+      y: s.getUTCFullYear(), m: s.getUTCMonth() + 1, d: s.getUTCDate(),
+      hh: s.getUTCHours(), mm: s.getUTCMinutes(), wd: s.getUTCDay()
+    };
+  }
+
+  const p = {};
+  VN_FMT.formatToParts(dt).forEach(function (x) { p[x.type] = x.value; });
+  return {
+    y: +p.year, m: +p.month, d: +p.day,
+    hh: +p.hour % 24, mm: +p.minute,
+    wd: dt.getUTCDay() /* chi dung de tham chieu, khong hien ra */
+  };
+}
+
+const VN_WD = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+const p2 = function (n) { return String(n).padStart(2, '0'); };
+
+/* "18/08/2026" theo gio VN */
+function vnDate(input) {
+  const v = vnParts(input);
+  return v ? p2(v.d) + '/' + p2(v.m) + '/' + v.y : '';
+}
+
+/* "22:00" theo gio VN */
+function vnTime(input) {
+  const v = vnParts(input);
+  return v ? p2(v.hh) + ':' + p2(v.mm) : '';
+}
+
+/* "2026-08-18" theo gio VN — dung de so sanh voi ngay Steam tra ve */
+function vnYmd(input) {
+  const v = vnParts(input);
+  return v ? v.y + '-' + p2(v.m) + '-' + p2(v.d) : '';
+}
+
+/* "Thứ ba" theo gio VN */
+function vnWeekday(input) {
+  const dt = input instanceof Date ? input : new Date(input);
+  if (isNaN(dt.getTime())) return '';
+  try {
+    const s = new Intl.DateTimeFormat('en-US', { timeZone: VN_TZ, weekday: 'short' })
+      .format(dt);
+    const k = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(s.slice(0, 3));
+    return k >= 0 ? VN_WD[k] : '';
+  } catch (e) { return ''; }
+}
+
+/* Bao nhieu ngay lich giua hai chuoi "YYYY-MM-DD" */
+function daysBetweenYmd(a, b) {
+  if (!a || !b) return 0;
+  const t1 = Date.parse(a + 'T00:00:00Z');
+  const t2 = Date.parse(b + 'T00:00:00Z');
+  if (isNaN(t1) || isNaN(t2)) return 0;
+  return Math.round((t2 - t1) / 86400000);
+}
+
+/* ----------------------------------------------------------------------------
+   DOI CHIEU NGAY RA MAT VOI STEAM
+   Steam khong tra ve gio, chi co ngay theo lich + co "coming_soon". Nen:
+     * lech duoi 3 ngay  -> giu moc da bien tap (chi tiet toi tung gio,
+                            chenh 1 ngay chi la do mui gio cua cua hang);
+     * lech tu 3 ngay    -> game bi doi lich, lay ngay cua Steam va giu
+                            nguyen khung gio cu;
+     * coming_soon=false -> da phat hanh that, dem nguoc dung lai.
+   -------------------------------------------------------------------------- */
+
+const REL_SS = 'nx_rel_v1';
+let memRel = null;
+let relInflight = null;
+
+function fetchReleases(ids) {
+  const list = (ids || [])
+    .map(function (x) { return String(x || '').trim(); })
+    .filter(function (x) { return /^\d{2,10}$/.test(x); })
+    .filter(function (x, i, a) { return a.indexOf(x) === i; })
+    .slice(0, 32);
+
+  if (!list.length) return Promise.resolve({});
+  if (memRel) return Promise.resolve(memRel);
+  if (relInflight) return relInflight;
+
+  try {
+    const c = sessionStorage.getItem(REL_SS);
+    if (c) { memRel = JSON.parse(c) || {}; return Promise.resolve(memRel); }
+  } catch (e) { /* bo qua */ }
+
+  relInflight = (async function () {
+    try {
+      const ac = new AbortController();
+      const to = setTimeout(function () { ac.abort(); }, 9000);
+      const res = await fetch('/api/upcoming?ids=' + list.join(','), { signal: ac.signal });
+      clearTimeout(to);
+      if (res.ok) {
+        const d = await res.json();
+        if (d && d.ok && d.items) {
+          memRel = d.items;
+          try { sessionStorage.setItem(REL_SS, JSON.stringify(memRel)); } catch (e) {}
+          return memRel;
+        }
+      }
+    } catch (e) { /* mat mang -> giu lich da bien tap */ }
+    memRel = {};
+    return memRel;
+  })().finally(function () { relInflight = null; });
+
+  return relInflight;
+}
+
+/* Gop lich Steam vao mot the: tra ve moc gio da chinh + trang thai */
+function mergeRelease(game, info) {
+  const base = game && game.targetDate;
+  const out = { target: base, moved: 0, released: false, steamYmd: '', source: 'local' };
+  if (!base || !info) return out;
+
+  if (info.coming_soon === false) out.released = true;
+  if (!info.ymd) return out;
+
+  out.steamYmd = info.ymd;
+  const gap = daysBetweenYmd(vnYmd(base), info.ymd);
+  if (Math.abs(gap) < 3) return out;   /* chi la lech mui gio */
+
+  /* Doi lich that -> thay ngay, giu nguyen gio phut cua moc cu */
+  const v = vnParts(base);
+  const hh = v ? p2(v.hh) : '22';
+  const mm = v ? p2(v.mm) : '00';
+  const next = info.ymd + 'T' + hh + ':' + mm + ':00+07:00';
+  if (!isNaN(new Date(next).getTime())) {
+    out.target = next;
+    out.moved = gap;
+    out.source = 'steam';
+  }
+  return out;
+}
+
+/* Hook: goi mot lan cho ca danh sach, tra ve { appId: info } */
+function useSteamReleases(games) {
+  const ids = useMemo(function () {
+    return (games || [])
+      .map(function (g) { return g && g.appId; })
+      .filter(Boolean)
+      .map(String);
+  }, [games]);
+
+  const [map, setMap] = useState(function () { return memRel || {}; });
+
+  useEffect(function () {
+    if (!ids.length) return;
+    let alive = true;
+    fetchReleases(ids).then(function (m) { if (alive) setMap(m || {}); });
+    return function () { alive = false; };
+  }, [ids.join(',')]);
+
+  return map;
 }
 
 /* Dem nguoc toi moc thoi gian. Het gio -> done = true (khong dung im o 00:00:00) */
@@ -655,6 +840,97 @@ function Empty({ icon, title, desc, action }) {
 }
 
 /* ----------------------------------------------------------------------------
+   NGAY PHAT HANH DO STEAM TRA VE
+   Steam tra ve mot chuoi da dich san theo ngon ngu dang xem, vi du
+   "9 Thg07, 2026" hoac "Sep 2, 2026". De nguyen thi moi game mot kieu, nen
+   quy het ve dd/mm/yyyy cho dong bo voi phan con lai cua giao dien.
+   -------------------------------------------------------------------------- */
+
+const EN_MONTH = {
+  jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
+  jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12
+};
+
+function steamDateVN(text) {
+  const s = String(text || '').trim();
+  if (!s) return '';
+
+  const ym = s.match(/\b((?:19|20)\d{2})\b/);
+  if (!ym) return s;                       /* "Coming soon", "To be announced" */
+  const year = ym[1];
+  let rest = s.replace(ym[0], ' ');
+
+  let mon = 0;
+  const vn = rest.match(/Th(?:g|áng)\s*0*(\d{1,2})/i);
+  if (vn) { mon = +vn[1]; rest = rest.replace(vn[0], ' '); }
+  else {
+    const en = rest.match(/[A-Za-z]{3,}/);
+    if (en) {
+      const k = EN_MONTH[en[0].slice(0, 3).toLowerCase()];
+      if (k) { mon = k; rest = rest.replace(en[0], ' '); }
+    }
+  }
+  if (!mon || mon > 12) return s;          /* "Q1 2026" — giu nguyen */
+
+  const d = rest.match(/\b(3[01]|[12]\d|0?[1-9])\b/);
+  if (!d) return 'Tháng ' + p2(mon) + '/' + year;
+  return p2(+d[1]) + '/' + p2(mon) + '/' + year;
+}
+
+/* ----------------------------------------------------------------------------
+   HIEN DAN KHI CUON TOI
+   Gan ref vao mot khoi; khoi do chay hieu ung xuat hien dung mot lan, ngay khi
+   lot vao tam nhin. Khong ho tro IntersectionObserver, hoac nguoi dung da tat
+   hieu ung chuyen dong, thi hien thang — khong giau gi ca.
+   -------------------------------------------------------------------------- */
+
+function prefersCalm() {
+  try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+  catch (e) { return false; }
+}
+
+function useReveal(margin) {
+  const ref = useRef(null);
+
+  useEffect(function () {
+    const el = ref.current;
+    if (!el) return undefined;
+    if (!('IntersectionObserver' in window) || prefersCalm()) {
+      el.classList.add('is-seen');
+      return undefined;
+    }
+    /* Khoi da nam san trong tam nhin luc gan: mo ngay o khung hinh ke tiep.
+       Cho IntersectionObserver bao thi som nhat cung phai qua mot nhip ve,
+       du de nguoi dung thay mot khoang trong nhap nhay. */
+    const root = el.closest('.nx-scroll');
+    const rr = root
+      ? root.getBoundingClientRect()
+      : { top: 0, bottom: window.innerHeight || 0 };
+    const er = el.getBoundingClientRect();
+    if (er.top < rr.bottom && er.bottom > rr.top) {
+      const raf = requestAnimationFrame(function () { el.classList.add('is-seen'); });
+      return function () { cancelAnimationFrame(raf); };
+    }
+
+    const io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('is-seen');
+        io.unobserve(en.target);
+      });
+    }, {
+      root: el.closest('.nx-scroll') || null,
+      rootMargin: margin || '0px 0px -6% 0px',
+      threshold: 0.04
+    });
+    io.observe(el);
+    return function () { io.disconnect(); };
+  }, [margin]);
+
+  return ref;
+}
+
+/* ----------------------------------------------------------------------------
    10. XUAT RA
    -------------------------------------------------------------------------- */
 
@@ -667,6 +943,9 @@ window.NX = {
   coverSources, heroSources, fetchMedia, buildMedia, fetchTranslation,
   REV_STATE_CACHE, setRevListener,
   useFallbackImg, useCountdown, useClickOutside, useEscape,
+  VN_TZ, vnParts, vnDate, vnTime, vnYmd, vnWeekday, daysBetweenYmd,
+  fetchReleases, mergeRelease, useSteamReleases, steamDateVN,
+  prefersCalm, useReveal,
   ToastHost, useToast,
   Img, ScoreRing, Note, Modal, Empty
 };

@@ -50,10 +50,17 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 
 :focus { outline: none; }
 :focus-visible {
-  outline: 2px solid var(--br-1);
+  outline: 1.5px solid var(--focus);
   outline-offset: 2px;
   border-radius: var(--r-xs);
 }
+/* O nhap lieu da co vien sang rieng theo mau cua tung khoi. Neu de them
+   vong mac dinh o tren thi thanh hai vong long nhau, rat roi (anh #20). */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus-visible { outline: none; }
 
 /* ---- THANH CUON ---- */
 ::-webkit-scrollbar { width: 11px; height: 11px; }
@@ -109,10 +116,6 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   overflow-y: auto;
   overflow-x: hidden;
   scroll-behavior: smooth;
-}
-
-.nx-page {
-  animation: nx-rise var(--t-slow) var(--e-out) both;
 }
 
 /* ============================================================================
@@ -365,9 +368,9 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 }
 .nx-search input::placeholder { color: var(--tx-faint); }
 .nx-search input:focus {
-  border-color: rgba(58, 216, 255, 0.5);
+  border-color: color-mix(in srgb, var(--br-1) 52%, transparent);
   background: var(--bg-surface);
-  box-shadow: 0 0 0 3px var(--br-1-soft);
+  box-shadow: var(--focus-ring);
 }
 .nx-search__ico {
   position: absolute;
@@ -391,6 +394,44 @@ input, textarea { -webkit-user-select: text; user-select: text; }
   transition: color var(--t-fast), background var(--t-fast);
 }
 .nx-search__clear:hover { color: var(--tx-hi); background: rgba(255, 255, 255, 0.1); }
+
+/* ============================================================================
+   HIEU UNG CHUYEN CANH
+   ========================================================================== */
+
+/* Doi trang. Chi chay opacity + transform de trinh duyet dua het sang GPU;
+   khong dung filter: blur() cho ca cay con vi rat nang o kich thuoc nay. */
+.nx-view { transform-origin: 50% 0; }
+.nx-view.is-in  { animation: nx-view-in 420ms var(--e-out) both; }
+.nx-view.is-out { animation: nx-view-out 180ms ease-in both; pointer-events: none; }
+
+/* Hien dan khi cuon toi: khoi nam yen o duoi man hinh, cuon toi dau hien toi
+   do — thay cho kieu ca trang cung nhay len mot luot nhu truoc. */
+.nx-reveal {
+  opacity: 0;
+  transform: translate3d(0, 30px, 0);
+  transition:
+    opacity 640ms var(--e-out),
+    transform 640ms var(--e-out);
+}
+.nx-reveal.is-seen { opacity: 1; transform: none; }
+
+/* Cac the ben trong ke ngang truot vao lan luot.
+   Dung animation voi fill-mode "backwards": chay xong la tra lai style goc,
+   nho vay transform khi ro chuot vao the van hoat dong binh thuong. */
+.nx-reveal .shelf__track > * { opacity: 0; }
+.nx-reveal.is-seen .shelf__track > * {
+  opacity: 1;
+  animation: nx-slide-x 560ms var(--e-out) backwards;
+}
+.nx-reveal.is-seen .shelf__track > *:nth-child(1) { animation-delay:  60ms; }
+.nx-reveal.is-seen .shelf__track > *:nth-child(2) { animation-delay: 105ms; }
+.nx-reveal.is-seen .shelf__track > *:nth-child(3) { animation-delay: 150ms; }
+.nx-reveal.is-seen .shelf__track > *:nth-child(4) { animation-delay: 195ms; }
+.nx-reveal.is-seen .shelf__track > *:nth-child(5) { animation-delay: 240ms; }
+.nx-reveal.is-seen .shelf__track > *:nth-child(6) { animation-delay: 285ms; }
+.nx-reveal.is-seen .shelf__track > *:nth-child(7) { animation-delay: 330ms; }
+.nx-reveal.is-seen .shelf__track > *:nth-child(n + 8) { animation-delay: 370ms; }
 
 /* ============================================================================
    NUT
@@ -491,6 +532,58 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 .nx-btn--lg { padding-right: 24px; }
 .nx-btn--sm  { height: 32px; padding: 0 13px; font-size: 12px; border-radius: var(--r-xs); gap: 7px; }
 .nx-btn--full { width: 100%; }
+
+/* Nut an theo mau cua the chua no.
+   Truoc day moi the dich vu mot tong mau rieng nhung nut ben duoi deu chung
+   mot dai xanh-tim, nen nut nao cung "lac" khoi the cua no. Nay nut doc hai
+   bien --sc-a / --sc-b ma the truyen xuong: nen kinh toi am mau the, chu giu
+   trang de doc, con mau ruc nam o huy hieu icon va quang sang khi ro chuot. */
+.nx-btn--accent {
+  --a: var(--sc-a, var(--br-3));
+  --b: var(--sc-b, var(--br-1));
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--b) 26%, transparent),
+      color-mix(in srgb, var(--a) 30%, transparent)),
+    rgba(9, 12, 18, 0.62);
+  border-color: color-mix(in srgb, var(--b) 32%, transparent);
+  color: var(--tx-hi);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 10px rgba(0, 0, 0, 0.3);
+}
+.nx-btn--accent::after {
+  background: linear-gradient(100deg, transparent 30%,
+    color-mix(in srgb, var(--b) 30%, rgba(255, 255, 255, 0.16)) 50%, transparent 70%);
+}
+.nx-btn--accent:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--b) 58%, transparent);
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--b) 38%, transparent),
+      color-mix(in srgb, var(--a) 42%, transparent)),
+    rgba(9, 12, 18, 0.54);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 14px 32px color-mix(in srgb, var(--b) 24%, transparent),
+    0 4px 12px rgba(0, 0, 0, 0.36);
+}
+/* Huy hieu icon: cho nhan mau ruc nhat cua the */
+.nx-btn--accent.nx-btn--lg > i:first-child {
+  background: linear-gradient(135deg, var(--b), var(--a));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 3px 10px color-mix(in srgb, var(--b) 34%, transparent);
+  color: #f7fbff;
+  transition: box-shadow var(--t-base) var(--e-out), transform var(--t-base) var(--e-out);
+}
+.nx-btn--accent.nx-btn--lg:hover:not(:disabled) > i:first-child {
+  transform: scale(1.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    0 4px 16px color-mix(in srgb, var(--b) 52%, transparent);
+}
 
 /* Nut tron chi co icon */
 .nx-icobtn {

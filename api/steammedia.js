@@ -54,6 +54,143 @@ function htmlToText(html) {
     .trim();
 }
 
+// ---------------------------------------------------------------------------
+// HTML cua Steam -> mang khoi CO CAU TRUC, GIU LAI anh & anh dong giua bai.
+// Trang cua hang Steam chen bang-ron, anh minh hoa (.avif/.gif) va ca "anh
+// dong" (<video autoplay muted loop> webm/mp4) vao giua cac doan van.
+// htmlToText() phia tren nem het di nen mo ta trong launcher chi con chu.
+//
+//   { k:'h',   t }                    tieu de muc
+//   { k:'p',   t }                    doan van
+//   { k:'ul',  items:[] }             danh sach gach dau dong
+//   { k:'img', src, w, h }            anh tinh / anh gif
+//   { k:'vid', src, poster, w, h }    anh dong (webm hoac mp4)
+// ---------------------------------------------------------------------------
+
+const M_IMG = '\u0000';
+const M_LI = '\u0001';
+const M_H = '\u0002';
+const M_VID = '\u0003';
+
+function absUrl(u, base) {
+  if (!u) return '';
+  let src = String(u).replace(/\{STEAM_APP_IMAGE\}/g, base).trim();
+  if (/^\/\//.test(src)) src = 'https:' + src;
+  return /^https?:\/\//i.test(src) ? src : '';
+}
+
+function sizeOf(tag) {
+  const w = (tag.match(/\bwidth\s*=\s*["']?(\d+)/i) || [])[1] || '';
+  const h = (tag.match(/\bheight\s*=\s*["']?(\d+)/i) || [])[1] || '';
+  return w + '|' + h;
+}
+
+function parseRich(html, appId) {
+  if (!html) return [];
+
+  const base =
+    'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/' + appId;
+
+  let s = String(html)
+    // Anh dong: <video ...><source src=".webm"><source src=".mp4"></video>
+    .replace(/<\s*video[\s\S]*?<\s*\/\s*video\s*>/gi, (tag) => {
+      const poster = absUrl((tag.match(/poster\s*=\s*["']([^"']+)["']/i) || [])[1], base);
+      const webm = tag.match(/<\s*source[^>]*src\s*=\s*["']([^"']+\.webm[^"']*)["']/i);
+      const mp4 = tag.match(/<\s*source[^>]*src\s*=\s*["']([^"']+\.mp4[^"']*)["']/i);
+      const src = absUrl((webm && webm[1]) || (mp4 && mp4[1]) || '', base);
+      if (!src && !poster) return '';
+      return '\n' + M_VID + src + '|' + poster + '|' + sizeOf(tag) + '\n';
+    })
+    .replace(/<\s*img[^>]*>/gi, (tag) => {
+      const src = absUrl((tag.match(/\bsrc\s*=\s*["']([^"']+)["']/i) || [])[1], base);
+      if (!src) return '';
+      return '\n' + M_IMG + src + '|' + sizeOf(tag) + '\n';
+    })
+    .replace(/<\s*h[1-6][^>]*>/gi, '\n' + M_H)
+    .replace(/<\s*\/\s*h[1-6]\s*>/gi, '\n')
+    .replace(/<\s*li[^>]*>/gi, '\n' + M_LI)
+    .replace(/<\s*br\s*\/?\s*>/gi, '\n')
+    .replace(/<\s*\/\s*(p|div|li|ul|ol|tr|table|blockquote)\s*>/gi, '\n')
+    .replace(/<[^>]+>/g, '');
+
+  s = decodeEntities(s).replace(/\r/g, '');
+
+  const out = [];
+  let list = null;
+  const flush = () => {
+    if (list && list.items.length) out.push(list);
+    list = null;
+  };
+
+  s.split('\n').forEach((raw) => {
+    const line = raw.replace(/[ \t\u00a0]+/g, ' ').trim();
+    if (!line) return;
+
+    const head = line.charAt(0);
+
+    if (head === M_VID) {
+      flush();
+      const b = line.slice(1).split('|');
+      out.push({ k: 'vid', src: b[0] || '', poster: b[1] || '', w: +b[2] || 0, h: +b[3] || 0 });
+      return;
+    }
+
+    if (head === M_IMG) {
+      flush();
+      const b = line.slice(1).split('|');
+      if (b[0]) out.push({ k: 'img', src: b[0], w: +b[1] || 0, h: +b[2] || 0 });
+      return;
+    }
+
+    if (head === M_LI) {
+      const t = line.slice(1).replace(/^[\u2022\u25aa\u25cf\u00b7*\-\u2013\u2014]\s*/, '').trim();
+      if (!t) return;
+      if (!list) list = { k: 'ul', items: [] };
+      list.items.push(t);
+      return;
+    }
+
+    flush();
+
+    if (head === M_H) {
+      const t = line.slice(1).trim();
+      if (t) out.push({ k: 'h', t });
+      return;
+    }
+
+    out.push({ k: 'p', t: line });
+  });
+
+  flush();
+
+  // Steam doi khi lap lai cung mot bang-ron ngan cach hai lan lien tiep
+  return out.filter((b, i, arr) => {
+    if (b.k !== 'img' && b.k !== 'vid') return true;
+    const prev = arr[i - 1];
+    return !(prev && prev.k === b.k && prev.src === b.src);
+  });
+}
+
+const IS_MEDIA = (b) => b.k === 'img' || b.k === 'vid';
+
+// Cat bot khi mo ta qua dai — chi dem ky tu VAN BAN, khong bao gio bo anh.
+function clampRich(blocks, limit) {
+  const out = [];
+  let n = 0;
+  let cut = false;
+  for (const b of blocks) {
+    if (IS_MEDIA(b)) { out.push(b); continue; }
+    const len = b.k === 'ul' ? b.items.join(' ').length : String(b.t || '').length;
+    if (n + len > limit && out.length) { cut = true; break; }
+    out.push(b);
+    n += len;
+  }
+  // Chi khi bi cat giua chung moi bo anh mo coi o cuoi.
+  // (Vai game nhu The Witcher 3 co mo ta THUAN anh — phai giu nguyen.)
+  if (cut) while (out.length > 1 && IS_MEDIA(out[out.length - 1])) out.pop();
+  return out;
+}
+
 // Parse khoi pc_requirements (HTML) -> object co cau truc.
 // Steam thuong viet "<strong>Memory:</strong> 8 GB RAM" nhung cung co khi
 // nhan va gia tri nam o hai dong khac nhau.
@@ -225,7 +362,23 @@ module.exports = async (req, res) => {
 
     // ---- mo ta ------------------------------------------------------------
     const short = htmlToText(d.short_description || '');
-    const about = htmlToText(d.about_the_game || d.detailed_description || '');
+    const aboutHtml = d.about_the_game || d.detailed_description || '';
+    const about = htmlToText(aboutHtml);
+    const aboutRich = clampRich(parseRich(aboutHtml, appId), 7000);
+
+    // Vai game (The Witcher 3, Cyberpunk 2077...) co phan gioi thieu THUAN
+    // anh/video, khong mot chu nao. Chen mo ta ngan len dau de con co chu doc.
+    const richChars = aboutRich.reduce(
+      (n, b) =>
+        n +
+        (b.k === 'ul'
+          ? b.items.join(' ').length
+          : b.k === 'p' || b.k === 'h'
+          ? String(b.t || '').length
+          : 0),
+      0
+    );
+    if (richChars < 40 && short) aboutRich.unshift({ k: 'p', t: short });
 
     res.status(200).json({
       appid: appId,
@@ -242,6 +395,8 @@ module.exports = async (req, res) => {
 
       short_description: short,
       about: about.length > 4000 ? about.slice(0, 4000).trim() + '…' : about,
+      // Khuon co cau truc: giu tieu de, danh sach VA anh chen giua bai.
+      about_rich: aboutRich,
       // Nhieu game khong co trang cua hang tieng Viet -> Steam van tra tieng Anh.
       // Giao dien dua vao co nay de goi /api/translate.
       about_lang: isVietnamese(about) ? 'vi' : 'en',

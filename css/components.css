@@ -137,29 +137,70 @@
   z-index: 2;
 }
 
-/* Dai danh gia noi tren anh, goc duoi-phai */
+/* Diem danh gia noi tren anh, goc duoi-phai.
+   Truoc day dung emoji mat cuoi/mat meu — nhin roi va thieu nghiem tuc.
+   Nay chi con con so, mau y nghia nam o vach doc ben trai. */
 .gc__score {
   position: absolute;
   right: 9px; bottom: 9px;
   display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
+  align-items: baseline;
+  gap: 1px;
+  height: 22px;
+  padding: 0 8px 0 9px;
   border-radius: var(--r-xs);
-  background: rgba(5, 7, 11, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(5, 7, 11, 0.72);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  color: var(--tx-hi);
+  overflow: hidden;
+  z-index: 2;
+  transition: border-color var(--t-base), box-shadow var(--t-base);
+}
+/* Vach mau doc — thay cho emoji, doc duoc muc danh gia trong mot cai liec */
+.gc__score::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+.gc__score b {
   font-family: var(--f-num);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  z-index: 2;
+  letter-spacing: -0.028em;
+  line-height: 1;
+  color: var(--tx-hi);
 }
-.gc__score i { font-size: 11px; }
+.gc__score em {
+  font-family: var(--f-num);
+  font-style: normal;
+  font-size: 8.5px;
+  font-weight: 750;
+  line-height: 1;
+  color: var(--tx-faint);
+}
 .gc__score--pos { color: var(--ok); }
 .gc__score--mix { color: var(--warn); }
 .gc__score--neg { color: var(--bad); }
+.gc:hover .gc__score {
+  border-color: color-mix(in srgb, currentColor 34%, transparent);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.5),
+              0 0 0 1px color-mix(in srgb, currentColor 12%, transparent);
+}
+/* Con so trong hang danh sach */
+.gc__rev__n {
+  font-family: var(--f-num);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: currentColor;
+}
 
 .gc__body {
   padding: 12px 13px 13px;
@@ -335,6 +376,18 @@
 .shelf__track::-webkit-scrollbar { height: 0; }
 .shelf__track > * { scroll-snap-align: start; }
 
+/* Nam keo bang chuot trai: doi con tro, va chan keo-tha anh cua trinh duyet */
+.shelf__track { cursor: grab; }
+.shelf__track img { -webkit-user-drag: none; user-drag: none; }
+.shelf__track.is-grab {
+  cursor: grabbing;
+  scroll-snap-type: none;      /* dang keo thi bo hut dinh cho muot tay */
+  scroll-behavior: auto;
+  -webkit-user-select: none; user-select: none;
+}
+/* Dang keo thi khoa moi hieu ung hover ben trong cho khoi giat */
+.shelf__track.is-grab * { pointer-events: none; }
+
 /* Mo dan hai canh de bao con noi dung */
 .shelf::before,
 .shelf::after {
@@ -384,81 +437,268 @@
 
 .uc {
   position: relative;
+  display: flex;
+  flex-direction: column;
   border-radius: var(--r-md);
   overflow: hidden;
-  background: var(--bg-surface);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 42%),
+    var(--bg-surface);
   border: 1px solid var(--line);
   cursor: default;
-  transition: transform var(--t-base) var(--e-out), box-shadow var(--t-base), border-color var(--t-base);
+  isolation: isolate;
+  transition: transform var(--t-base) var(--e-out), box-shadow var(--t-base),
+              border-color var(--t-base);
 }
-.uc:hover { transform: translateY(-5px); border-color: var(--line-strong); box-shadow: var(--sh-3); }
+.uc:hover {
+  transform: translateY(-5px);
+  border-color: var(--line-strong);
+  box-shadow: var(--sh-3);
+}
 
-.uc__shot { position: relative; aspect-ratio: 460 / 215; overflow: hidden; background: var(--bg-sunken); }
+/* Vien sang chay quanh the khi con duoi 7 ngay */
+.uc.is-soon { border-color: color-mix(in srgb, var(--warn) 30%, transparent); }
+.uc.is-soon::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(115deg,
+    transparent 30%,
+    color-mix(in srgb, var(--warn) 62%, transparent) 50%,
+    transparent 70%);
+  background-size: 260% 100%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: nx-uc-sweep 3.6s linear infinite;
+  pointer-events: none;
+}
+.uc.is-done { border-color: color-mix(in srgb, var(--ok) 26%, transparent); }
+
+.uc__shot {
+  position: relative;
+  aspect-ratio: 460 / 215;
+  overflow: hidden;
+  background: var(--bg-sunken);
+}
 .uc__shot img {
   width: 100%; height: 100%; object-fit: cover;
-  filter: saturate(0.72) brightness(0.66);
-  transition: filter var(--t-slow) var(--e-out), transform 700ms var(--e-out);
+  filter: saturate(0.7) brightness(0.6);
+  transform: scale(1.015);
+  transition: filter var(--t-slow) var(--e-out), transform 760ms var(--e-out);
 }
-.uc:hover .uc__shot img { filter: saturate(1) brightness(0.86); transform: scale(1.06); }
+.uc:hover .uc__shot img { filter: saturate(1.02) brightness(0.9); transform: scale(1.07); }
 .uc__shot::after {
   content: '';
   position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(5, 7, 11, 0.95), rgba(5, 7, 11, 0.2) 55%, transparent);
+  background: linear-gradient(to top, rgba(5, 7, 11, 0.96), rgba(5, 7, 11, 0.22) 58%, transparent);
 }
 
-.uc__tag {
+/* Quang sang mo dan tu day anh — cho khoi anh khong bi "chet" */
+.uc__glow {
   position: absolute;
-  left: 10px; top: 10px;
-  z-index: 2;
+  left: 50%; bottom: -46%;
+  width: 150%; height: 92%;
+  transform: translateX(-50%);
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+  background: radial-gradient(ellipse at center,
+    color-mix(in srgb, var(--br-1) 26%, transparent), transparent 68%);
+  transition: opacity var(--t-slow) var(--e-out);
+}
+.uc:hover .uc__glow { opacity: 0.85; }
+.uc.is-soon .uc__glow {
+  background: radial-gradient(ellipse at center,
+    color-mix(in srgb, var(--warn) 28%, transparent), transparent 68%);
+}
+.uc.is-done .uc__glow {
+  background: radial-gradient(ellipse at center,
+    color-mix(in srgb, var(--ok) 26%, transparent), transparent 68%);
 }
 
-.uc__body { padding: 13px 14px 15px; }
+.uc__tag { position: absolute; left: 10px; top: 10px; z-index: 3; }
+
+/* Nhan bao Steam da doi lich */
+.uc__moved {
+  position: absolute;
+  right: 10px; top: 10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 21px;
+  padding: 0 8px;
+  border-radius: var(--r-pill);
+  font-family: var(--f-ui);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  color: var(--info);
+  background: rgba(5, 7, 11, 0.76);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--info) 34%, transparent);
+  cursor: help;
+}
+.uc__moved i { font-size: 11px; }
+
+.uc__body {
+  position: relative;
+  z-index: 2;
+  padding: 13px 14px 15px;
+  display: flex;
+  flex-direction: column;
+}
 .uc__title {
   font-family: var(--f-display);
   font-size: 14.5px;
-  font-weight: 700;
+  font-weight: 750;
+  letter-spacing: -0.012em;
   color: var(--tx-hi);
-  line-height: 1.3;
-  min-height: 2.6em;
+  line-height: 1.28;
+  min-height: 2.56em;
+}
+
+.uc__when {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
 }
 .uc__date {
-  display: flex; align-items: center; gap: 6px;
-  margin-top: 7px;
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-family: var(--f-num);
+  font-size: 11.5px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.008em;
+  color: var(--tx-dim);
+  white-space: nowrap;
+}
+.uc__date i {
+  flex: none;
+  font-size: 12px;
+  color: var(--tx-faint);
+  font-variant-numeric: normal;
+}
+/* Nhan mui gio — noi ro moc gio dang hien theo gio Viet Nam */
+.uc__tz {
+  flex: none;
+  margin-left: auto;
+  padding: 2px 6px;
+  border-radius: var(--r-xs);
+  font-family: var(--f-num);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--tx-faint);
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--line);
+  cursor: help;
+}
+.uc__wd {
+  margin-top: 3px;
+  font-family: var(--f-ui);
+  font-size: 10.5px;
   font-weight: 600;
+  letter-spacing: 0.006em;
   color: var(--tx-faint);
 }
 
 /* Dong ho dem nguoc */
 .cd { display: flex; gap: 7px; margin-top: 12px; }
 .cd__cell {
+  position: relative;
   flex: 1;
+  min-width: 0;
   text-align: center;
-  padding: 7px 3px 6px;
+  padding: 8px 3px 7px;
   border-radius: var(--r-sm);
+  overflow: hidden;
   background: var(--bg-sunken);
   border: 1px solid var(--line);
-  transition: border-color var(--t-base), background var(--t-base);
+  animation: nx-rise 460ms var(--e-out) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+  transition: border-color var(--t-base), background var(--t-base),
+              box-shadow var(--t-base);
 }
-.uc:hover .cd__cell { border-color: rgba(58, 216, 255, 0.22); background: rgba(58, 216, 255, 0.05); }
+/* Vach sang mong tren dinh moi o */
+.cd__cell::before {
+  content: '';
+  position: absolute;
+  left: 22%; right: 22%; top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent,
+    color-mix(in srgb, var(--br-1) 55%, transparent), transparent);
+  opacity: 0.5;
+  transition: opacity var(--t-base);
+}
+.uc:hover .cd__cell {
+  border-color: color-mix(in srgb, var(--br-1) 24%, transparent);
+  background: color-mix(in srgb, var(--br-1) 6%, var(--bg-sunken));
+  box-shadow: inset 0 0 16px color-mix(in srgb, var(--br-1) 7%, transparent);
+}
+.uc:hover .cd__cell::before { opacity: 1; }
+.uc.is-soon .cd__cell::before {
+  background: linear-gradient(90deg, transparent,
+    color-mix(in srgb, var(--warn) 62%, transparent), transparent);
+}
+.uc.is-soon:hover .cd__cell {
+  border-color: color-mix(in srgb, var(--warn) 28%, transparent);
+  background: color-mix(in srgb, var(--warn) 6%, var(--bg-sunken));
+  box-shadow: inset 0 0 16px color-mix(in srgb, var(--warn) 8%, transparent);
+}
+
 .cd__n {
   display: block;
   font-family: var(--f-num);
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 800;
   line-height: 1;
   color: var(--tx-hi);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  /* Moi lan so doi, React thay khoa -> chay lai hieu ung nay */
+  animation: nx-tick 340ms var(--e-out);
 }
 .cd__l {
   display: block;
-  margin-top: 4px;
+  margin-top: 5px;
+  font-family: var(--f-ui);
   font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 0.13em;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   color: var(--tx-faint);
   text-transform: uppercase;
+}
+
+/* Thanh tien do: con bao xa toi ngay ra mat */
+.cd__rail {
+  position: relative;
+  height: 3px;
+  margin-top: 10px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+.cd__rail i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--grad-brand);
+  box-shadow: 0 0 10px var(--br-1-soft);
+  transition: width 900ms var(--e-out);
+}
+.uc.is-soon .cd__rail i {
+  background: linear-gradient(90deg, var(--warn), var(--gold));
+  box-shadow: 0 0 10px var(--warn-soft);
 }
 
 /* Da phat hanh — thay cho dong ho 00:00:00 dung im */
@@ -468,14 +708,16 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 11px;
+  padding: 12px;
   border-radius: var(--r-sm);
   background: var(--ok-soft);
   border: 1px solid rgba(47, 224, 164, 0.3);
   color: var(--ok);
+  font-family: var(--f-ui);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.08em;
+  animation: nx-pop 420ms var(--e-out) both;
 }
 .cd--done i { font-size: 15px; }
 

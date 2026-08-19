@@ -288,7 +288,7 @@
             </div>
           </div>
         ) : (
-          <button className="nx-btn nx-btn--primary nx-btn--full nx-btn--lg" onClick={install} disabled={busy}>
+          <button className="nx-btn nx-btn--accent nx-btn--full nx-btn--lg" onClick={install} disabled={busy}>
             {st === 'checking' ? <Busy label="Đang kiểm tra..." />
               : st === 'installing' ? <Busy label="Đang cài đặt..." />
               : st === 'uninstalling' ? <Busy label="Đang gỡ..." />
@@ -344,7 +344,7 @@
     return (
       <ServiceCard card={card} note={note ? <Note tone="bad">{note}</Note> : null}>
         <button
-          className={'nx-btn nx-btn--full nx-btn--lg ' + (st === 'installed' ? 'nx-btn--ok' : 'nx-btn--primary')}
+          className={'nx-btn nx-btn--full nx-btn--lg ' + (st === 'installed' ? 'nx-btn--ok' : 'nx-btn--accent')}
           onClick={click}
           disabled={st === 'checking' || st === 'installing'}
         >
@@ -421,7 +421,7 @@
             <i className="ph-bold ph-magnifying-glass"></i>
           </button>
         </div>
-        <button className="nx-btn nx-btn--primary nx-btn--full nx-btn--lg" onClick={click} disabled={st === 'activating'}>
+        <button className="nx-btn nx-btn--accent nx-btn--full nx-btn--lg" onClick={click} disabled={st === 'activating'}>
           {st === 'activating'
             ? <Busy label="Đang kích hoạt..." />
             : <React.Fragment><i className="ph-fill ph-lightning"></i>KÍCH HOẠT NGAY</React.Fragment>}
@@ -489,7 +489,7 @@
     return (
       <ServiceCard card={card} note={note ? <Note tone={/Lỗi|lỗi|Vui lòng/.test(note) ? 'bad' : 'ok'}>{note}</Note> : null}>
         <button
-          className={'nx-btn nx-btn--full nx-btn--lg ' + (st === 'installed' ? 'nx-btn--bad' : 'nx-btn--primary')}
+          className={'nx-btn nx-btn--full nx-btn--lg ' + (st === 'installed' ? 'nx-btn--bad' : 'nx-btn--accent')}
           onClick={click}
           disabled={busy}
         >

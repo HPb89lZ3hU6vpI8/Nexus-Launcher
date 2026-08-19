@@ -13,9 +13,10 @@
     openExternal,
     pctNum, reviewTone, TONE_ICON, reviewCountNum, fmtCount, sortKey,
     isOnlineGame, customAppIdOf,
-    coverSources, heroSources, fetchMedia,
-    useClickOutside,
+    coverSources, heroSources, fetchMedia, fetchTranslation,
+    useClickOutside, useReveal,
     GameCard, GameRow, UpcomingCard, Shelf, GENRES, GenreCard,
+    useSteamReleases,
     Empty
   } = window.NX;
 
@@ -69,6 +70,15 @@
      HERO TRANG CHU — bang chuyen tu dong, dung khi ro chuot
      ========================================================================== */
 
+  const HERO_MS = 7400;
+
+  /* Cat mo ta cho vua khung, khong cat giua chung mot tu */
+  function clipDesc(s) {
+    const t = String(s || '').replace(/\s+/g, ' ').trim();
+    if (!t) return '';
+    return t.length > 238 ? t.slice(0, 236).replace(/\s+\S*$/, '') + '…' : t;
+  }
+
   function Hero({ picks, onOpen, onLibrary }) {
     const [i, setI] = useState(0);
     const [hold, setHold] = useState(false);
@@ -79,23 +89,49 @@
     const srcs = useMemo(function () { return heroSources(appId); }, [appId]);
     const bg = useBgImage(srcs);
 
+    /* Mo ta: hien ban goc ngay khi co, roi lang le thay bang ban tieng Viet.
+       Game nao Steam da co san trang tieng Viet thi khong goi ban dich nua. */
     const [desc, setDesc] = useState('');
     useEffect(function () {
       let alive = true;
       setDesc('');
       if (!appId) return undefined;
+
       fetchMedia(appId).then(function (d) {
         if (!alive || !d) return;
-        const s = plain(d.desc) || plain(d.about);
-        if (s) setDesc(s.length > 260 ? s.slice(0, 258).replace(/\s+\S*$/, '') + '…' : s);
+        const s = clipDesc(plain(d.desc) || plain(d.about));
+        if (s) setDesc(s);
+
+        const lang = String(d.desc_lang || d.about_lang || '').toLowerCase();
+        if (lang === 'vi') return;
+        fetchTranslation(appId).then(function (t) {
+          if (!alive || !t) return;
+          const v = clipDesc(plain(t.desc) || plain(t.about));
+          if (v) setDesc(v);
+        });
       });
+
       return function () { alive = false; };
     }, [appId]);
 
+    /* Dem gio con lai cua slide. Ro chuot vao la dung, roi chuot ra thi chay
+       tiep dung cho vua dung — thanh chay duoi cham cung theo nhip nay. */
+    const leftRef = useRef(HERO_MS);
+    const t0Ref = useRef(0);
+
+    useEffect(function () { leftRef.current = HERO_MS; }, [i]);
+
     useEffect(function () {
       if (hold || picks.length < 2) return undefined;
-      const t = setTimeout(function () { setI(function (v) { return (v + 1) % picks.length; }); }, 7400);
-      return function () { clearTimeout(t); };
+      t0Ref.current = Date.now();
+      const t = setTimeout(function () {
+        setI(function (v) { return (v + 1) % picks.length; });
+      }, leftRef.current);
+      return function () {
+        clearTimeout(t);
+        const used = Date.now() - t0Ref.current;
+        leftRef.current = Math.max(500, leftRef.current - used);
+      };
     }, [i, hold, picks.length]);
 
     if (!g) return null;
@@ -103,7 +139,7 @@
     const tone = reviewTone(g.percent, g.reviewText);
     const pct = pctNum(g.percent);
     const cnt = reviewCountNum(g.reviewCount);
-    const tags = (Array.isArray(g.tags) ? g.tags : []).slice(0, 3);
+    const tags = (Array.isArray(g.tags) ? g.tags : []).slice(0, 2);
 
     return (
       <section
@@ -116,24 +152,44 @@
              key={appId} />
         <div className="hero__scrim" />
         <div className="hero__aurora"><i /><i /></div>
+        <div className="hero__edge" />
 
         <div className="hero__in" key={'in-' + appId}>
           <div className="hero__eyebrow">
-            <i className="ph-fill ph-flame"></i>Nổi bật hôm nay
+            <i className="ph-fill ph-flame"></i>
+            <span>Nổi bật hôm nay</span>
           </div>
 
           <h1 className="hero__title">{g.title}</h1>
 
-          <div className="hero__meta">
+          {/* Mot dai kinh duy nhat thay cho chum huy hieu roi rac truoc day */}
+          <div className={'hero__strip hero__strip--' + tone}>
             {pct !== null && (
-              <span className={'nx-badge nx-badge--' + (tone === 'pos' ? 'ok' : tone === 'neg' ? 'bad' : 'warn')}>
-                <i className={TONE_ICON[tone]}></i>{Math.round(pct)}% · {g.reviewText}
+              <span className="hero__cell hero__cell--score">
+                <b className="hero__pct">{Math.round(pct)}<em>%</em></b>
+                <span className="hero__tone">{g.reviewText}</span>
               </span>
             )}
-            {cnt > 0 && <span className="nx-tag"><i className="ph-fill ph-chat-circle-text"></i>{fmtCount(cnt)} đánh giá</span>}
-            {g.viethoa && <span className="nx-badge nx-badge--gold"><i className="ph-fill ph-translate"></i>VIỆT HÓA</span>}
-            {isOnlineGame(g) && <span className="nx-badge nx-badge--info"><i className="ph-fill ph-globe"></i>ONLINE</span>}
-            {tags.map(function (t) { return <span className="nx-tag" key={t}>{t}</span>; })}
+            {pct !== null && cnt > 0 && <i className="hero__sep" />}
+            {cnt > 0 && (
+              <span className="hero__cell hero__cell--cnt">
+                <i className="ph-fill ph-users-three"></i>{fmtCount(cnt)}
+              </span>
+            )}
+            {tags.length > 0 && <i className="hero__sep" />}
+            {tags.map(function (t) {
+              return <span className="hero__cell hero__cell--tag" key={t}>{t}</span>;
+            })}
+            {g.viethoa && (
+              <span className="hero__chip hero__chip--vi">
+                <i className="ph-fill ph-translate"></i>Việt hoá
+              </span>
+            )}
+            {isOnlineGame(g) && (
+              <span className="hero__chip hero__chip--on">
+                <i className="ph-fill ph-globe-simple"></i>Online
+              </span>
+            )}
           </div>
 
           <p className="hero__desc nx-clamp-3">
@@ -141,7 +197,7 @@
           </p>
 
           <div className="hero__acts">
-            <button className="nx-btn nx-btn--primary nx-btn--lg" onClick={function () { onOpen(g); }}>
+            <button className="nx-btn nx-btn--primary nx-btn--lg hero__cta" onClick={function () { onOpen(g); }}>
               <i className="ph-fill ph-play"></i>Xem chi tiết
             </button>
             <button className="nx-btn nx-btn--ghost nx-btn--lg" onClick={onLibrary}>
@@ -151,17 +207,27 @@
         </div>
 
         {picks.length > 1 && (
-          <div className="hero__dots">
-            {picks.map(function (p, k) {
-              return (
-                <button
-                  key={p.id || p.appId || k}
-                  className={'hero__dot' + (k === i ? ' is-on' : '')}
-                  onClick={function () { setI(k); }}
-                  aria-label={'Xem ' + p.title}
-                />
-              );
-            })}
+          <div className={'hero__nav' + (hold ? ' is-hold' : '')}>
+            <span className="hero__num">
+              <b>{('0' + (i + 1)).slice(-2)}</b>
+              <i />
+              {('0' + picks.length).slice(-2)}
+            </span>
+            <div className="hero__dots">
+              {picks.map(function (p, k) {
+                return (
+                  <button
+                    key={p.id || p.appId || k}
+                    className={'hero__dot' + (k === i ? ' is-on' : '')}
+                    onClick={function () { setI(k); }}
+                    aria-label={'Xem ' + p.title}
+                  >
+                    {/* Khoa doi theo slide -> thanh chay khoi lai tu dau */}
+                    <i key={'f' + i} />
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
       </section>
@@ -185,6 +251,9 @@
   }
 
   function HomeContent({ games, upcoming, onOpen, onGenre, onLibrary }) {
+    /* Doi chieu lich ra mat voi Steam — game bi doi ngay se tu cap nhat */
+    const rel = useSteamReleases(upcoming);
+
     const picks = useMemo(function () {
       const pool = games.filter(function (g) {
         return g.appId && pctNum(g.percent) !== null && pctNum(g.percent) >= 84 && reviewCountNum(g.reviewCount) >= 15000;
@@ -281,7 +350,10 @@
         {(upcoming && upcoming.length > 0) && (
           <Shelf title="Sắp ra mắt" icon="ph-fill ph-rocket-launch"
                  sub="Đếm ngược tới ngày phát hành">
-            {upcoming.map(function (g) { return <UpcomingCard key={g.id || g.appId} game={g} />; })}
+            {upcoming.map(function (g) {
+              return <UpcomingCard key={g.id || g.appId} game={g}
+                                    steam={rel[String(g.appId)]} />;
+            })}
           </Shelf>
         )}
 

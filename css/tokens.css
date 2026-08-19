@@ -75,6 +75,10 @@
   --sh-brand: 0 10px 34px rgba(58, 216, 255, 0.22), 0 3px 10px rgba(139, 108, 255, 0.18);
 
   /* ---- CHUYEN DONG: 1 bo easing dung chung, khong moi cho 1 kieu ---- */
+  /* Vong sang khi dieu huong bang ban phim / chon o nhap */
+  --focus: color-mix(in srgb, var(--br-1) 58%, transparent);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--br-1) 17%, transparent);
+
   --e-out:    cubic-bezier(0.22, 1, 0.36, 1);      /* giam toc, mac dinh */
   --e-inout:  cubic-bezier(0.65, 0, 0.35, 1);
   --e-spring: cubic-bezier(0.34, 1.46, 0.64, 1);   /* nay nhe, dung cho modal/toast */
@@ -117,6 +121,43 @@
 }
 
 /* Vet sang chay qua khung — dung cho skeleton va vien the khi hover */
+/* Chuyen trang: trang moi troi len, trang cu nhich len roi tan */
+@keyframes nx-view-in {
+  from { opacity: 0; transform: translate3d(0, 18px, 0) scale(0.988); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes nx-view-out {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translate3d(0, -12px, 0) scale(0.994); }
+}
+/* Cac the trong ke ngang lan luot truot vao tu ben phai */
+@keyframes nx-slide-x {
+  from { opacity: 0; transform: translate3d(28px, 0, 0); }
+  to   { opacity: 1; transform: none; }
+}
+/* Hero: khoi chu troi len kem mo dan, nhe hon nx-rise mot chut */
+@keyframes nx-hero-in {
+  from { opacity: 0; transform: translate3d(0, 22px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+/* Thanh chay trong cham dieu huong hero */
+@keyframes nx-hero-fill {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+@keyframes nx-uc-sweep {
+  from { background-position: 200% 0; }
+  to   { background-position: -60% 0; }
+}
+@keyframes nx-tick {
+  0%   { transform: translateY(-42%); opacity: 0; filter: blur(1.5px); }
+  60%  { filter: blur(0); }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes nx-bar-grow {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
 @keyframes nx-shimmer {
   from { background-position: -220% 0; }
   to   { background-position: 320% 0; }
@@ -167,4 +208,9 @@
   /* Vong quay va thanh tien trinh la chi bao trang thai: luon phai chay,
      neu khong nguoi dung tuong ung dung bi treo. */
   .nx-spin { animation: nx-spin 640ms linear infinite !important; }
+  /* Cac khoi von an cho toi khi cuon toi thi phai hien san */
+  .nx-reveal { opacity: 1 !important; transform: none !important; }
+  .nx-reveal .shelf__track > * { opacity: 1 !important; }
+  .hero__bg { opacity: 1 !important; transform: none !important; }
+  .hero__dot i { width: 100% !important; }
 }

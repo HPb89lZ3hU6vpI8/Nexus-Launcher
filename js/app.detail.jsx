@@ -14,7 +14,7 @@
     callApi, openExternal,
     pctNum, reviewTone, TONE_ICON, reviewCountNum, fmtCount, fmtBytes,
     getGamePlatform, isOnlineGame, hasCloudSave, customAppIdOf,
-    coverSources, fetchMedia, buildMedia, fetchTranslation,
+    coverSources, fetchMedia, buildMedia, fetchTranslation, steamDateVN,
     REV_STATE_CACHE, setRevListener,
     useEscape, useToast,
     Img, ScoreRing, Note
@@ -137,6 +137,93 @@
   /* Cao toi da khi chua bung -- du de doc y chinh ma khong nuot ca trang */
   const ABOUT_CLAMP = 470;
 
+  /* Ten ngon ngu goc cua trang cua hang Steam (Steam chi bao vi / khong-vi) */
+  const LANG_LABEL = { vi: 'Tiếng Việt', en: 'Tiếng Anh' };
+
+  /* Anh dong Steam nhung giua bai: chi cho chay khi dang nam trong khung nhin,
+     cuon qua la dung — do khong lam nong may khi mo ta co toi 10 video. */
+  function RichVideo({ b }) {
+    const ref = useRef(null);
+    const [on, setOn] = useState(false);
+
+    useEffect(function () {
+      const el = ref.current;
+      if (!el || typeof IntersectionObserver === 'undefined') return undefined;
+      const io = new IntersectionObserver(function (ents) {
+        ents.forEach(function (en) {
+          if (en.isIntersecting) {
+            const p = el.play();
+            if (p && p.catch) p.catch(function () {});
+          } else {
+            el.pause();
+          }
+        });
+      }, { threshold: 0.15 });
+      io.observe(el);
+      return function () { io.disconnect(); };
+    }, []);
+
+    return (
+      <video
+        ref={ref}
+        className={'gd__media' + (on ? ' is-on' : '')}
+        src={b.src}
+        poster={b.poster || undefined}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        onLoadedData={function () { setOn(true); }}
+      />
+    );
+  }
+
+  function RichFigure({ b }) {
+    const [ok, setOk] = useState(true);
+    const ratio = b.w && b.h ? b.w + ' / ' + b.h : undefined;
+    if (!ok) return null;
+    return (
+      <figure className={'gd__fig' + (b.k === 'vid' ? ' gd__fig--v' : '')}
+              style={{ aspectRatio: ratio }}>
+        {b.k === 'vid' ? (
+          <RichVideo b={b} />
+        ) : (
+          <img className="gd__media" src={b.src} alt="" loading="lazy" decoding="async"
+               onError={function () { setOk(false); }} />
+        )}
+      </figure>
+    );
+  }
+
+  /* Ve mang khoi da co cau truc (tieu de / doan / danh sach / anh / anh dong) */
+  function RichBody({ blocks }) {
+    let lead = true;
+    return blocks.map(function (b, i) {
+      if (b.k === 'img' || b.k === 'vid') return <RichFigure key={i} b={b} />;
+
+      if (b.k === 'h') return <h4 className="gd__h" key={i}>{b.t}</h4>;
+
+      if (b.k === 'ul') {
+        return (
+          <ul className="gd__ul" key={i}>
+            {b.items.map(function (t, j) {
+              return (
+                <li key={j}>
+                  <i className="ph-fill ph-caret-right" aria-hidden="true"></i>
+                  <span>{t}</span>
+                </li>
+              );
+            })}
+          </ul>
+        );
+      }
+
+      const isLead = lead && b.k === 'p';
+      if (isLead) lead = false;
+      return <p className={isLead ? 'gd__lead' : 'gd__p'} key={i}>{b.t}</p>;
+    });
+  }
+
   function AboutBlock({ appId, live, about }) {
     const [tr, setTr] = useState(null);     /* null = dang cho, false = khong co */
     const [orig, setOrig] = useState(false);
@@ -145,7 +232,9 @@
     const body = useRef(null);
 
     /* Steam khong co trang tieng Viet cho game nay -> nho may chu dich */
-    const needTr = !!(about && live && live.about_lang === 'en');
+    const srcLang = (live && live.about_lang) || '';
+    const hasRaw = !!(live && Array.isArray(live.about_rich) && live.about_rich.length);
+    const needTr = !!(live && srcLang === 'en' && (about || hasRaw));
 
     useEffect(function () {
       if (!needTr || !appId) return undefined;
@@ -156,26 +245,56 @@
     }, [needTr, appId]);
 
     const viText = tr && tr.about ? tr.about : '';
-    const text = (!orig && viText) ? viText : about;
-    const blocks = useMemo(function () { return parseAbout(text); }, [text]);
+    const viRich = tr && Array.isArray(tr.about_rich) && tr.about_rich.length ? tr.about_rich : null;
+    const useVi = !orig && (!!viRich || !!viText);
+
+    /* Uu tien mang khoi (giu duoc anh + anh dong Steam chen giua bai);
+       chi khi khong co moi tach chu bang bo doan heuristic cu. */
+    const blocks = useMemo(function () {
+      const raw = hasRaw ? live.about_rich : null;
+      if (useVi && viRich) return viRich;
+      if (!useVi && raw) return raw;
+      if (useVi && viText) return parseAbout(viText);
+      if (raw) return raw;
+      return parseAbout(about);
+    }, [useVi, viRich, viText, hasRaw, live, about]);
+
+    const hasMedia = useMemo(function () {
+      return blocks.some(function (b) { return b.k === 'img' || b.k === 'vid'; });
+    }, [blocks]);
+
+    const hasText = !!(about || blocks.length);
 
     useEffect(function () {
       const el = body.current;
-      setTall(!!el && el.scrollHeight > ABOUT_CLAMP + 90);
-    }, [blocks]);
+      const cap = hasMedia ? ABOUT_CLAMP + 250 : ABOUT_CLAMP;
+      setTall(!!el && el.scrollHeight > cap + 90);
+    }, [blocks, hasMedia]);
 
     useEffect(function () { setOpen(false); }, [orig]);
+
+    const langChip = srcLang ? (
+      <span
+        className={'gd__lang is-' + srcLang}
+        title={srcLang === 'vi'
+          ? 'Nhà phát hành đã viết sẵn bản tiếng Việt trên Steam'
+          : 'Trang Steam của trò chơi này chỉ có ' + (LANG_LABEL[srcLang] || 'ngoại ngữ')}>
+        <i className={'ph-fill ' + (srcLang === 'vi' ? 'ph-seal-check' : 'ph-globe-hemisphere-west')}></i>
+        {LANG_LABEL[srcLang] || srcLang.toUpperCase()}
+      </span>
+    ) : null;
 
     return (
       <section className="gd__about">
         <div className="gd__about-h">
           <span className="gd__about-i"><i className="ph-fill ph-article"></i></span>
           <h3>Giới thiệu</h3>
+          {langChip}
           <span className="gd__rule" />
           {needTr && tr === null && (
             <span className="gd__trwait"><span className="nx-spin" />Đang dịch</span>
           )}
-          {!!viText && (
+          {(!!viRich || !!viText) && (
             <div className="gd__seg" role="group" aria-label="Ngôn ngữ mô tả">
               <button type="button" className={orig ? '' : 'is-on'}
                       onClick={function () { setOrig(false); }}>Tiếng Việt</button>
@@ -185,37 +304,22 @@
           )}
         </div>
 
-        {!about && live === null && (
+        {!hasText && live === null && (
           <div className="gd__skel" aria-label="Đang tải mô tả">
             <span /><span /><span /><span /><span />
           </div>
         )}
 
-        {!about && live !== null && (
+        {!hasText && live !== null && (
           <p className="gd__p gd__p--empty">Chưa có mô tả cho trò chơi này.</p>
         )}
 
-        {!!about && (
+        {hasText && (
           <React.Fragment>
-            <div className={'gd__body' + (tall && !open ? ' is-clamp' : '')} ref={body}>
-              {blocks.map(function (b, i) {
-                if (b.k === 'h') return <h4 className="gd__h" key={i}>{b.t}</h4>;
-                if (b.k === 'ul') {
-                  return (
-                    <ul className="gd__ul" key={i}>
-                      {b.items.map(function (t, j) {
-                        return (
-                          <li key={j}>
-                            <i className="ph-fill ph-caret-right" aria-hidden="true"></i>
-                            <span>{t}</span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  );
-                }
-                return <p className={b.k === 'lead' ? 'gd__lead' : 'gd__p'} key={i}>{b.t}</p>;
-              })}
+            <div
+              className={'gd__body' + (hasMedia ? ' has-media' : '') + (tall && !open ? ' is-clamp' : '')}
+              ref={body}>
+              <RichBody blocks={blocks} />
             </div>
 
             {tall && (
@@ -229,7 +333,10 @@
             {!orig && tr && tr.source === 'auto' && (
               <div className="gd__trnote">
                 <i className="ph-bold ph-translate"></i>
-                <span>Bản dịch tự động — bản gốc do nhà phát hành viết bằng tiếng Anh.</span>
+                <span>
+                  Bản dịch tự động — bản gốc do nhà phát hành viết bằng{' '}
+                  {LANG_LABEL[srcLang] || 'ngoại ngữ'}.
+                </span>
               </div>
             )}
           </React.Fragment>
@@ -483,6 +590,17 @@
      BANG THONG SO
      ------------------------------------------------------------------------ */
 
+  /* The gia tri nho trong bang thong so — thay cho chu mau tho truoc day */
+  function SpecChip({ tone, ico, tint, children }) {
+    return (
+      <span className={'spec__chip is-' + (tone || 'plain')}
+            style={tint ? { '--chip': tint } : undefined}>
+        {ico && <i className={ico}></i>}
+        {children}
+      </span>
+    );
+  }
+
   function SpecRow({ ico, k, children }) {
     return (
       <div className="spec__row">
@@ -498,45 +616,41 @@
     const plat = PLATFORMS.find(function (p) { return p.id === getGamePlatform(game); }) || PLATFORMS[1];
     const dev = live && live.developers && live.developers.length ? live.developers.join(', ') : null;
     const pub = live && live.publishers && live.publishers.length ? live.publishers.join(', ') : null;
-    const rel = live && live.release ? live.release : null;
+    const rel = live && live.release ? steamDateVN(live.release) : null;
 
     return (
       <div className="spec">
-        <SpecRow ico="ph-bold ph-mask-happy" k="Chế độ">
-          <span className={online ? 'spec__v--ok' : 'spec__v--bad'} style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-            <span className="nx-dot nx-dot--live" style={{ background: online ? 'var(--ok)' : 'var(--warn)' }}></span>
-            <span style={{ color: online ? 'var(--ok)' : 'var(--warn)' }}>{online ? 'ONLINE' : 'OFFLINE'}</span>
-          </span>
+        <SpecRow ico="ph-bold ph-broadcast" k="Chế độ">
+          <SpecChip tone={online ? 'ok' : 'warn'}>
+            <span className="nx-dot nx-dot--live"></span>
+            {online ? 'Trực tuyến' : 'Ngoại tuyến'}
+          </SpecChip>
         </SpecRow>
 
-        <SpecRow ico="ph-bold ph-user-plus" k="Yêu cầu">
-          <span style={{ color: 'var(--gold)', fontWeight: 700 }}>
-            MIỄN PHÍ <i className="ph-fill ph-gift"></i>
-          </span>
+        <SpecRow ico="ph-bold ph-tag" k="Yêu cầu">
+          <SpecChip tone="gold" ico="ph-fill ph-gift">Miễn phí</SpecChip>
         </SpecRow>
 
         <SpecRow ico="ph-fill ph-cloud" k="Cloud Save">
           {cloud
-            ? <span className="spec__v--ok"><i className="ph-fill ph-check-circle"></i> Có hỗ trợ</span>
-            : <span className="spec__v--bad"><i className="ph-fill ph-x-circle"></i> Không hỗ trợ</span>}
+            ? <SpecChip tone="ok" ico="ph-bold ph-check">Có hỗ trợ</SpecChip>
+            : <SpecChip tone="bad" ico="ph-bold ph-x">Không hỗ trợ</SpecChip>}
         </SpecRow>
 
         <SpecRow ico="ph-fill ph-floppy-disk" k="Local Save">
-          <span className="spec__v--ok"><i className="ph-fill ph-check-circle"></i> Có hỗ trợ</span>
+          <SpecChip tone="ok" ico="ph-bold ph-check">Có hỗ trợ</SpecChip>
         </SpecRow>
 
         <SpecRow ico="ph-bold ph-storefront" k="Nền tảng">
-          <span style={{ color: plat.tone, fontWeight: 700 }}>
-            <i className={plat.ico} style={{ marginRight: 6 }}></i>{plat.label}
-          </span>
+          <SpecChip tone="tint" ico={plat.ico} tint={plat.tone}>{plat.label}</SpecChip>
         </SpecRow>
 
         {dev && <SpecRow ico="ph-bold ph-code" k="Nhà phát triển">{dev}</SpecRow>}
         {pub && <SpecRow ico="ph-bold ph-buildings" k="Nhà phát hành">{pub}</SpecRow>}
-        {rel && <SpecRow ico="ph-bold ph-calendar-blank" k="Ngày phát hành">{rel}</SpecRow>}
+        {rel && <SpecRow ico="ph-bold ph-calendar-blank" k="Ngày phát hành"><span className="spec__v--num">{rel}</span></SpecRow>}
 
         <SpecRow ico="ph-bold ph-identification-card" k="App ID">
-          <span className="nx-num nx-selectable">{game.appId || '—'}</span>
+          <span className="spec__v--num nx-selectable">{game.appId || '—'}</span>
         </SpecRow>
       </div>
     );
@@ -1287,14 +1401,7 @@
               <div className="pc">
                 {!isUpcoming && (
                   <div className={'rev is-' + tone}>
-                    <div className="rev__wrap">
-                      <ScoreRing percent={game.percent} size={64} thickness={5} />
-                      {pct !== null && (
-                        <span className="rev__badge" aria-hidden="true">
-                          <i className={TONE_ICON[tone]}></i>
-                        </span>
-                      )}
-                    </div>
+                    <ScoreRing percent={game.percent} size={62} thickness={4} />
                     <div className="rev__main">
                       <div className="rev__txt">{game.reviewText || 'Chưa có đánh giá'}</div>
                       <div className="rev__cnt">
@@ -1307,6 +1414,11 @@
                           <span>{game.reviewCount || 'Chưa có dữ liệu'}</span>
                         )}
                       </div>
+                      {pct !== null && (
+                        <div className="rev__bar" aria-hidden="true">
+                          <i style={{ width: Math.max(3, Math.min(100, pct)) + '%' }} />
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1484,5 +1596,5 @@
      XUAT RA
      ------------------------------------------------------------------------ */
 
-  Object.assign(window.NX, { GameDetail, MediaStage, ActionButton, AboutBlock, parseAbout, Sheet, ZoomView, noteTone, stripHtml });
+  Object.assign(window.NX, { GameDetail, MediaStage, ActionButton, AboutBlock, RichBody, parseAbout, Sheet, ZoomView, noteTone, stripHtml });
 })();

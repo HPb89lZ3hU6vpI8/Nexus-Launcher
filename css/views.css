@@ -8,11 +8,11 @@
 
 .hero {
   position: relative;
-  min-height: 442px;
+  min-height: 462px;
   display: flex;
   align-items: flex-end;
-  padding: 46px var(--pad-page) 34px;
-  margin-bottom: 40px;
+  padding: 52px var(--pad-page) 40px;
+  margin-bottom: 34px;
   overflow: hidden;
   isolation: isolate;
 }
@@ -23,31 +23,50 @@
   z-index: -3;
   background-size: cover;
   background-position: center 22%;
-  filter: saturate(1.05);
-  transform: scale(1.04);
+  filter: saturate(1.06) contrast(1.03);
+  transform: scale(1.05);
   opacity: 0;
-  transition: opacity 900ms var(--e-out), transform 1400ms var(--e-out);
+  transition: opacity 900ms var(--e-out), transform 1500ms var(--e-out);
 }
 .hero__bg.is-in { opacity: 1; transform: scale(1); }
 
-/* Man che nhieu lop: toi tu duoi len + tu trai sang, giu chu luon doc duoc */
+/* Hai lop phu: mot doc cho chu noi tren nen, mot ngang cho cot chu ben trai */
 .hero__scrim {
   position: absolute;
   inset: 0;
   z-index: -2;
   background:
-    linear-gradient(to top,   var(--bg-app) 1%, rgba(11, 15, 23, 0.86) 26%, rgba(11, 15, 23, 0.28) 62%, rgba(11,15,23,0.42) 100%),
-    linear-gradient(to right, rgba(11, 15, 23, 0.95) 0%, rgba(11, 15, 23, 0.66) 38%, transparent 76%);
+    linear-gradient(to top,
+      var(--bg-app) 0%,
+      rgba(11, 15, 23, 0.9) 24%,
+      rgba(11, 15, 23, 0.3) 62%,
+      rgba(11, 15, 23, 0.44) 100%),
+    linear-gradient(to right,
+      rgba(11, 15, 23, 0.96) 0%,
+      rgba(11, 15, 23, 0.7) 36%,
+      transparent 74%);
 }
 
-/* Aurora troi cham — hai vet mau rat mo, tao chieu sau song dong */
+/* Duong vien duoi mo dan — noi hero vao phan noi dung phia sau cho lien mach */
+.hero__edge {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--br-1) 26%, transparent) 22%,
+    color-mix(in srgb, var(--br-3) 22%, transparent) 62%,
+    transparent);
+}
+
 .hero__aurora { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
 .hero__aurora i {
   position: absolute;
   display: block;
   border-radius: 50%;
-  filter: blur(84px);
-  will-change: transform;
+  filter: blur(96px);
 }
 .hero__aurora i:nth-child(1) {
   width: 520px; height: 520px;
@@ -64,75 +83,228 @@
 
 .hero__in {
   position: relative;
-  max-width: 660px;
-  animation: nx-rise 640ms var(--e-out) both;
+  max-width: 664px;
+  animation: nx-hero-in 720ms var(--e-out) both;
 }
+
 .hero__eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 13px;
+  gap: 7px;
+  height: 25px;
+  padding: 0 11px 0 9px;
+  margin-bottom: 17px;
   border-radius: var(--r-pill);
-  background: rgba(58, 216, 255, 0.12);
-  border: 1px solid rgba(58, 216, 255, 0.3);
+  background: linear-gradient(120deg,
+    rgba(58, 216, 255, 0.16), rgba(139, 108, 255, 0.12));
+  border: 1px solid color-mix(in srgb, var(--br-1) 32%, transparent);
+  box-shadow: 0 2px 14px rgba(58, 216, 255, 0.12);
   color: var(--br-1);
-  font-size: 10.5px;
+  font-family: var(--f-ui);
+  font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  margin-bottom: 16px;
 }
+.hero__eyebrow i { font-size: 12px; animation: nx-breathe 2.8s var(--e-inout) infinite; }
+
 .hero__title {
   font-family: var(--f-display);
-  font-size: clamp(32px, 4.1vw, 54px);
+  font-size: clamp(34px, 4.3vw, 58px);
   font-weight: 900;
-  line-height: 1.05;
-  letter-spacing: -0.035em;
+  line-height: 1.02;
+  letter-spacing: -0.042em;
   color: #fff;
-  text-shadow: 0 4px 34px rgba(0, 0, 0, 0.6);
-  margin-bottom: 14px;
+  margin-bottom: 16px;
+  text-wrap: balance;
+  text-shadow:
+    0 2px 2px rgba(0, 0, 0, 0.34),
+    0 8px 44px rgba(0, 0, 0, 0.62);
 }
-.hero__meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 15px;
-}
-.hero__desc {
-  font-size: 14px;
-  line-height: 1.68;
-  color: var(--tx);
-  margin-bottom: 24px;
-  max-width: 580px;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
-}
-.hero__acts { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
 
-/* Cham chuyen game noi bat */
-.hero__dots {
+/* --- Dai thong tin: gop huy hieu roi rac vao mot thanh kinh duy nhat ------ */
+
+.hero__strip {
+  --tone: var(--br-1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
+  padding: 5px 6px;
+  margin-bottom: 18px;
+  border-radius: var(--r-pill);
+  background: rgba(8, 11, 17, 0.52);
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 6px 26px rgba(0, 0, 0, 0.34);
+}
+.hero__strip--pos { --tone: var(--ok); }
+.hero__strip--mix { --tone: var(--warn); }
+.hero__strip--neg { --tone: var(--bad); }
+
+.hero__cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  font-family: var(--f-ui);
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--tx);
+  white-space: nowrap;
+}
+.hero__sep {
+  width: 1px;
+  height: 15px;
+  flex: none;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.hero__cell--score { gap: 8px; padding-left: 10px; }
+.hero__pct {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  font-family: var(--f-num);
+  font-size: 17px;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  color: var(--tone);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--tone) 42%, transparent);
+}
+.hero__pct em { font-style: normal; font-size: 10px; font-weight: 750; opacity: 0.62; }
+.hero__tone {
+  font-family: var(--f-ui);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--tone) 82%, #fff);
+}
+
+.hero__cell--cnt {
+  font-family: var(--f-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--tx-dim);
+}
+.hero__cell--cnt i { font-size: 13px; color: var(--tx-faint); }
+.hero__cell--tag { color: var(--tx-dim); font-weight: 600; }
+.hero__cell--tag + .hero__cell--tag { padding-left: 0; }
+.hero__cell--tag + .hero__cell--tag::before {
+  content: '·';
+  margin-right: 12px;
+  color: var(--tx-faint);
+}
+
+.hero__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  margin-left: 6px;
+  padding: 0 11px 0 9px;
+  border-radius: var(--r-pill);
+  font-family: var(--f-ui);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hero__chip i { font-size: 12px; }
+.hero__chip--vi {
+  color: var(--gold);
+  background: var(--gold-soft);
+  border: 1px solid color-mix(in srgb, var(--gold) 32%, transparent);
+}
+.hero__chip--on {
+  color: var(--info);
+  background: var(--info-soft);
+  border: 1px solid color-mix(in srgb, var(--info) 32%, transparent);
+}
+
+.hero__desc {
+  font-family: var(--f-ui);
+  font-size: 14.5px;
+  font-weight: 450;
+  line-height: 1.72;
+  letter-spacing: 0.002em;
+  color: var(--tx);
+  margin-bottom: 26px;
+  max-width: 588px;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.72);
+  transition: opacity var(--t-base) var(--e-out);
+}
+
+.hero__acts { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* Nut chinh cua hero: to hon mot nhip, chu day hon, quang sang manh hon */
+.hero__cta {
+  height: 52px;
+  padding-right: 28px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.004em;
+}
+.hero__cta > i:first-child { width: 32px; height: 32px; font-size: 15px; }
+
+/* --- Dieu huong slide ----------------------------------------------------- */
+
+.hero__nav {
   position: absolute;
   right: var(--pad-page);
-  bottom: 36px;
+  bottom: 38px;
+  z-index: 2;
   display: flex;
   align-items: center;
-  gap: 9px;
-  z-index: 2;
+  gap: 14px;
 }
+.hero__num {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--f-num);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--tx-faint);
+}
+.hero__num b { font-size: 14px; font-weight: 850; color: var(--tx-hi); }
+.hero__num i { width: 12px; height: 1px; background: rgba(255, 255, 255, 0.2); }
+
+.hero__dots { display: flex; align-items: center; gap: 8px; }
 .hero__dot {
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.24);
+  position: relative;
+  width: 10px; height: 10px;
+  padding: 0;
   border: 0;
-  transition: width var(--t-base) var(--e-out), background var(--t-base), transform var(--t-fast);
-}
-.hero__dot:hover { background: rgba(255, 255, 255, 0.5); transform: scale(1.2); }
-.hero__dot.is-on {
-  width: 30px;
   border-radius: var(--r-pill);
-  background: var(--grad-brand);
-  box-shadow: 0 0 14px rgba(58, 216, 255, 0.6);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transition: width var(--t-base) var(--e-out), background var(--t-base),
+              transform var(--t-fast) var(--e-out);
 }
+.hero__dot:hover { background: rgba(255, 255, 255, 0.42); transform: scale(1.18); }
+.hero__dot.is-on { width: 46px; transform: none; background: rgba(255, 255, 255, 0.14); }
+/* Thanh chay ben trong cho biet con bao lau nua thi sang slide ke tiep */
+.hero__dot i {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0;
+  border-radius: inherit;
+  background: var(--grad-brand);
+  box-shadow: 0 0 12px rgba(58, 216, 255, 0.55);
+}
+.hero__dot.is-on i { animation: nx-hero-fill 7400ms linear both; }
+.hero__nav.is-hold .hero__dot.is-on i { animation-play-state: paused; }
 
 /* ============================================================================
    THANH CONG CU THU VIEN
@@ -564,6 +736,32 @@
   text-transform: uppercase;
   color: var(--tx-dim);
 }
+/* Nhan ngon ngu goc cua mo ta tren Steam */
+.gd__lang {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 10px 0 8px;
+  border-radius: var(--r-pill);
+  font-family: var(--f-ui);
+  font-size: 10.5px;
+  font-weight: 750;
+  letter-spacing: 0.012em;
+  white-space: nowrap;
+  color: var(--tx-dim);
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--line);
+  cursor: default;
+}
+.gd__lang i { font-size: 11px; opacity: 0.9; }
+.gd__lang.is-vi {
+  color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 13%, transparent);
+  border-color: color-mix(in srgb, var(--ok) 26%, transparent);
+}
+
 .gd__rule {
   flex: 1;
   min-width: 10px;
@@ -612,6 +810,7 @@
   -webkit-user-select: text;
   user-select: text;
 }
+.gd__body.has-media.is-clamp { max-height: 720px; }
 .gd__body.is-clamp {
   max-height: 470px;
   overflow: hidden;
@@ -691,6 +890,51 @@
   color: var(--br-1);
   opacity: 0.9;
 }
+
+/* Anh minh hoa & anh dong Steam chen giua bai gioi thieu */
+.gd__fig {
+  position: relative;
+  margin: 20px 0 22px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.012)),
+    var(--bg-sunken);
+  border: 1px solid var(--line);
+  box-shadow: var(--sh-2);
+  isolation: isolate;
+  animation: nx-fade 620ms var(--e-out) both;
+  transition: border-color var(--t-base), box-shadow var(--t-base),
+              transform var(--t-base) var(--e-out);
+}
+.gd__fig:hover {
+  border-color: var(--line-mid);
+  box-shadow: var(--sh-3);
+  transform: translateY(-2px);
+}
+/* Vien sang mong ben trong cho anh sac net, khong bi "chim" vao nen */
+.gd__fig::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.028);
+}
+.gd__media {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: inherit;
+}
+video.gd__media {
+  opacity: 0;
+  transition: opacity 460ms var(--e-out);
+}
+video.gd__media.is-on { opacity: 1; }
 
 .gd__more {
   display: inline-flex;
@@ -826,7 +1070,6 @@
   opacity: 0.08;
   pointer-events: none;
 }
-.rev__wrap { position: relative; flex: none; }
 .rev__ring {
   position: relative;
   flex: none;
@@ -837,14 +1080,14 @@
 .rev__ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
 .rev__ring circle { fill: none; stroke-linecap: round; }
 .rev__ring .rev__trk { stroke: rgba(255, 255, 255, 0.07); }
+.rev__ring .rev__trk { stroke: rgba(255, 255, 255, 0.09); }
 .rev__ring .rev__val {
-  transition: stroke-dashoffset 1s var(--e-out);
-  filter: drop-shadow(0 0 5px currentColor);
+  transition: stroke-dashoffset 1.1s var(--e-out);
 }
 .rev__pct {
   position: relative;
   font-family: var(--f-num);
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.045em;
@@ -859,21 +1102,6 @@
   vertical-align: 5px;
   opacity: 0.5;
 }
-/* Huy hieu lay mau tu .rev.is-* qua currentColor */
-.rev__badge {
-  position: absolute;
-  right: -1px;
-  bottom: 0;
-  width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: currentColor;
-  box-shadow: 0 0 0 3px var(--bg-surface), 0 3px 10px rgba(0, 0, 0, 0.55);
-}
-.rev__badge i { font-size: 11px; color: #05090f; }
-
 .rev__main { position: relative; flex: 1; min-width: 0; }
 .rev__txt {
   font-family: var(--f-display);
@@ -899,6 +1127,25 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.015em;
   color: var(--tx-dim);
+}
+/* Thanh do thay cho huy hieu emoji cu — doc duoc ty le ngay tuc thi */
+.rev__bar {
+  position: relative;
+  height: 3px;
+  margin-top: 10px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.075);
+}
+.rev__bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, currentColor 42%, transparent), currentColor);
+  box-shadow: 0 0 9px color-mix(in srgb, currentColor 55%, transparent);
+  transform-origin: left center;
+  animation: nx-bar-grow 1.1s var(--e-out) both;
 }
 .is-pos { color: var(--ok); }
 .is-mix { color: var(--warn); }
@@ -954,34 +1201,83 @@
 .spec { display: flex; flex-direction: column; }
 .spec__row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
-  padding: 9px 16px;
-  font-size: 12.5px;
+  min-height: 40px;
+  padding: 8px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.032);
   transition: background var(--t-fast);
 }
 .spec__row:last-child { border-bottom: 0; }
 .spec__row:hover { background: rgba(255, 255, 255, 0.022); }
+
+/* Cot nhan: chu nho, deu, khong canh tranh voi gia tri */
 .spec__k {
   flex: none;
-  width: 116px;
-  color: var(--tx-faint);
+  width: 118px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--f-ui);
+  font-size: 11.5px;
   font-weight: 600;
-  display: flex; align-items: center; gap: 7px;
+  letter-spacing: 0.008em;
+  line-height: 1.35;
+  color: var(--tx-faint);
 }
-.spec__k i { font-size: 13px; width: 14px; }
+.spec__k i {
+  flex: none;
+  width: 15px;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+/* Cot gia tri: dam hon, sang hon, dung dung mot ho font */
 .spec__v {
   flex: 1;
   min-width: 0;
-  color: var(--tx);
-  font-weight: 550;
+  font-family: var(--f-ui);
+  font-size: 12.8px;
+  font-weight: 600;
   line-height: 1.5;
+  letter-spacing: -0.002em;
+  color: var(--tx-hi);
   word-break: break-word;
   -webkit-user-select: text; user-select: text;
 }
+.spec__v--num {
+  font-family: var(--f-num);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.012em;
+  color: var(--tx);
+}
 .spec__v--ok  { color: var(--ok);  font-weight: 700; }
 .spec__v--bad { color: var(--bad); font-weight: 700; }
+
+/* The gia tri: gon, co vien, khong dung chu mau tran */
+.spec__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  font-family: var(--f-ui);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.004em;
+  white-space: nowrap;
+  color: var(--chip, var(--tx-dim));
+  background: color-mix(in srgb, var(--chip, #8e99b3) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--chip, #8e99b3) 27%, transparent);
+}
+.spec__chip i { font-size: 12px; margin-left: -1px; }
+.spec__chip .nx-dot { margin-left: -1px; background: currentColor; }
+.spec__chip.is-ok   { --chip: var(--ok); }
+.spec__chip.is-bad  { --chip: var(--bad); }
+.spec__chip.is-warn { --chip: var(--warn); }
+.spec__chip.is-gold { --chip: var(--gold); }
 
 /* Vung nut hanh dong */
 .act { display: flex; flex-direction: column; gap: 9px; padding: 16px; }
@@ -1014,21 +1310,38 @@
   flex: 1;
   min-width: 0;
   height: 42px;
-  padding: 0 14px;
+  padding: 0 12px;
   border-radius: var(--r-sm);
   background: var(--bg-sunken);
   border: 1px solid var(--line-mid);
   color: var(--tx-hi);
   font-family: var(--f-num);
-  font-size: 17px;
+  font-size: 16.5px;
   font-weight: 800;
-  letter-spacing: 0.34em;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;          /* bu khoang cach thua ben phai cho can giua */
   text-align: center;
   text-transform: uppercase;
-  transition: border-color var(--t-base), box-shadow var(--t-base);
+  caret-color: var(--gold);
+  transition: border-color var(--t-base), box-shadow var(--t-base),
+              background var(--t-base);
 }
-.code input::placeholder { letter-spacing: 0.18em; font-size: 13px; font-weight: 600; color: var(--tx-faint); }
-.code input:focus { border-color: rgba(255, 207, 92, 0.5); box-shadow: 0 0 0 3px var(--gold-soft); }
+.code input::placeholder {
+  letter-spacing: 0.14em;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--tx-faint);
+}
+/* Mot vong duy nhat, om sat vien, cung tone vang voi nut ben canh */
+.code input:hover:not(:focus) { border-color: var(--line-strong); }
+.code input:focus {
+  background: color-mix(in srgb, var(--gold) 5%, var(--bg-sunken));
+  border-color: color-mix(in srgb, var(--gold) 52%, transparent);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--gold) 15%, transparent),
+    inset 0 0 14px color-mix(in srgb, var(--gold) 8%, transparent);
+}
+.code input:disabled { opacity: 0.55; }
 
 /* Thanh tien trinh tai */
 .prog { display: flex; flex-direction: column; gap: 8px; }
