@@ -1127,7 +1127,8 @@ video.gd__media.is-on { opacity: 1; }
   pointer-events: none;
 }
 .rev__pct b {
-  font-size: 21px;
+  position: relative;
+  font-size: 22px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.045em;
@@ -1135,20 +1136,34 @@ video.gd__media.is-on { opacity: 1; }
      ca nhom chu bi keo lech sang trai. Tra lai dung khoang thua do. */
   margin-right: 0.045em;
   line-height: 1;
+  text-align: center;
   color: var(--tx-hi);
   text-shadow: 0 1px 7px rgba(0, 0, 0, 0.6);
 }
+/* LOI DA SUA (lan 2): dau % truoc day dung align-self: flex-start. Trong mot
+   khung cao dung bang ca vong tron thi "flex-start" nghia la sat MEP TREN cua
+   vong tron chu khong phai ngang dau con so — do duoc no nam cach tam 23.6px
+   len tren, tuc la de len net ve nen gan nhu bien mat. Mat chu % thi con lai
+   moi con so, ma con so lai duoc can giua theo ca cum "so + %" nen no lech
+   trai 6.1px trong mot vong tron trong.
+   Nay: dau % can giua theo cum roi nang len bang transform — transform khong
+   lam thay doi do cao dong nen khong the keo lech duoc nua. */
 .rev__pct em {
-  align-self: flex-start;
-  margin-top: 0.28em;
-  margin-left: 1.5px;
+  position: absolute;
+  left: 100%;
+  top: 14%;
+  margin-left: 2px;
   font-style: normal;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 750;
   line-height: 1;
   color: currentColor;
-  opacity: 0.62;
+  opacity: 0.72;
 }
+/* Chi dung cho truong hop 100% — thu nho lai de dau % khong dung vao net ve.
+   Du lieu hien tai cao nhat la 98 nen day chi la luoi do phong. */
+.rev__ring.is-wide .rev__pct b { font-size: 17px; }
+.rev__ring.is-wide .rev__pct em { font-size: 7.5px; }
 .rev__main { position: relative; flex: 1; min-width: 0; }
 .rev__txt {
   font-family: var(--f-display);

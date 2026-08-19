@@ -1447,7 +1447,7 @@
               <div className="pc">
                 {!isUpcoming && (
                   <div className={'rev is-' + tone}>
-                    <ScoreRing percent={game.percent} size={62} thickness={4} />
+                    <ScoreRing percent={game.percent} size={70} thickness={5} />
                     <div className="rev__main">
                       <div className="rev__txt">{TX(game.reviewText || 'Chưa có đánh giá')}</div>
                       <div className="rev__cnt">

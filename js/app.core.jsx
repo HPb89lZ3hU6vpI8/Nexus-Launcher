@@ -920,8 +920,12 @@ function ScoreRing({ percent, size, thickness }) {
      dung chung mot dinh nghia va mau se sai o vong thu hai tro di. */
   const gid = useMemo(function () { return 'nxring' + (++_ringSeq); }, []);
   const mid = s / 2;
+  /* nxDigits: so chu so cua ket qua cuoi cung. Giu san dung tung ay cho de
+     luc so dem tang dan (7 -> 93) con so khong bi nhay qua nhay lai. */
+  const nxDigits = n === null ? 1 : String(Math.round(p)).length;
   return (
-    <div className="rev__ring" style={{ width: s, height: s }}>
+    <div className={'rev__ring' + (nxDigits >= 3 ? ' is-wide' : '')}
+         style={{ width: s, height: s }}>
       <svg width={s} height={s} aria-hidden="true">
         <defs>
           <linearGradient id={gid} x1="0%" y1="100%" x2="100%" y2="0%">
@@ -943,8 +947,13 @@ function ScoreRing({ percent, size, thickness }) {
         )}
       </svg>
       <span className="rev__pct">
-        <b>{n === null ? '—' : Math.round(shown === null ? n : shown)}</b>
-        {n !== null && <em>%</em>}
+        {/* Dau % nam BEN TRONG the <b> va duoc dat tuyet doi (xem views.css)
+            nen no khong chiem cho trong dong chu. Nho vay con so la thu duy
+            nhat duoc can giua, va no nam dung tam vong tron. */}
+        <b style={{ minWidth: nxDigits * 0.6 + 'em' }}>
+          {n === null ? '—' : Math.round(shown === null ? n : shown)}
+          {n !== null && <em>%</em>}
+        </b>
       </span>
     </div>
   );
