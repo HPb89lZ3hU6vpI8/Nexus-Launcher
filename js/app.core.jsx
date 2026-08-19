@@ -245,13 +245,14 @@ function normalizeMedia(raw) {
     items = items.filter(m => m.src);
   }
 
-  if (!items.length && !raw.sysreq && !raw.short_description) return null;
+  if (!items.length && !raw.sysreq && !raw.sysreq_rec && !raw.short_description) return null;
 
   return {
     items,
     header_image: raw.header_image || '',
     background:   raw.background || '',
     sysreq:       raw.sysreq || null,
+    sysreq_rec:   raw.sysreq_rec || null,
     desc:         raw.short_description || raw.desc || '',
     about:        raw.about || '',
     developers:   Array.isArray(raw.developers) ? raw.developers : [],

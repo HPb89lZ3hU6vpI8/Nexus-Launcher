@@ -35,7 +35,7 @@
         ['Tự động sync', 'Khắc phục lỗi Steam Cloud'],
         ['Bảo mật', 'An toàn dữ liệu tuyệt đối']
       ],
-      note: 'Dữ liệu được bảo mật tuyệt đối — hỗ trợ riêng cho các trò chơi Steam tại Nexus Launcher.'
+      note: 'Dữ liệu được bảo mật tuyệt đối cho mọi trò chơi Steam.'
     },
     {
       id: 'canhcut',
@@ -45,7 +45,7 @@
       a: '#0e7490', b: '#06b6d4', glow: 'rgba(6,182,212,0.13)',
       features: [
         'Việt hóa game AAA và Indie chất lượng cao',
-        'Hơn 100 dự án: Elden Ring, Wukong, MGS V…',
+        'Hơn 100 dự án lớn: Elden Ring, Wukong, MGS V',
         'Từng câu thoại dịch tỉ mỉ, sắc thái mượt',
         'Tích hợp launcher tự động tải và cài đặt',
         'Cập nhật bản vá mới nhất liên tục'

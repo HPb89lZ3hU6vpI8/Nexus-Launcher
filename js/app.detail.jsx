@@ -353,20 +353,49 @@
     );
   }
 
-  function SysSpecs({ req }) {
-    const r = req || {};
-    const rows = [
-      ['ph-bold ph-windows-logo', 'Hệ điều hành', r.os],
-      ['ph-bold ph-cpu', 'Bộ xử lý', r.cpu],
-      ['ph-bold ph-circuitry', 'Bộ nhớ RAM', r.ram],
-      ['ph-bold ph-monitor', 'Đồ họa', r.gpu],
-      ['ph-bold ph-cube', 'DirectX', r.dx],
-      ['ph-bold ph-wifi-high', 'Kết nối', r.connection],
-      ['ph-bold ph-hard-drive', 'Lưu trữ', r.storage],
-      ['ph-bold ph-note', 'Ghi chú', r.note]
-    ].filter(function (x) { return !!x[2]; });
+  /* Cac truong cau hinh Steam tra ve, theo thu tu hien thi */
+  const SYS_FIELDS = [
+    ['ph-bold ph-windows-logo', 'Hệ điều hành', 'os'],
+    ['ph-bold ph-cpu', 'Bộ xử lý', 'cpu'],
+    ['ph-bold ph-circuitry', 'Bộ nhớ RAM', 'ram'],
+    ['ph-bold ph-monitor', 'Đồ họa', 'gpu'],
+    ['ph-bold ph-cube', 'DirectX', 'dx'],
+    ['ph-bold ph-wifi-high', 'Kết nối', 'connection'],
+    ['ph-bold ph-hard-drive', 'Lưu trữ', 'storage'],
+    ['ph-bold ph-note', 'Ghi chú', 'note']
+  ];
 
-    if (!rows.length) {
+  function sysRows(req) {
+    const r = req || {};
+    return SYS_FIELDS
+      .map(function (f) { return [f[0], f[1], r[f[2]]]; })
+      .filter(function (x) { return !!x[2]; });
+  }
+
+  /* Mot nhom cau hinh (Toi thieu hoac De nghi). Tra ve null neu Steam khong co. */
+  function SysGroup({ req, head, ico }) {
+    const rows = sysRows(req);
+    if (!rows.length) return null;
+
+    return (
+      <div className="sysg">
+        <div className="sysg__head"><i className={ico}></i>{head}</div>
+        <div className="spec">
+          {rows.map(function (row) {
+            return <SpecRow key={row[1]} ico={row[0]} k={row[1]}>{row[2]}</SpecRow>;
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  function SysSpecs({ req, rec }) {
+    const hasMin = sysRows(req).length > 0;
+    /* Chi hien nhom De nghi khi Steam that su ghi khac phan Toi thieu */
+    const same = req && rec && JSON.stringify(req) === JSON.stringify(rec);
+    const hasRec = !same && sysRows(rec).length > 0;
+
+    if (!hasMin && !hasRec) {
       return (
         <div className="spec">
           <SpecRow ico="ph-bold ph-info" k="Cấu hình">Chưa có dữ liệu cấu hình cho trò chơi này.</SpecRow>
@@ -375,11 +404,9 @@
     }
 
     return (
-      <div className="spec">
-        <SpecRow ico="ph-bold ph-check-square" k="Kiến trúc">Yêu cầu CPU và hệ điều hành 64-bit</SpecRow>
-        {rows.map(function (row) {
-          return <SpecRow key={row[1]} ico={row[0]} k={row[1]}>{row[2]}</SpecRow>;
-        })}
+      <div className="sys">
+        {hasMin && <SysGroup req={req} head="CẤU HÌNH TỐI THIỂU" ico="ph-bold ph-gauge" />}
+        {hasRec && <SysGroup req={rec} head="CẤU HÌNH ĐỀ NGHỊ" ico="ph-bold ph-rocket-launch" />}
       </div>
     );
   }
@@ -514,6 +541,7 @@
     }, [appId]);
 
     const sysreq = (live && live.sysreq) || game.sysreq || null;
+    const sysreqRec = (live && live.sysreq_rec) || null;
     const about = useMemo(function () {
       if (!live) return '';
       const long = stripHtml(live.about);
@@ -950,7 +978,7 @@
                   </button>
                 </div>
 
-                {tab === 'info' ? <InfoSpecs game={game} live={live} /> : <SysSpecs req={sysreq} />}
+                {tab === 'info' ? <InfoSpecs game={game} live={live} /> : <SysSpecs req={sysreq} rec={sysreqRec} />}
 
                 {/* ---------------------------- HANH DONG ---------------------------- */}
                 <div className="act">
