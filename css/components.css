@@ -417,7 +417,12 @@
   grid-auto-flow: column;
   /* Chieu rong the tu tinh theo khung: luon thay dung N the + nua the ke tiep
      -> nguoi dung biet ngay con noi dung, khong bao gio bi cat le vai pixel. */
-  --cols: 4;
+  /* So the hien cung mot luc do doan script o dau index.html tinh san roi ghi
+     vao --shelf-cols. No biet ca be ngang cua so lan muc phong to nen tinh ra
+     duoc be rong that su cua mot the, viec ma cau lenh @media khong lam duoc
+     (media chi doc duoc be ngang, mu tit ve phong to). So 4 phia sau chi la
+     muc du phong neu script chua kip chay. */
+  --cols: var(--shelf-cols, 4);
   grid-auto-columns: calc((100% - var(--cols) * 18px) / (var(--cols) + 0.5));
   gap: 18px;
   overflow-x: auto;
@@ -483,9 +488,6 @@
 .shelf__nav:disabled { opacity: 0 !important; pointer-events: none; }
 .shelf__nav--l { left: calc(var(--pad-page) - 19px); }
 .shelf__nav--r { right: calc(var(--pad-page) - 19px); }
-
-@media (max-width: 1400px) { .shelf__track { --cols: 3; } }
-@media (max-width: 1080px) { .shelf__track { --cols: 2; } }
 
 /* ----------------------------------------------------------------------------
    THE SAP RA MAT + DEM NGUOC

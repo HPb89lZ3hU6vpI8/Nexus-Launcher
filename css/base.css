@@ -107,7 +107,13 @@ select:focus-visible { outline: none; }
   display: flex;
   flex-direction: column;
   position: relative;
-  z-index: 1;
+  /* Phai nam TREN thanh ben trai (.nx-rail, z-index 3). Khong phai vi hai
+     cai de len nhau -- chung nam canh nhau, khong cham nhau bao gio -- ma vi
+     lop phu toan man hinh cua hop thoai duoc ve BEN TRONG day. Neu khoi nay
+     thap hon thanh ben, thi du hop thoai co dat z-index bao nhieu di nua no
+     cung khong the phu qua duoc thanh ben: thanh ben van sang ro va van bam
+     duoc trong khi le ra ca man hinh dang bi khoa. */
+  z-index: 4;
 }
 
 .nx-scroll {
@@ -302,7 +308,11 @@ select:focus-visible { outline: none; }
   backdrop-filter: blur(18px) saturate(150%);
   -webkit-backdrop-filter: blur(18px) saturate(150%);
   position: relative;
-  z-index: 2;
+  /* Phai cao hon MOI thu cuon ben duoi, dac biet la thanh cong cu Thu vien
+     (.lib__bar, z-index 5). Bang chon ngon ngu do xuong tu day; truoc day
+     thanh Thu vien de len no va an mat hang dau, cang thu hep cua so thi
+     thanh do cang xuong hang nhieu va che cang nang. */
+  z-index: 10;
 }
 
 /* Huy hieu bieu tuong cho tung trang -- thay cho chu tran khong co diem nhan */
@@ -353,7 +363,7 @@ select:focus-visible { outline: none; }
 .nx-search {
   position: relative;
   width: 340px;
-  max-width: 42vw;
+  max-width: calc(42 * var(--vw));
 }
 .nx-search input {
   width: 100%;
@@ -850,11 +860,23 @@ select:focus-visible { outline: none; }
   width: 236px;
   padding: 7px;
   border-radius: var(--r-lg);
-  background: var(--bg-overlay);
+  /* Nen phai DUC hoan toan. Truoc day o day la nen mo 78% cong mot lop lam
+     mo hau canh. Lop lam mo do khong bao gio chay: cha cua bang nay la thanh
+     tren cung, ma thanh tren cung cung dang lam mo hau canh roi. Khi mot o da
+     lam mo hau canh thi con chau ben trong no chi con lam mo duoc phan hau
+     canh nam trong long no thoi. Thanh tren cung chi cao khoang 62px, con bang
+     nay thi tha xuong hon 300px, nen gan nhu toan bo bang khong co gi de lam
+     mo -- chi con lai 22% do ho, va noi dung trang phia sau xuyen thang qua,
+     ro net. O Trang chu hay Tich hop phia sau la nen toi nen khong ai thay;
+     rieng Thu vien thi ngay sau lung bang la thanh cong cu chu trang va anh
+     game sang, thanh ra phan dau bang trong nhu bi che.
+
+     Nen bo han lop lam mo, va dung nen duc giong het bang chon Sap xep o Thu
+     vien. Vach sang mo mot pixel o mep tren la meo quen thuoc de mot tam bang
+     trong nhu dang noi len khoi nen. */
+  background: var(--bg-raised);
   border: 1px solid var(--line-mid);
-  box-shadow: var(--sh-4);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  box-shadow: var(--sh-4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   animation: nx-pop 200ms var(--e-out) both;
   transform-origin: top right;
 }
@@ -866,7 +888,7 @@ select:focus-visible { outline: none; }
   right: 15px;
   width: 9px;
   height: 9px;
-  background: var(--bg-overlay);
+  background: var(--bg-raised);
   border-left: 1px solid var(--line-mid);
   border-top: 1px solid var(--line-mid);
   transform: rotate(45deg);

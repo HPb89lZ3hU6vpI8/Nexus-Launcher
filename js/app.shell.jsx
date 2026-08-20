@@ -19,15 +19,20 @@
   } = window.NX;
 
   /* --------------------------------------------------------------------------
-     TY LE HIEN THI CO DINH
+     KHOA THU PHONG THU CONG
      ------------------------------------------------------------------------ */
 
-  /* Launcher chay o ty le co dinh 100%: khoa moi thao tac thu phong cua
-     trinh duyet (Ctrl +/-/0, Ctrl + con lan) va xoa muc thu phong da luu
-     tu cac phien truoc de giao dien khong bi lech. */
+  /* Muc phong to cua giao dien do doan script o dau index.html tu tinh theo
+     man hinh. Nguoi dung khong duoc tu chinh them: chan Ctrl +/-/0 va Ctrl +
+     con lan, vi so do ho chinh se chong len so do tu tinh, giao dien lech ngay.
+
+     Truoc day dong duoi la lenh XOA TRANG muc phong to, tu thoi launcher con
+     khoa cung o 100%. Nay khong duoc xoa nua -- xoa la mat luon phan tu can
+     theo man hinh, va do React chay sau nen no xoa dung cai vua dat xong. Thay
+     bang mot lan goi lai ham tu can cho chac. */
   function useNoZoom() {
     useEffect(function () {
-      document.documentElement.style.zoom = '';
+      if (window.NXFit) window.NXFit();
       try { localStorage.removeItem('nx.zoom'); } catch (e) {}
 
       const onKey = function (e) {
@@ -87,13 +92,20 @@
      KICH THUOC CUA SO
      ------------------------------------------------------------------------ */
 
+  /* Tra ve be ngang MA BO CUC DUOC DUNG, khong phai so pixel that cua cua so.
+     Ca trang dang duoc phong to theo man hinh, nen phai chia lai cho he so do.
+     Neu khong, may dat do phan giai cao cua Windows (200-250%) se bi bao la
+     "man hinh qua hep" du bo cuc thuc te con rat rong. */
   function useViewport() {
-    const [w, setW] = useState(function () { return window.innerWidth; });
+    const eff = function () {
+      return Math.round(window.innerWidth / (window.NXZ ? window.NXZ() : 1));
+    };
+    const [w, setW] = useState(eff);
     useEffect(function () {
       let raf = 0;
       const on = function () {
         cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(function () { setW(window.innerWidth); });
+        raf = requestAnimationFrame(function () { setW(eff()); });
       };
       window.addEventListener('resize', on);
       return function () { window.removeEventListener('resize', on); cancelAnimationFrame(raf); };

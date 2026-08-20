@@ -250,6 +250,13 @@ function UpcomingCard({ game, steam }) {
               con lai, nen xe tu nha ga va do nhe vao mep -- khoang 100px
               cuoi la bat dau ha toc. Day chinh la cho truoc kia dam thang
               vao tuong roi dung khuc mot cai.                               */
+/* Toa do ngang cua chuot, quy ve DUNG he pixel ma scrollLeft dang dung.
+   Ca trang duoc phong to theo man hinh (xem script o dau index.html). Chuot
+   tra ve toa do DA nhan he so phong to, con scrollLeft thi khong. Tron thang
+   hai thu do lai se lam anh chay nhanh hon -- hoac cham hon -- ngon tay, nhin
+   nhu anh bi truot khoi con tro. Chia lai cho khop. */
+function cx(e) { return e.clientX / (window.NXZ ? window.NXZ() : 1); }
+
 const DRAG_MIN = 6;
 const FRICTION = 0.94;
 const V_MIN = 0.055;
@@ -313,7 +320,9 @@ function Shelf({ title, icon, sub, children, action }) {
     if (!el) return;
     stopAnim();
     const first = el.firstElementChild;
-    const cell = first ? first.getBoundingClientRect().width + 18 : 280;
+    /* offsetWidth chu khong phai getBoundingClientRect: cai sau da nhan he so
+       phong to roi, dem chung voi clientWidth ben duoi la lech nhau. */
+    const cell = first ? first.offsetWidth + 18 : 280;
     const span = Math.max(cell, Math.floor(el.clientWidth / cell) * cell);
     const max = el.scrollWidth - el.clientWidth;
     const from = el.scrollLeft;
@@ -339,8 +348,8 @@ function Shelf({ title, icon, sub, children, action }) {
     stopAnim();
     drag.current = {
       down: true, moved: false, cap: false,
-      x: e.clientX, left: el.scrollLeft, id: e.pointerId,
-      s: [performance.now(), e.clientX]
+      x: cx(e), left: el.scrollLeft, id: e.pointerId,
+      s: [performance.now(), cx(e)]
     };
   };
 
@@ -349,7 +358,7 @@ function Shelf({ title, icon, sub, children, action }) {
     const d = drag.current;
     if (!el || !d.down) return;
 
-    const dx = e.clientX - d.x;
+    const dx = cx(e) - d.x;
     if (!d.moved) {
       if (Math.abs(dx) <= DRAG_MIN) return;
       d.moved = true;
@@ -362,7 +371,7 @@ function Shelf({ title, icon, sub, children, action }) {
        ca doan ~100ms cuoi chu khong chi nhin khung hinh chot, nen mot khung
        hinh bi giat khong con lam hong cu truot. */
     const s = d.s;
-    s.push(performance.now(), e.clientX);
+    s.push(performance.now(), cx(e));
     if (s.length > 24) s.splice(0, s.length - 24);
 
     el.scrollLeft = d.left - dx;

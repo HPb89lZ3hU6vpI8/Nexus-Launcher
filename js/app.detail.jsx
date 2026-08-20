@@ -424,6 +424,13 @@
   }
 
   const PALWORLD_APPID = '1623730';
+/* Toa do ngang cua chuot, quy ve DUNG he pixel ma scrollLeft dang dung.
+   Ca trang duoc phong to theo man hinh (xem script o dau index.html). Chuot
+   tra ve toa do DA nhan he so phong to, con scrollLeft thi khong. Tron thang
+   hai thu do lai se lam anh chay nhanh hon -- hoac cham hon -- ngon tay, nhin
+   nhu anh bi truot khoi con tro. Chia lai cho khop. */
+function cx(e) { return e.clientX / (window.NXZ ? window.NXZ() : 1); }
+
   const DRAG_THRESHOLD = 6;
   const IS_HLS = /\.m3u8(\?|$)/i;
 
@@ -529,7 +536,7 @@
     const onDown = function (e) {
       const el = strip.current;
       if (!el) return;
-      drag.current = { down: true, moved: false, cap: false, x: e.clientX, left: el.scrollLeft };
+      drag.current = { down: true, moved: false, cap: false, x: cx(e), left: el.scrollLeft };
       /* KHONG bat con tro ngay o day. Neu bat, Chromium se chuyen huong su kien
          click sang chinh dai anh thay vi vao nut ben trong -> khong doi duoc
          anh/video. Chi bat khi nguoi dung that su keo (xem onMove). */
@@ -537,7 +544,7 @@
     const onMove = function (e) {
       const el = strip.current;
       if (!el || !drag.current.down) return;
-      const dx = e.clientX - drag.current.x;
+      const dx = cx(e) - drag.current.x;
       if (!drag.current.moved && Math.abs(dx) > DRAG_THRESHOLD) {
         drag.current.moved = true;
         setDragging(true);

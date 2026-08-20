@@ -69,10 +69,65 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/fill/style.css">
 
 <!-- Giao dien Nexus -->
-<link rel="stylesheet" href="./css/tokens.css?v=25">
-<link rel="stylesheet" href="./css/base.css?v=25">
-<link rel="stylesheet" href="./css/components.css?v=25">
-<link rel="stylesheet" href="./css/views.css?v=25">
+<link rel="stylesheet" href="./css/tokens.css?v=30">
+<link rel="stylesheet" href="./css/base.css?v=30">
+<link rel="stylesheet" href="./css/components.css?v=30">
+<link rel="stylesheet" href="./css/views.css?v=30">
+
+<!-- Tu can giao dien theo man hinh. Phai chay TRUOC khi khung dau tien duoc
+     ve len, nen viet thang o day chu khong bo vao file jsx (jsx con phai cho
+     Babel dich xong moi chay, luc do nguoi dung da kip thay giao dien nhay). -->
+<script>
+(function () {
+  /* Man hinh goc de doi chieu: cua so 1670x866, tuc man 1080p o muc phong to
+     100% cua Windows. Moi may khac deu duoc quy ve khung nay.
+
+     Lay CAN BAC HAI la co y: man rong gap doi thi giao dien chi to hon khoang
+     1.4 lan, phan du con lai danh cho viec hien THEM noi dung. Neu nhan thang
+     he so thi man 4K chi la man 1080p phong to, chang loi gi ca.
+
+     Lay so NHO HON giua chieu ngang va chieu doc, de man rat rong ma thap
+     (ultrawide) khong bi cao qua roi tran ra ngoai khung. */
+  var W0 = 1670, H0 = 866, MIN = 0.72, MAX = 1.55;
+
+  /* Do de tinh so the tren mot hang o Trang chu. 311 la phan be ngang bi
+     rail trai va cac le an mat, do duoc va giong nhau o moi phan giai. 286
+     la be rong mot the tren man 1080p -- moc chuan de man nao cung nhin ra
+     the co cung co, 18 la khe giua hai the. */
+  var OFF = 311, CARD = 286, GAP = 18;
+  var d = document.documentElement, raf = 0;
+
+  function fit() {
+    var w = window.innerWidth  || W0;
+    var h = window.innerHeight || H0;
+    var z = Math.sqrt(Math.min(w / W0, h / H0));
+    z = Math.round(Math.max(MIN, Math.min(MAX, z)) * 1000) / 1000;
+    d.style.zoom = z;
+    d.style.setProperty('--ui-zoom', z);
+    window.NXZOOM = z;
+
+    /* Man cang rong thi hien cang NHIEU the, chu khong phai vai the phong to
+       ken ca man hinh. Phai tinh o day chu khong dung duoc @media trong CSS:
+       @media chi doc duoc be ngang cua so, no khong biet gi ve muc phong to,
+       ma dung ra thi be rong the nguoi ta NHIN THAY = be ngang chia phong to.
+       Truoc do dung @media nen man 4K bi chia thanh 8 cot, chu trong the chat
+       qua phai xuong dong. */
+    var room = w / z - OFF;
+    var n = Math.round((room - CARD / 2) / (CARD + GAP));
+    d.style.setProperty('--shelf-cols', Math.max(2, Math.min(8, n)));
+  }
+
+  /* Cho cac cho khac doc lai he so. Chuot tra ve toa do DA nhan zoom, con
+     scrollLeft thi khong -- cho nao tron hai thu do phai chia lai cho no. */
+  window.NXZ = function () { return window.NXZOOM || 1; };
+  window.NXFit = fit;
+  fit();
+  window.addEventListener('resize', function () {
+    if (raf) return;
+    raf = requestAnimationFrame(function () { raf = 0; fit(); });
+  });
+})();
+</script>
 </head>
 
 <body>
@@ -94,10 +149,10 @@
 <!-- ==========================================================================
      1. DU LIEU — JavaScript thuan, KHONG di qua Babel (nhanh hon rat nhieu)
      ========================================================================== -->
-<script src="./js/data.games.js?v=25"></script>
-<script src="./js/data.media.js?v=25"></script>
-<script src="./js/data.static.js?v=25"></script>
-<script src="./js/i18n.js?v=25"></script>
+<script src="./js/data.games.js?v=30"></script>
+<script src="./js/data.media.js?v=30"></script>
+<script src="./js/data.static.js?v=30"></script>
+<script src="./js/i18n.js?v=30"></script>
 
 <!-- ==========================================================================
      2. THU VIEN
@@ -111,12 +166,12 @@
      3. GIAO DIEN — chay theo dung thu tu: core -> cards -> detail -> views
                     -> integrate -> shell
      ========================================================================== -->
-<script type="text/babel" data-presets="react" src="./js/app.core.jsx?v=25"></script>
-<script type="text/babel" data-presets="react" src="./js/app.cards.jsx?v=25"></script>
-<script type="text/babel" data-presets="react" src="./js/app.detail.jsx?v=25"></script>
-<script type="text/babel" data-presets="react" src="./js/app.views.jsx?v=25"></script>
-<script type="text/babel" data-presets="react" src="./js/app.integrate.jsx?v=25"></script>
-<script type="text/babel" data-presets="react" src="./js/app.shell.jsx?v=25"></script>
+<script type="text/babel" data-presets="react" src="./js/app.core.jsx?v=30"></script>
+<script type="text/babel" data-presets="react" src="./js/app.cards.jsx?v=30"></script>
+<script type="text/babel" data-presets="react" src="./js/app.detail.jsx?v=30"></script>
+<script type="text/babel" data-presets="react" src="./js/app.views.jsx?v=30"></script>
+<script type="text/babel" data-presets="react" src="./js/app.integrate.jsx?v=30"></script>
+<script type="text/babel" data-presets="react" src="./js/app.shell.jsx?v=30"></script>
 
 <!-- ==========================================================================
      4. LUOI AN TOAN — neu co gi do hong, bao cho nguoi dung thay vi man hinh den
