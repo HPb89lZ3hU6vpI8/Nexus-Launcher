@@ -1,17 +1,17 @@
 /* ============================================================================
    NEXUS LAUNCHER — DICH VU TICH HOP
-   Luoi 5 the: Cloud Save · Cánh Cụt Team · Game Thuần Việt · Easy-Install · Fluenty UI
-   Thay carousel cu (the bi tran chu) bang luoi khong bao gio vo bo cuc.
+   Ban the keo ngang, 5 muc: Cloud Save · Cánh Cụt Team · Game Thuần Việt · Easy-Install · Fluenty UI
+   Ca bo nam gon trong mot man hinh: keo trai/phai de doi the, khong cuon doc.
    Phu thuoc: window.NX (app.core.jsx)
    ========================================================================== */
 
 (function () {
   'use strict';
 
-  const { useState, useEffect, useCallback } = React;
+  const { useState, useEffect, useCallback, useRef } = React;
   const {
     callApi, hasApi, apiProp, openExternal, DISCORD_URL, Note, useToast,
-    TX, useLang, tagTone, markedTone, stripTone
+    TX, useLang, tagTone, markedTone, stripTone, prefersCalm
   } = window.NX;
 
   /* --------------------------------------------------------------------------
@@ -145,7 +145,12 @@
      KHUNG THE
      ------------------------------------------------------------------------ */
 
-  function ServiceCard({ card, children, note }) {
+  /* extra: phan nhap lieu rieng cua tung dich vu, dat o cuoi cot phai cua
+     THAN the chu khong phai o chan the. De duoi chan thi rieng the co o nhap
+     se cao vot len ~66px so voi bon the con lai -- ma trong mot ban the, the
+     nen cao hon the dang xem trong rat ky. Dat vao than the thi ca nam the
+     deu ket thuc bang dung mot nut CTA giong het nhau. */
+  function ServiceCard({ card, children, note, extra }) {
     return (
       <article className="sc" style={{ '--sc-a': card.a, '--sc-b': card.b, '--sc-glow': card.glow }}>
         <header className="sc__head">
@@ -156,45 +161,59 @@
           </div>
         </header>
 
+        {/* Than the chia doi: cot TRAI noi dich vu lam duoc gi va khong lam
+            duoc gi, cot PHAI la bang thong so + ghi chu. Xep ngang nhu vay the
+            beo ra ma lun han xuong, nho do ca bo the nam gon trong mot man
+            hinh -- day chinh la dieu kien de bo duoc thanh cuon doc.
+            Khoi "khong ho tro" nam ben trai chu khong nam chung voi bang
+            thong so, vi neu don het sang phai thi rieng the Easy-Install se
+            cao vot len ~180px so voi bon the con lai, ma the cao nhat quyet
+            dinh chieu cao ca ban the. */}
         <div className="sc__body">
-          <div className="sc__feats">
-            {card.features.map(function (f, i) {
-              return (
-                <div className="sc__feat" key={i}>
-                  <i className="ph-fill ph-check-circle"></i>
-                  <span>{TX(f)}</span>
+          <div className="sc__col">
+            <div className="sc__feats">
+              {card.features.map(function (f, i) {
+                return (
+                  <div className="sc__feat" key={i}>
+                    <i className="ph-fill ph-check-circle"></i>
+                    <span>{TX(f)}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {card.unsup && (
+              <div className="sc__unsup">
+                <div className="sc__unsup-h"><i className="ph-fill ph-prohibit"></i>{TX(card.unsupHead)}</div>
+                <div className="sc__unsup-tags">
+                  {card.unsup.map(function (u) { return <span className="nx-tag" key={u}>{TX(u)}</span>; })}
                 </div>
-              );
-            })}
+              </div>
+            )}
           </div>
 
-          {card.info && (
-            <div className="sc__info">
-              <div className="sc__info-h">{TX(card.infoHead)}</div>
-              <div className="sc__info-b">
-                {card.info.map(function (kv) {
-                  return (
-                    <div className="sc__kv" key={kv[0]}>
-                      <b>{TX(kv[0])}</b><span>{TX(kv[1])}</span>
-                    </div>
-                  );
-                })}
+          <div className="sc__col">
+            {card.info && (
+              <div className="sc__info">
+                <div className="sc__info-h">{TX(card.infoHead)}</div>
+                <div className="sc__info-b">
+                  {card.info.map(function (kv) {
+                    return (
+                      <div className="sc__kv" key={kv[0]}>
+                        <b>{TX(kv[0])}</b><span>{TX(kv[1])}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {card.unsup && (
-            <div className="sc__unsup">
-              <div className="sc__unsup-h"><i className="ph-fill ph-prohibit"></i>{TX(card.unsupHead)}</div>
-              <div className="sc__unsup-tags">
-                {card.unsup.map(function (u) { return <span className="nx-tag" key={u}>{TX(u)}</span>; })}
-              </div>
-            </div>
-          )}
+            {card.note && (
+              <div className="sc__note"><i className="ph-fill ph-info"></i><span>{TX(card.note)}</span></div>
+            )}
 
-          {card.note && (
-            <div className="sc__note"><i className="ph-fill ph-info"></i><span>{TX(card.note)}</span></div>
-          )}
+            {extra}
+          </div>
         </div>
 
         <footer className="sc__foot">
@@ -417,7 +436,10 @@
     const tone = st === 'success' ? 'ok' : st === 'already' ? 'warn' : 'bad';
 
     return (
-      <ServiceCard card={card} note={note ? <Note tone={tone}>{stripTone(note)}</Note> : null}>
+      <ServiceCard
+        card={card}
+        note={note ? <Note tone={tone}>{stripTone(note)}</Note> : null}
+        extra={
         <div className="sc__appid">
           <input
             type="text"
@@ -435,6 +457,8 @@
             <i className="ph-bold ph-magnifying-glass"></i>
           </button>
         </div>
+        }
+      >
         <button className="nx-btn nx-btn--accent nx-btn--full nx-btn--lg" onClick={click} disabled={st === 'activating'}>
           {st === 'activating'
             ? <Busy label={TX('Đang kích hoạt...')} />
@@ -518,6 +542,291 @@
   }
 
   /* ==========================================================================
+     BAN THE KEO NGANG
+     Truoc day nam the xep thanh luoi doc, trang dai gap doi man hinh nen phai
+     cuon len cuon xuong nhu mot trang web. Nay xep thanh MOT hang keo ngang:
+     the dang xem nam giua, to va ro; hai the ke ben lui ra sau, nho lai va mo
+     di roi tho nua nguoi o mep man hinh -- nhin la biet con keo duoc nua.
+     ========================================================================== */
+
+  const DECK_GAP = 24;      /* khe giua hai the */
+  const DECK_MIN = 6;       /* keo qua bao nhieu px moi tinh la keo, duoi nguong van la mot cu bam */
+  const SNAP_MS = 520;      /* thoi gian bay ve the dich */
+  const FLICK = 240;        /* vuot nhanh thi quy doi van toc ra "bay them may the" */
+  const WHEEL_LOCK = 360;   /* lan chuot lien tuc thi khoa bot, khong de luot vut qua ca bo */
+  const EDGE_PULL = 0.32;   /* keo qua dau bo thi nang dan tay lai */
+
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+
+  function Deck({ children, label }) {
+    const items = React.Children.toArray(children);
+    const n = items.length;
+
+    const vp = useRef(null);
+    const track = useRef(null);
+    const cells = useRef([]);
+    const [active, setActive] = useState(0);
+    const [grab, setGrab] = useState(false);
+
+    /* Vi tri tinh theo DON VI THE, co phan le: 1.37 nghia la dang o giua the 1
+       va the 2. Giu trong ref chu khong phai state -- moi khung hinh tu tay ve
+       lai se muot hon nhieu so voi viec bat React dung lai ca cay component
+       sau chuc lan moi giay. */
+    const pos = useRef(0);
+    const dest = useRef(0);
+    const geo = useRef({ w: 0, cw: 0 });
+    const anim = useRef(0);
+    const lock = useRef(0);
+    const noClick = useRef(0);   /* vua keo xong thi nuot cai bam theo sau */
+    const drag = useRef({ down: false, moved: false, cap: false, x: 0, p0: 0, id: 0, s: [] });
+
+    const stopAnim = useCallback(function () {
+      if (anim.current) { cancelAnimationFrame(anim.current); anim.current = 0; }
+    }, []);
+
+    /* Ve mot khung hinh: day ca hang sang ngang, roi tung the tu thu nho va mo
+       di theo khoang cach toi tam. */
+    const paint = useCallback(function () {
+      const g = geo.current;
+      if (!g.cw) return;
+      const step = g.cw + DECK_GAP;
+      const p = pos.current;
+      if (track.current) {
+        track.current.style.transform =
+          'translate3d(' + (g.w / 2 - g.cw / 2 - p * step) + 'px,0,0)';
+      }
+      for (let i = 0; i < n; i++) {
+        const el = cells.current[i];
+        if (!el) continue;
+        const d = Math.abs(i - p);
+        const k = Math.min(1, d);
+        const sc = 1 - k * 0.13;
+        /* The thu nho lai thi mep cua no thut vao, khe ho se toac ra dung bang
+           phan be di. Keo nguoc lai chung ay px de khoang cach nhin van deu. */
+        const shift = (i < p ? 1 : -1) * (1 - sc) * g.cw / 2;
+        el.style.transform = 'translate3d(' + shift + 'px,0,0) scale(' + sc + ')';
+        el.style.opacity = String(1 - k * 0.6);
+        el.style.zIndex = String(50 - Math.round(Math.min(9, d) * 5));
+      }
+    }, [n]);
+
+    const measure = useCallback(function () {
+      const el = vp.current;
+      if (!el) return;
+      const w = el.clientWidth;
+      /* Be rong the KHONG phai mot ti le co dinh. Cua so cang hep thi the phai
+         chiem ti le cang LON, vi the hep lai la chu xuong dong nhieu hon va
+         the cao vot len -- dung luc man hinh nho cung thap di. Cho ti le chay
+         muot tu 62% (cua so nho) ve 44% (man hinh 1080p tro len): the luon du
+         ngan de lot man hinh, ma hai the ben canh van tho ra du de nhin thay.
+         Chay muot chu khong nhay bac, de keo gian cua so khong bi giat. */
+      const f = clamp(0.62 - (w - 900) * (0.62 - 0.44) / 540, 0.44, 0.62);
+      const cw = Math.round(clamp(w * f, 380, 700));
+      geo.current = { w: w, cw: cw };
+      el.style.setProperty('--cw', cw + 'px');
+      paint();
+    }, [paint]);
+
+    useEffect(function () {
+      measure();
+      const el = vp.current;
+      if (!el) return undefined;
+      const ro = new ResizeObserver(measure);
+      ro.observe(el);
+      return function () { ro.disconnect(); stopAnim(); };
+    }, [measure, stopAnim]);
+
+    /* React ve lai xong thi cac ref vua duoc gan lai -> son lai mot lan cho
+       chac, neu khong the se nhay ve dung nguyen ban trong mot khung hinh. */
+    useEffect(function () { paint(); });
+
+    /* Bay muot ve the dich. Nhanh luc dau, cham dan luc ve gan -- cung mot
+       duong cong voi cu truot ngang o trang chu nen ca app mot cam giac tay. */
+    const glide = useCallback(function (to) {
+      const t = clamp(Math.round(to), 0, n - 1);
+      dest.current = t;
+      setActive(t);
+      stopAnim();
+      const from = pos.current;
+      if (from === t || prefersCalm()) { pos.current = t; paint(); return; }
+      const t0 = performance.now();
+      const run = function (ts) {
+        const k = Math.min(1, (ts - t0) / SNAP_MS);
+        pos.current = from + (t - from) * easeOutCubic(k);
+        paint();
+        anim.current = k < 1 ? requestAnimationFrame(run) : 0;
+      };
+      anim.current = requestAnimationFrame(run);
+    }, [n, paint, stopAnim]);
+
+    const go = useCallback(function (d) { glide(dest.current + d); }, [glide]);
+
+    /* ---- keo tay ---- */
+    const onDown = function (e) {
+      if (e.button !== 0 || e.pointerType === 'touch') return;
+      stopAnim();
+      drag.current = {
+        down: true, moved: false, cap: false,
+        x: e.clientX, p0: pos.current, id: e.pointerId,
+        s: [performance.now(), e.clientX]
+      };
+    };
+
+    const onMove = function (e) {
+      const d = drag.current;
+      if (!d.down) return;
+      const dx = e.clientX - d.x;
+      if (!d.moved) {
+        if (Math.abs(dx) < DECK_MIN) return;
+        d.moved = true;
+        setGrab(true);
+        try { vp.current.setPointerCapture(d.id); d.cap = true; } catch (err) {}
+      }
+      const g = geo.current;
+      let p = d.p0 - dx / (g.cw + DECK_GAP);
+      /* Qua dau bo thi cho nhuc nhich mot chut roi ghi lai -- co phan hoi de
+         biet la minh dang keo, dong thoi biet la het duong. */
+      if (p < 0) p = p * EDGE_PULL;
+      else if (p > n - 1) p = (n - 1) + (p - (n - 1)) * EDGE_PULL;
+      pos.current = p;
+      paint();
+      /* Ghi vet tay: tung cap (thoi diem, toa do), lat nua do van toc tren ca
+         doan ~100ms cuoi chu khong chi nhin khung hinh chot. */
+      const s = d.s;
+      s.push(performance.now(), e.clientX);
+      if (s.length > 24) s.splice(0, s.length - 24);
+    };
+
+    const onUp = function () {
+      const d = drag.current;
+      if (d.cap && vp.current) { try { vp.current.releasePointerCapture(d.id); } catch (err) {} }
+      d.down = false;
+      d.cap = false;
+      if (!d.moved) return;
+      setGrab(false);
+      /* Nha tay xong trinh duyet ban them mot su kien "bam" ngay sau do. Neu
+         khong chan, keo tu the nay sang the kia se bi hieu nham thanh bam vao
+         the dang nam duoi con tro. Chan bang MOC THOI GIAN chu khong bang mot
+         cai co, vi co thi phai co cho xoa -- ma quen xoa la tu day tro di moi
+         cu bam vao the ben canh deu bi nuot. */
+      noClick.current = performance.now() + 220;
+      const s = d.s;
+      const m = s.length;
+      let v = 0;
+      if (m >= 4) {
+        let i = m - 2;
+        while (i >= 2 && s[m - 2] - s[i - 2] < 100) i -= 2;
+        const dt = s[m - 2] - s[i];
+        if (dt > 8) v = (s[m - 1] - s[i + 1]) / dt;
+      }
+      const step = geo.current.cw + DECK_GAP;
+      /* Keo cham thi ve the gan nhat; vuot nhanh thi cong them toi da mot the
+         theo huong vua vuot, nen chi can hat nhe co tay la sang the ke ben. */
+      glide(pos.current - clamp(v * FLICK / step, -1, 1));
+    };
+
+    /* Bam vao mot the ben canh = chon the do, chu khong phai bam nut ben trong
+       no. Cac nut cua the khong duoc chon da bi tat o CSS. */
+    const pick = function (i) {
+      if (performance.now() < noClick.current) return;
+      if (i !== dest.current) glide(i);
+    };
+
+    /* ---- con lan chuot ---- */
+    useEffect(function () {
+      const el = vp.current;
+      if (!el) return undefined;
+      const onWheel = function (e) {
+        const sc = document.querySelector('.nx-scroll');
+        const pageScrolls = !!sc && sc.scrollHeight > sc.clientHeight + 2;
+        const ax = Math.abs(e.deltaX);
+        const ay = Math.abs(e.deltaY);
+        /* Con lan doc chi duoc dung de lat the KHI trang khong con gi de cuon.
+           Neu khong, tren man hinh thap nguoi dung se khong cuon noi trang. */
+        const use = ax > ay ? e.deltaX : (pageScrolls ? 0 : e.deltaY);
+        if (!use) return;
+        e.preventDefault();
+        const now = performance.now();
+        if (now < lock.current) return;
+        lock.current = now + WHEEL_LOCK;
+        go(use > 0 ? 1 : -1);
+      };
+      el.addEventListener('wheel', onWheel, { passive: false });
+      return function () { el.removeEventListener('wheel', onWheel); };
+    }, [go]);
+
+    /* ---- phim mui ten ---- */
+    useEffect(function () {
+      const onKey = function (e) {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        const a = document.activeElement;
+        if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT')) return;
+        if (!vp.current || !vp.current.offsetParent) return;
+        e.preventDefault();
+        go(e.key === 'ArrowRight' ? 1 : -1);
+      };
+      window.addEventListener('keydown', onKey);
+      return function () { window.removeEventListener('keydown', onKey); };
+    }, [go]);
+
+    return (
+      <div className="ig__deck">
+        <div
+          className={'ig__vp' + (grab ? ' is-grab' : '')}
+          ref={vp}
+          onPointerDown={onDown}
+          onPointerMove={onMove}
+          onPointerUp={onUp}
+          onPointerCancel={onUp}
+          role="group"
+          aria-label={label}
+        >
+          <div className="ig__track" ref={track}>
+            {items.map(function (it, i) {
+              return (
+                <div
+                  className={'ig__cell' + (i === active ? ' is-on' : '')}
+                  key={i}
+                  ref={function (el) { cells.current[i] = el; }}
+                  onClick={function () { pick(i); }}
+                  aria-hidden={i === active ? undefined : 'true'}
+                >
+                  {it}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <button className="ig__nav ig__nav--l" onClick={function () { go(-1); }}
+                disabled={active === 0} aria-label={TX('Lùi lại')}>
+          <i className="ph-bold ph-caret-left"></i>
+        </button>
+        <button className="ig__nav ig__nav--r" onClick={function () { go(1); }}
+                disabled={active === n - 1} aria-label={TX('Tiến tới')}>
+          <i className="ph-bold ph-caret-right"></i>
+        </button>
+
+        <div className="ig__dots" role="tablist">
+          {items.map(function (it, i) {
+            return (
+              <button
+                key={i}
+                className={'ig__dot' + (i === active ? ' is-on' : '')}
+                onClick={function () { glide(i); }}
+                role="tab"
+                aria-selected={i === active}
+                aria-label={TX('Dịch vụ') + ' ' + (i + 1)}
+              />
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  /* ==========================================================================
      TRANG TICH HOP
      ========================================================================== */
 
@@ -527,7 +836,7 @@
     CARDS.forEach(function (c) { byId[c.id] = c; });
 
     return (
-      <div className="nx-page">
+      <div className="nx-page nx-page--deck">
         <header className="ig__hero">
           <h1 className="ig__title">{TX('Hệ thống dịch vụ tích hợp')}</h1>
           <p className="ig__sub">
@@ -535,23 +844,19 @@
           </p>
         </header>
 
-        <div className="ig__grid">
+        <Deck label={TX('Hệ thống dịch vụ tích hợp')}>
           <CloudCard card={byId.cloud} />
           <ToolCard card={byId.canhcut} />
           <ToolCard card={byId.thuanviet} />
           <EasyCard card={byId.vip} />
           <FluentyCard card={byId.fluenty} />
-        </div>
+        </Deck>
 
-        <div style={{ padding: '0 var(--pad-page) 52px' }}>
-          <button className="bn bn--discord" onClick={function () { openExternal(DISCORD_URL); }}>
+        <div className="ig__foot">
+          <button className="bn bn--discord bn--slim" onClick={function () { openExternal(DISCORD_URL); }}>
             <span className="bn__ico"><i className="fa-brands fa-discord"></i></span>
-            <span style={{ textAlign: 'left' }}>
-              <span className="bn__t" style={{ display: 'block' }}>{TX('CẦN THÊM GAME HOẶC GẶP LỖI?')}</span>
-              <span className="bn__d" style={{ display: 'block' }}>
-                {TX('Gửi yêu cầu trong Discord, đội hỗ trợ sẽ xử lý trực tiếp')}
-              </span>
-            </span>
+            <span className="bn__t">{TX('CẦN THÊM GAME HOẶC GẶP LỖI?')}</span>
+            <span className="bn__d">{TX('Gửi yêu cầu trong Discord, đội hỗ trợ sẽ xử lý trực tiếp')}</span>
             <i className="bn__go ph-bold ph-arrow-up-right"></i>
           </button>
         </div>

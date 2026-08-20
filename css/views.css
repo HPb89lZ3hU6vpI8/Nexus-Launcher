@@ -1532,16 +1532,25 @@ video.gd__media.is-on { opacity: 1; }
 .bn--discord { background: rgba(88, 101, 242, 0.1);  border-color: rgba(88, 101, 242, 0.26); }
 .bn--discord .bn__ico { background: rgba(88, 101, 242, 0.18); color: #a9b2ff; }
 .bn--discord:hover { border-color: rgba(88, 101, 242, 0.5); }
+/* Ban gon mot dong: dung o cuoi trang Tich hop, noi tung px chieu cao deu
+   phai tiet kiem de ca trang lot trong mot man hinh. */
+.bn--slim { width: 100%; max-width: 700px; padding: 9px 13px; }
+.bn--slim .bn__ico { width: 28px; height: 28px; font-size: 15px; border-radius: var(--r-xs); }
+.bn--slim .bn__d { margin-top: 0; padding-left: 12px; border-left: 1px solid var(--line-mid); }
+@media (max-width: 1180px) { .bn--slim .bn__d { display: none; } }
+
 .bn--vh { background: rgba(255, 79, 109, 0.08); border-color: rgba(255, 79, 109, 0.24); }
 .bn--vh .bn__ico { background: rgba(255, 255, 255, 0.9); padding: 4px; }
 .bn--vh:hover { border-color: rgba(255, 79, 109, 0.46); }
 
 /* ============================================================================
-   TICH HOP — LUOI THE DICH VU (thay carousel cu, khong bao gio tran chu)
+   TICH HOP — BAN THE KEO NGANG (ca bo gon trong mot man hinh)
    ========================================================================== */
 
+/* Trang nay khong cuon doc nen tieu de phai gon het muc co the, nhuong
+   chieu cao lai cho ban the. */
 .ig__hero {
-  padding: 40px var(--pad-page) 26px;
+  padding: 20px var(--pad-page) 8px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -1558,57 +1567,142 @@ video.gd__media.is-on { opacity: 1; }
 .ig__title {
   position: relative;
   font-family: var(--f-display);
-  font-size: clamp(24px, 3vw, 36px);
+  font-size: clamp(20px, 2.2vw, 29px);
   font-weight: 900;
   letter-spacing: -0.035em;
   background: linear-gradient(135deg, #fff 12%, var(--br-1) 52%, var(--br-3) 92%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 .ig__sub {
   position: relative;
-  font-size: 13.5px;
+  font-size: 12.5px;
   color: var(--tx-dim);
-  max-width: 620px;
+  max-width: 760px;
   margin: 0 auto;
-  line-height: 1.65;
+  line-height: 1.55;
 }
 
-.ig__grid {
-  display: grid;
-  /* 6 cot ao, moi the chiem 2 -> 3 the moi hang. Hang cuoi chi co 2 the nen
-     duoc day vao giua thay vi bo trong mot o ben phai. */
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 22px;
-  padding: 12px var(--pad-page) 52px;
-  /* Cac the trong cung mot hang cao bang nhau -> nut CTA thang hang tuyet doi,
-     du noi dung tung the dai ngan khac nhau. */
-  align-items: stretch;
+/* Trang Tich hop la MOT khung cao bang man hinh chu khong phai mot to giay
+   dai. Chi rieng trang nay moi bien lop boc thanh cot dan hoi (dung :has de
+   khong dung cham cac trang khac), nho vay tieu de luon o tren, cham tron va
+   nut Discord luon o duoi, con ban the tu gian ra chiem het cho o giua. */
+.nx-scroll > .nx-view:has(> .nx-page--deck) {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
-.ig__grid > * { grid-column: span 2; }
-.ig__grid > *:nth-child(4) { grid-column: 2 / span 2; }
-.ig__grid > *:nth-child(5) { grid-column: 4 / span 2; }
+/* flex-shrink = 0: man hinh qua thap thi tha cho cuon, tuyet doi khong ep
+   ban the be lai roi cat mat chan the. */
+.nx-page--deck { flex: 1 0 auto; display: flex; flex-direction: column; }
 
-@media (max-width: 1340px) {
-  .ig__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .ig__grid > *, .ig__grid > *:nth-child(4) { grid-column: span 2; }
-  .ig__grid > *:nth-child(5) { grid-column: 2 / span 2; }
+.ig__deck {
+  position: relative;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: nx-rise 520ms var(--e-out) both;
 }
-@media (max-width: 980px) {
-  .ig__grid { grid-template-columns: minmax(0, 1fr); }
-  .ig__grid > *,
-  .ig__grid > *:nth-child(4),
-  .ig__grid > *:nth-child(5) { grid-column: 1 / -1; }
+
+.ig__vp {
+  --cw: 560px;
+  position: relative;
+  /* clip chu khong phai hidden: chi cat hai ben, con bong do tren duoi cua
+     the van duoc tran ra. Dung hidden thi trinh duyet cat ca bon phia. */
+  overflow-x: clip;
+  overflow-y: visible;
+  padding: 6px 0 8px;
+  cursor: grab;
+  /* Doc nhuong cho trang, ngang minh tu xu ly */
+  touch-action: pan-y;
 }
-.ig__grid > * { animation: nx-rise 520ms var(--e-out) both; }
-.ig__grid > *:nth-child(2) { animation-delay: 70ms; }
-.ig__grid > *:nth-child(3) { animation-delay: 140ms; }
-.ig__grid > *:nth-child(4) { animation-delay: 210ms; }
-.ig__grid > *:nth-child(5) { animation-delay: 280ms; }
+.ig__vp.is-grab { cursor: grabbing; }
+.ig__vp.is-grab * { cursor: grabbing !important; }
+
+.ig__track {
+  display: flex;
+  /* center chu KHONG phai stretch. Trong mot cai luoi thi keo moi the cao bang
+     nhau la dep, vi cac the nam canh nhau nen so sanh duoc. O day moi luc chi
+     nhin mot the, ma keo bang nhau thi the ngan nhat bi doi ra mot khoang
+     trong to tuong giua noi dung va nut bam. Cho moi the dung dung chieu cao
+     that cua no roi canh giua theo truc ngang. */
+  align-items: center;
+  gap: 24px;
+  will-change: transform;
+}
+
+/* KHONG dat transition cho .ig__cell: transform duoc ghi tay tung khung hinh
+   trong mot vong requestAnimationFrame, them transition nua la hai thu giang
+   co nhau va sinh ra do tre. */
+.ig__cell {
+  width: var(--cw);
+  flex: none;
+  display: flex;
+  will-change: transform, opacity;
+}
+.ig__cell > * { flex: 1; min-width: 0; }
+
+/* The khong duoc chon: bam vao la chon no chu khong bam trung nut ben trong,
+   va cac hieu ung ro chuot cung tat het cho khoi gay hieu nham. */
+.ig__cell:not(.is-on) { cursor: pointer; }
+.ig__cell:not(.is-on) .sc { pointer-events: none; }
+.ig__cell:not(.is-on) .sc:hover { transform: none; box-shadow: none; border-color: var(--line); }
+
+/* Rieng the dang xem thi noi han len khoi nen */
+.ig__cell.is-on .sc { border-color: var(--line-strong); box-shadow: var(--sh-4); }
+
+.ig__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px; height: 42px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: rgba(11, 15, 23, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--line-mid);
+  color: var(--tx-hi);
+  font-size: 16px;
+  z-index: 6;
+  box-shadow: var(--sh-2);
+  transition: background var(--t-fast), transform var(--t-base) var(--e-out), opacity var(--t-base);
+}
+.ig__nav:hover { background: var(--bg-raised); transform: translateY(-50%) scale(1.09); }
+.ig__nav:disabled { opacity: 0; pointer-events: none; }
+.ig__nav--l { left: 12px; }
+.ig__nav--r { right: 12px; }
+
+/* Cham tron: vach dai la the dang xem. Doc duoc so muc va vi tri hien tai chi
+   bang mot cai liec, khong can dem. */
+.ig__dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 0 0;
+}
+.ig__dot {
+  width: 8px; height: 8px;
+  flex: none;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.19);
+  transition: width var(--t-base) var(--e-spring), background var(--t-base);
+}
+.ig__dot:hover { background: rgba(255, 255, 255, 0.42); }
+.ig__dot.is-on { width: 26px; background: var(--grad-brand); }
+
+.ig__foot {
+  display: flex;
+  justify-content: center;
+  padding: 10px var(--pad-page) 14px;
+}
 
 .sc {
+  container: sc / inline-size;
   display: flex;
   flex-direction: column;
   border-radius: var(--r-lg);
@@ -1650,7 +1744,7 @@ video.gd__media.is-on { opacity: 1; }
   display: flex;
   align-items: center;
   gap: 13px;
-  padding: 20px 20px 16px;
+  padding: 18px 20px 14px;
 }
 .sc__ico {
   width: 46px; height: 46px;
@@ -1667,14 +1761,28 @@ video.gd__media.is-on { opacity: 1; }
 .sc__ttl { font-family: var(--f-display); font-size: 16.5px; font-weight: 800; color: var(--tx-hi); letter-spacing: -0.02em; line-height: 1.2; }
 .sc__sub { font-size: 10.5px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--sc-b); margin-top: 4px; }
 
+/* Than the xep hai cot: trai la tinh nang, phai la bang thong tin + ghi chu.
+   Nho vay the beo ngang ra ma lun han xuong -- day la dieu kien de ca bo the
+   nam vua mot man hinh. The nao hep qua thi tu gop lai mot cot (do bang
+   container query, tuc do CHINH be rong cua the chu khong phai cua man hinh
+   -- the o giua va the ben canh rong khac nhau nen media query khong dung). */
 .sc__body {
   position: relative;
   z-index: 1;
   flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+  gap: 18px;
+  padding: 0 20px 18px;
+}
+.sc__col {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 0 20px 18px;
+  gap: 13px;
+  min-width: 0;
+}
+@container sc (max-width: 440px) {
+  .sc__body { grid-template-columns: minmax(0, 1fr); }
 }
 
 .sc__feats { display: flex; flex-direction: column; gap: 9px; }
@@ -1770,6 +1878,44 @@ video.gd__media.is-on { opacity: 1; }
 }
 .sc__appid input::placeholder { font-weight: 500; color: var(--tx-faint); letter-spacing: 0; }
 .sc__appid input:focus { border-color: var(--sc-b); box-shadow: 0 0 0 3px var(--sc-glow); }
+
+/* ---- Bop theo chieu cao cua so ---------------------------------------------
+   Dat o CUOI, sau tat ca rule cua .ig__* va .sc__*. CSS cung do uu tien thi
+   cai viet sau thang, nen neu de khoi nay len tren thi cac rule binh thuong
+   ben duoi se de bep no. */
+/* Cua so khong cao thi tieu de va chan trang nhuong bot cho cho ban the.
+   Nguong 900px la co y: man hinh 1080p mo cua so 87% cho ra khung nhin cao
+   ~866px, tuc la roi vao day -- do moi la co man hinh pho bien nhat. Man hinh
+   1440p tro len thi khung nhin cao hon 900px va giu nguyen tieu de day du. */
+@media (max-height: 900px) {
+  .ig__hero { padding: 12px var(--pad-page) 6px; }
+  .ig__title { font-size: clamp(19px, 1.9vw, 24px); margin-bottom: 4px; }
+  .ig__sub { font-size: 12px; line-height: 1.45; }
+  .ig__vp { padding: 4px 0 6px; }
+  .ig__dots { padding: 8px 0 0; }
+  .ig__foot { padding: 8px var(--pad-page) 10px; }
+  .bn--slim { padding: 7px 12px; }
+}
+
+/* Bac chat hon: cua so cang thap thi bop luon ruot the lai. Chi cham vao
+   khoang dem, khong dong den co chu, nen the van de doc. */
+@media (max-height: 820px) {
+  .sc__head { padding: 14px 20px 12px; }
+  .sc__body { padding-bottom: 14px; gap: 14px; }
+  .sc__foot { padding: 12px 20px 14px; }
+  .ig__hero { padding: 10px var(--pad-page) 4px; }
+}
+
+/* Bac cuoi: cua so thap den muc nay thi bo han cau mo ta duoi tieu de va phan
+   giai thich o nut Discord -- do la thu doc mot lan la biet, giu lai chi de
+   day mat ban the xuong. Duoi nguong nay noi dung that su khong con nhet vua
+   mot man hinh, luc do cho trang cuon mot doan ngan la chap nhan duoc: keo
+   ngang van chay binh thuong. */
+@media (max-height: 745px) {
+  .ig__sub { display: none; }
+  .ig__title { margin-bottom: 0; }
+  .bn--slim .bn__d { display: none; }
+}
 
 /* ============================================================================
    MODAL
