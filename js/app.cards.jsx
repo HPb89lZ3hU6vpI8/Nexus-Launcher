@@ -126,8 +126,9 @@ function GameRow({ game, onOpen }) {
             <i className={plat.ico}></i>{TX(plat.label)}
           </span>
           {n !== null && (
-            <span className={'gc__rev gc__rev--dot gc__rev--' + tone}>
-              <b className="gc__rev__n">{Math.round(n)}<i>%</i></b> · {TX(game.reviewText)}
+            <span className={'gc__rev gc__rev--' + tone}>
+              <b className="gc__rev__n">{Math.round(n)}<i>%</i></b>
+              <span className="gc__rev__t">{TX(game.reviewText)}</span>
             </span>
           )}
           {count > 0 && <span className="gc__revn">{fmtCount(count)}<em>{TX('lượt đánh giá')}</em></span>}

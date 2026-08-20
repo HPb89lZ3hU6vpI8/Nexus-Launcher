@@ -136,48 +136,51 @@
   z-index: 2;
 }
 
-/* Con so diem, dung chung cho the game va hang danh sach */
+/* Con so diem, dung chung cho the game va hang danh sach.
+   Mot o mau nho dat ngay truoc nhan sac thai: liec qua la biet tot hay xau
+   ma khong can doc chu.
+
+   Truoc day o nay to mau DAC ruc kem mot vet hat sang mo ra xung quanh, ma
+   dong chu ben canh LAI cung mau do nua -- hai thu cung mau dinh lien nhau
+   lam ca goc the thanh mot vung xanh bet, con vet hat sang thi nhoe ra tren
+   nen the von rat phang, nhin nhu bi loi. Nay chi con nen mau rat nhat va mot
+   duong vien mong cung mau -- dung mot kieu voi nhan the loai o hang tren --
+   con dong chu ben canh tra ve mau chu thuong. Ca hang chi con MOT cho co mau
+   nen con so noi len duoc, va no khong con lan at ten tro choi nua. */
 .gc__rev__n {
+  flex: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5px;
+  padding: 2.5px 3.5px;
+  border-radius: 5px;
   font-family: var(--f-num);
+  font-size: 11px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-  color: currentColor;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tone) 38%, transparent);
+  transition: background var(--t-base), border-color var(--t-base);
 }
 /* Dau phan tram di lien con so nhung nho hon han: mat doc ra "93" truoc roi
    moi thay don vi, khong bi tuong nham la mot chu so thu ba. */
 .gc__rev__n i {
   font-style: normal;
-  font-size: 0.66em;
+  font-size: 0.68em;
   font-weight: 700;
   letter-spacing: 0;
-  opacity: 0.78;
+  opacity: 0.72;
 }
-
-/* Rieng tren the game: do dac ca o mau sac thai, chu doi thanh mau nen toi.
-   Day la loi trinh bay diem so quen thuoc cua Metacritic / OpenCritic -- mot
-   mieng mau nho dac ruc, liec qua la biet tot hay xau ma khong can doc chu.
-   Truoc kia o day chi la khung vien mo cung mau voi chu ben canh nen ca cum
-   nhin bet lai thanh mot dam chu dong mau. */
-.gc__meta .gc__rev__n {
-  flex: none;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.5px;
-  padding: 3.5px 3.5px;
-  border-radius: 6px;
-  font-size: 11.5px;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: #070b12;
-  background: linear-gradient(180deg,
-    color-mix(in srgb, #ffffff 20%, var(--tone)),
-    var(--tone));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.32),
-    0 2px 8px color-mix(in srgb, var(--tone) 26%, transparent);
+/* Ro them mot chut khi ro chuot len the, dung nhip voi nhan the loai va so
+   luot danh gia -- ca ba cung sang len chu khong chi rieng mot cai. */
+.gc:hover .gc__rev__n,
+.glr:hover .gc__rev__n {
+  background: color-mix(in srgb, var(--tone) 22%, transparent);
+  border-color: color-mix(in srgb, var(--tone) 55%, transparent);
 }
-.gc__meta .gc__rev__n i { opacity: 0.66; }
 
 .gc__body {
   padding: 12px 8px 13px;
@@ -280,6 +283,10 @@
 .gc__rev__t {
   min-width: 0;
   line-height: 1.25;
+  /* Dong chu sac thai KHONG con to mau nua. Mau da nam o o diem ngay ben
+     trai roi; to them lan hai chi lam hai thu tranh nhau. De mau chu thuong
+     thi con so mau moi bat len, va hang nay van deu voi ten tro choi. */
+  color: var(--tx);
 }
 .gc__rev {
   display: inline-flex;
