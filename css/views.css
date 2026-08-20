@@ -246,54 +246,53 @@
 
 /* Nut chinh cua hero.
 
-   BAN CU dung nen gradient thuong hieu (xanh lo -> xanh duong -> tim) chay het
-   than nut, chu mau gan den. Nut nay nam de tren anh bia game - moi game mot
-   tong mau khac nhau - nen mot dai ba mau nhu vay luon "cai" voi anh phia sau,
-   va chu den tren nen xanh la cap mau doc met mat.
+   Da thu hai huong, deu khong dat:
+   - Dai gradient BA MAU (xanh lo -> xanh duong -> tim) chay het than nut. Nut
+     nay dat de tren anh bia game, moi game mot tong mau, nen mot dai ba mau
+     luon co cho "cai" voi anh phia sau.
+   - Than nut mau TRANG. Trang giua mot giao dien toi thi choi qua muc, lai
+     them chip icon mau xanh nam ben trong -> thanh hai tong trang/xanh danh
+     nhau ngay trong long mot cai nut.
 
-   BAN NAY: than nut mau trang ngoc, chu den. Trang thi hop voi MOI anh bia, do
-   tuong phan cao nhat co the, va nhin dung chuan mot nut hanh dong chinh. Mau
-   thuong hieu duoc don vao dung chip icon tron ben trai, nen van nhan ra ngay
-   day la san pham cua minh ma khong con "chua" mau voi anh nen. */
+   BAN NAY di theo dung cach cac launcher lon van lam (Epic, Battle.net, Xbox):
+   MOT mau duy nhat, dam, chu trang. Mot tong mau thi khong the cai voi bat ky
+   anh bia nao; chu trang tren nen dam cho do tuong phan cao nhat; va chip icon
+   giu nguyen dang tron nhung doi sang trang mo, cung mot he voi nut "Toan bo
+   thu vien" ben canh nen hai nut nhin ra la mot cap. */
 .hero__cta {
   height: 52px;
-  padding: 0 26px 0 7px;
+  padding: 0 26px 0 8px;
+  gap: 12px;
   font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.004em;
-  background: linear-gradient(180deg, #ffffff 0%, #e4ecfa 100%);
-  color: #08111e;
+  font-weight: 750;
+  letter-spacing: 0.006em;
+  color: #ffffff;
   border: 0;
+  background: linear-gradient(180deg, #2f86f7 0%, #1a5fd9 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
-    0 10px 28px -9px rgba(0, 0, 0, 0.8);
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 0 1px rgba(150, 205, 255, 0.22),
+    0 10px 26px -10px rgba(26, 95, 217, 0.9),
+    0 2px 8px rgba(0, 0, 0, 0.45);
 }
 .hero__cta > i:first-child {
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   font-size: 15px;
   border-radius: 50%;
-  background: var(--grad-brand);
-  color: #04121c;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 3px 10px -1px rgba(58, 216, 255, 0.5);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.17);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
 }
 .hero__cta:hover:not(:disabled) {
-  background: linear-gradient(180deg, #ffffff 0%, #f1f6ff 100%);
-  color: #08111e;
+  color: #ffffff;
+  background: linear-gradient(180deg, #3d93ff 0%, #2069e6 100%);
   transform: translateY(-2px);
   box-shadow:
-    inset 0 1px 0 #ffffff,
-    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
-    0 16px 36px -10px rgba(0, 0, 0, 0.85),
-    0 0 32px -8px rgba(90, 168, 255, 0.55);
-}
-/* Vet sang chay ngang cua .nx-btn la mau TRANG - tren than nut trang thi
-   khong thay gi. Doi sang vet toi cho nut nay. */
-.hero__cta::after {
-  background: linear-gradient(100deg, transparent 30%, rgba(4, 16, 28, 0.11) 50%, transparent 70%);
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    inset 0 0 0 1px rgba(170, 215, 255, 0.3),
+    0 16px 34px -12px rgba(31, 108, 232, 1),
+    0 3px 10px rgba(0, 0, 0, 0.5);
 }
 .hero__cta:active:not(:disabled) { transform: translateY(0); }
 
@@ -1139,8 +1138,8 @@ video.gd__media.is-on { opacity: 1; }
   position: relative;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 15px 17px;
+  gap: 13px;
+  padding: 13px 15px;
   border-bottom: 1px solid var(--line);
   overflow: hidden;
 }
@@ -1163,7 +1162,7 @@ video.gd__media.is-on { opacity: 1; }
   display: flex;
   align-items: baseline;
   gap: 1px;
-  padding: 9px 14px 10px;
+  padding: 7px 12px 8px;
   border-radius: var(--r-md);
   background:
     linear-gradient(180deg,
@@ -1187,31 +1186,45 @@ video.gd__media.is-on { opacity: 1; }
 }
 .rev__num {
   font-family: var(--f-num);
-  font-size: 31px;
+  font-size: 26px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.045em;
+  /* Khoang cach chu AM con tru them mot lan sau chu so cuoi, keo dau % xich
+     vao qua sat. Tra lai dung khoang da tru. */
+  margin-right: 0.045em;
   line-height: 1;
   color: currentColor;
   text-shadow: 0 2px 16px color-mix(in srgb, currentColor 45%, transparent);
 }
+/* Dau % nay VAN dat dung tren duong chan chu voi con so (do duoc: hai chan
+   trung khit). Cai lam no TRONG nhu bi lech la ty le: 13px canh mot con so
+   31px chi bang 0.42 lan, nho toi muc doc ra nhu mot vet mo bi bo quen chu
+   khong phai mot don vi. Nang ty le len ~0.58 va bot mo di. */
 .rev__sym {
   font-family: var(--f-num);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.01em;
   color: currentColor;
-  opacity: 0.6;
+  opacity: 0.72;
 }
-.rev__plate.is-na { color: var(--tx-faint); }
-.rev__plate.is-na .rev__num { font-size: 26px; text-shadow: none; }
+/* Truong hop game chua co diem: chu "-" nho hon nen khung thap hon 4px so voi
+   khung co so. Ep cung chieu cao va can giua de hai truong hop trong nhu mot. */
+.rev__plate.is-na {
+  color: var(--tx-faint);
+  align-items: center;
+  min-height: 43px;
+  box-sizing: border-box;
+}
+.rev__plate.is-na .rev__num { font-size: 22px; text-shadow: none; }
 
 /* --- Cot chu ben phai ----------------------------------------------------- */
 .rev__main { position: relative; flex: 1; min-width: 0; }
 .rev__txt {
   font-family: var(--f-display);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1.2;
   color: currentColor;
@@ -1223,8 +1236,8 @@ video.gd__media.is-on { opacity: 1; }
    khong sinh them nut nao, ma van giu duoc hieu ung chay tu trai sang.      */
 .rev__meter {
   position: relative;
-  height: 8px;
-  margin: 9px 0 8px;
+  height: 7px;
+  margin: 8px 0 7px;
   background: rgba(255, 255, 255, 0.075);
   -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 10px);
   mask-image: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 10px);

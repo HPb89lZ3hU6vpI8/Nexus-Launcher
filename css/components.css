@@ -102,16 +102,16 @@
    TRUOC: neo goc TREN-TRAI va xep doc. Anh bia Steam luon dat ten/logo game o
    nua tren, nen hai huy hieu chong len nhau che mat phan dep nhat cua anh.
 
-   NAY: neo goc DUOI-TRAI va xep ngang, doi dien voi diem danh gia o duoi-phai.
-   Nua tren cua anh sach hoan toan; day anh von da co lop toi chuyen sac san
-   (.gc__shot::after) nen chu van doc ro. Neo bang "bottom" nen neu co nhieu
-   huy hieu, hang moi se day len TREN chu khong tran xuong duoi. */
+   NAY: neo goc DUOI-TRAI va xep ngang. Nua tren cua anh sach hoan toan; day
+   anh von da co lop toi chuyen sac san (.gc__shot::after) nen chu van doc ro.
+   Neo bang "bottom" nen neu co nhieu huy hieu, hang moi se day len TREN chu
+   khong tran xuong duoi. Diem danh gia da roi khoi anh nen dai nay duoc dung
+   het chieu ngang. */
 .gc__flags {
   position: absolute;
   left: 10px;
   bottom: 11px;
-  /* Chua cho diem danh gia o goc phai (rong ~54px + le 10px) */
-  right: 68px;
+  right: 10px;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -136,92 +136,24 @@
   z-index: 2;
 }
 
-/* Diem danh gia noi tren anh, goc duoi-phai.
-
-   DA BO dau "%": no duoc to theo mau danh gia (xanh/vang/do) nen doc nhu mot
-   ky tu la dinh canh con so, chu khong nhu don vi; o co 8px thi chi con la
-   mot vet mo. Vong cung ben trai da noi ro day la ty le phan tram roi, nen
-   con so dung mot minh vua sach vua de doc hon.
-
-   LOI DA SUA: khung cao co dinh 22px + align-items:baseline. Kieu canh theo
-   duong chan chu dat nhom chu sao cho chan chu trung nhau, chu khong dua vao
-   giua khung — nen con so bi day len sat mep tren, chua ke con thua mot khoang
-   trong o duoi. Do dung la cai "dinh len tran" nhin thay tren the.
-
-   Nay: khung canh GIUA, con so va dau % gom thanh mot nhom rieng (chi trong
-   nhom do moi canh theo chan chu), va them mot vong cung nho ben trai thay cho
-   vach mau cu — doc duoc ty le ngay ca khi khong doc con so.
-   -------------------------------------------------------------------------- */
-.gc__score {
-  position: absolute;
-  right: 10px; bottom: 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 25px;
-  padding: 0 10px 0 6px;
-  border-radius: var(--r-pill);
-  /* Cung ly do nhu tren: bo lam mo nen, tang do dam de nhin khong khac. */
-  background: linear-gradient(180deg, rgba(14, 19, 28, 0.93), rgba(6, 9, 14, 0.97));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    0 3px 12px rgba(0, 0, 0, 0.5);
-  color: var(--tx-hi);
-  z-index: 2;
-  transition: border-color var(--t-base), box-shadow var(--t-base), transform var(--t-base) var(--e-out);
-}
-.gc__gauge { display: block; flex: none; transform: rotate(-90deg); overflow: visible; }
-.gc__gauge circle { fill: none; stroke-width: 2.1; stroke-linecap: round; }
-.gc__gauge-t { stroke: rgba(255, 255, 255, 0.14); }
-/* Quang sang: mot ban sao cua chinh cung do, to hon va mo hon, ve nam duoi.
-   Truoc day dung bo loc drop-shadow — moi the mot cai, gan 300 the la gan 300
-   vung dem ve rieng, cuon la giat. Cach nay nhin nhu nhau ma khong ton gi. */
-.gc__gauge-h {
-  stroke: currentColor;
-  stroke-width: 4.6;
-  opacity: 0.24;
-  transition: stroke-dashoffset 900ms var(--e-out);
-}
-.gc__gauge-v {
-  stroke: currentColor;
-  transition: stroke-dashoffset 900ms var(--e-out);
-}
-.gc__score-n {
-  display: inline-flex;
-  align-items: baseline;
-  line-height: 1;
-}
-.gc__score-n b {
-  font-family: var(--f-num);
-  font-size: 13px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.03em;
-  /* Khoang cach chu am con cong them mot lan sau ky tu cuoi -> nhom chu bi
-     keo lech sang trai. Tra lai dung khoang thua do. */
-  margin-right: 0.03em;
-  line-height: 1;
-  color: var(--tx-hi);
-}
-.gc__score--pos { color: var(--ok); }
-.gc__score--mix { color: var(--warn); }
-.gc__score--neg { color: var(--bad); }
-.gc:hover .gc__score {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, currentColor 30%, transparent);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    0 4px 16px rgba(0, 0, 0, 0.55),
-    0 0 0 3px color-mix(in srgb, currentColor 9%, transparent);
-}
-/* Con so trong hang danh sach */
+/* Con so diem, dung chung cho the game va hang danh sach */
 .gc__rev__n {
   font-family: var(--f-num);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
   color: currentColor;
+}
+/* Rieng tren the game: dong khung nho lai cho tach bach voi dong chu ben canh,
+   nen to nhat theo dung mau sac thai nen doc mot cai la biet no di voi chu nao. */
+.gc__meta .gc__rev__n {
+  flex: none;
+  padding: 3px 5px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  line-height: 1;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 26%, transparent);
 }
 
 .gc__body {
@@ -279,17 +211,38 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
+/* Hang duoi cung: sac thai danh gia ben TRAI, so luot danh gia day sang mep
+   PHAI cho thang hang voi nhan the loai o hang tren -- hai cot deu nhau thay
+   vi don het ve mot ben roi bo trong nua hang. */
+/* Hang nay bat buoc chi duoc mot dong. Neu cho phep xuong dong thi so luot
+   danh gia tut xuong duoi, nhin ngang qua mot hang the la thay lech ngay. */
 .gc__meta {
   display: flex;
   align-items: center;
-  gap: 7px;
-  flex-wrap: wrap;
+  gap: 6px;
+  flex-wrap: nowrap;
   margin-top: auto;
+}
+.gc__meta .gc__revn {
+  margin-left: auto;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 6px;
+}
+.gc__meta .gc__revn i { font-size: 11px; opacity: 0.62; }
+/* Chot chan cuoi: gap ngon ngu nao co nhan dai bat thuong thi cat bang dau ba
+   cham, tuyet doi khong duoc day nhau xuong dong. */
+.gc__rev__t {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .gc__rev {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
   font-family: var(--f-display);
   font-size: 11px;
   font-weight: 700;

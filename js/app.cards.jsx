@@ -31,40 +31,13 @@ function PlatformMark({ platform }) {
 }
 
 /* ----------------------------------------------------------------------------
-   HUY HIEU DIEM DANH GIA TREN ANH
-   Truoc day la mot the chu canh theo duong chan chu (baseline) trong mot khung
-   cao co dinh — kieu canh do day chu len sat mep tren, nen nhin nhu bi lech len
-   tran. Nay khung canh giua, con so va dau % nam trong mot nhom rieng, va them
-   mot vong cung nho doc duoc ty le chi bang mot cai liec.
-   -------------------------------------------------------------------------- */
-
-function ScoreChip({ percent, tone, label }) {
-  const n = pctNum(percent);
-  if (n === null) return null;
-  const p = Math.max(0, Math.min(100, n));
-  const R = 5.4;
-  const C = 2 * Math.PI * R;
-  return (
-    <div className={'gc__score gc__score--' + tone} title={label || ''}>
-      <svg className="gc__gauge" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-        <circle className="gc__gauge-t" cx="7" cy="7" r={R} />
-        <circle className="gc__gauge-h" cx="7" cy="7" r={R}
-                strokeDasharray={C} strokeDashoffset={C * (1 - p / 100)} />
-        <circle className="gc__gauge-v" cx="7" cy="7" r={R}
-                strokeDasharray={C} strokeDashoffset={C * (1 - p / 100)} />
-      </svg>
-      <span className="gc__score-n"><b>{Math.round(p)}</b></span>
-    </div>
-  );
-}
-
-/* ----------------------------------------------------------------------------
    THE GAME (luoi)
    -------------------------------------------------------------------------- */
 
 function GameCard({ game, onOpen, eager }) {
   useLang();
   const tone = reviewTone(game.percent, game.reviewText);
+  const pct = pctNum(game.percent);
   const count = reviewCountNum(game.reviewCount);
   const isCustom = !!customAppIdOf(game);
   const sources = useMemo(() => coverSources(game.appId), [game.appId]);
@@ -95,8 +68,6 @@ function GameCard({ game, onOpen, eager }) {
         </div>
 
         <PlatformMark platform={getGamePlatform(game)} />
-
-        <ScoreChip percent={game.percent} tone={tone} label={TX(game.reviewText)} />
       </div>
 
       <div className="gc__body">
@@ -104,9 +75,27 @@ function GameCard({ game, onOpen, eager }) {
           <div className="gc__title nx-clamp-2">{game.title}</div>
           {genre && <span className="gc__gen">{TX(genre)}</span>}
         </div>
+        {/* Con so diem truoc day noi mot minh tren anh bia: vua che anh, vua
+            khong tu noi duoc no la gi. Nay no nam ngay truoc dong chu danh gia
+            -- "81 RAT TICH CUC" -- nen chinh dong chu do la loi giai thich cho
+            con so, khong ton them mot chu nao ma anh bia thi sach hoan toan.
+            Khong co diem thi rot lai ve dau cham mau nhu cu. */}
         <div className="gc__meta">
-          <span className={'gc__rev gc__rev--dot gc__rev--' + tone}>{TX(game.reviewText)}</span>
-          {count > 0 && <span className="gc__revn">{fmtCount(count)}<em>{TX('đánh giá')}</em></span>}
+          <span className={'gc__rev ' + (pct === null ? 'gc__rev--dot ' : '') + 'gc__rev--' + tone}>
+            {pct !== null && <b className="gc__rev__n">{Math.round(pct)}</b>}
+            <span className="gc__rev__t">{TX(game.reviewText)}</span>
+          </span>
+          {/* Chu "danh gia" dat o day tung an gan 50px chieu ngang. Nhan tieng Anh
+              dai nhat -- OVERWHELMINGLY POSITIVE -- cong them chu do thi vuot khung,
+              day so luot danh gia xuong dong hai va lech han so voi nhung the ben
+              canh cung hang. Thay chu bang mot icon bong thoai: gon hon nhieu, dung
+              duoc cho moi ngon ngu, va van hieu duoc nghia vi no nam ngay sau dong
+              chu danh gia. Chu day du van con o tooltip va o trang chi tiet. */}
+          {count > 0 && (
+            <span className="gc__revn" title={fmtCount(count) + ' ' + TX('đánh giá')}>
+              <i className="ph-fill ph-chat-circle-text"></i>{fmtCount(count)}
+            </span>
+          )}
         </div>
       </div>
     </button>
@@ -422,7 +411,7 @@ function GenreCard({ genre, count, onPick }) {
    -------------------------------------------------------------------------- */
 
 Object.assign(window.NX, {
-  PlatformMark, ScoreChip, GameCard, GameRow, UpcomingCard, Shelf, GENRES, GenreCard
+  PlatformMark, GameCard, GameRow, UpcomingCard, Shelf, GENRES, GenreCard
 });
 
 })();
