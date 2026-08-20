@@ -542,13 +542,27 @@
      ========================================================================== */
 
   const DECK_GAP = 24;      /* khe giua hai the */
-  const DECK_MIN = 6;       /* keo qua bao nhieu px moi tinh la keo, duoi nguong van la mot cu bam */
   const SNAP_MS = 520;      /* thoi gian bay ve the dich */
-  const FLICK = 240;        /* vuot nhanh thi quy doi van toc ra "bay them may the" */
-  const WHEEL_LOCK = 360;   /* lan chuot lien tuc thi khoa bot, khong de luot vut qua ca bo */
-  const EDGE_PULL = 0.32;   /* keo qua dau bo thi nang dan tay lai */
 
-  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  /* Windows co mot cong tac Hieu ung hoat anh trong Tro nang > Hieu ung hinh
+     anh. Nhieu may tat san, hoac bi cac tool toi uu he thong tat ho ma chu
+     may khong he biet. Khi no tat, trinh duyet bao prefers-reduced-motion:
+     reduce, va truoc day deck NHAY thang tu the nay sang the kia gon trong
+     dung mot khung hinh -- do la cai khong he co animation nhin vao thay rat
+     xau. Nhung cu truot ngang o day khong phai do trang tri: no la thu duy
+     nhat cho biet the vua chay ve dau, mat no thi bam xong khong con biet
+     minh dang dung o dau trong nam the. Nen thay vi tat han, rut ngan lai.
+     Van nhin ra duong di, ma van ton trong y muon it chuyen dong. */
+  const SNAP_CALM_MS = 380;
+
+  /* Duong cong chuyen dong. Ban cu dung easeOutCubic -- vot nhanh ngay tu
+     dau roi cham dan ve cuoi. Duong do dung cho luc THA TAY sau khi keo, vi
+     luc buong ra the dang co san van toc. Nay bo keo tay, moi cu chuyen deu
+     bat dau tu DUNG YEN, ma easeOutCubic bat dau o toc do cao nhat nen no
+     giat mot cai ngay khung hinh dau. Doi sang smootherstep: van toc VA gia
+     toc deu bang khong o ca hai dau, nen the tu tu lan di roi tu tu dung
+     lai, khong con diem nao gay khuc. */
+  function easeSmooth(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
 
   function Deck({ children, label }) {
@@ -559,7 +573,6 @@
     const track = useRef(null);
     const cells = useRef([]);
     const [active, setActive] = useState(0);
-    const [grab, setGrab] = useState(false);
 
     /* Vi tri tinh theo DON VI THE, co phan le: 1.37 nghia la dang o giua the 1
        va the 2. Giu trong ref chu khong phai state -- moi khung hinh tu tay ve
@@ -569,9 +582,6 @@
     const dest = useRef(0);
     const geo = useRef({ w: 0, cw: 0 });
     const anim = useRef(0);
-    const lock = useRef(0);
-    const noClick = useRef(0);   /* vua keo xong thi nuot cai bam theo sau */
-    const drag = useRef({ down: false, moved: false, cap: false, x: 0, p0: 0, id: 0, s: [] });
 
     const stopAnim = useCallback(function () {
       if (anim.current) { cancelAnimationFrame(anim.current); anim.current = 0; }
@@ -637,19 +647,19 @@
        chac, neu khong the se nhay ve dung nguyen ban trong mot khung hinh. */
     useEffect(function () { paint(); });
 
-    /* Bay muot ve the dich. Nhanh luc dau, cham dan luc ve gan -- cung mot
-       duong cong voi cu truot ngang o trang chu nen ca app mot cam giac tay. */
+    /* Bay muot ve the dich: tu tu lan di roi tu tu dung lai. */
     const glide = useCallback(function (to) {
       const t = clamp(Math.round(to), 0, n - 1);
       dest.current = t;
       setActive(t);
       stopAnim();
       const from = pos.current;
-      if (from === t || prefersCalm()) { pos.current = t; paint(); return; }
+      if (from === t) return;
+      const ms = prefersCalm() ? SNAP_CALM_MS : SNAP_MS;
       const t0 = performance.now();
       const run = function (ts) {
-        const k = Math.min(1, (ts - t0) / SNAP_MS);
-        pos.current = from + (t - from) * easeOutCubic(k);
+        const k = Math.min(1, (ts - t0) / ms);
+        pos.current = from + (t - from) * easeSmooth(k);
         paint();
         anim.current = k < 1 ? requestAnimationFrame(run) : 0;
       };
@@ -658,99 +668,17 @@
 
     const go = useCallback(function (d) { glide(dest.current + d); }, [glide]);
 
-    /* ---- keo tay ---- */
-    const onDown = function (e) {
-      if (e.button !== 0 || e.pointerType === 'touch') return;
-      stopAnim();
-      drag.current = {
-        down: true, moved: false, cap: false,
-        x: e.clientX, p0: pos.current, id: e.pointerId,
-        s: [performance.now(), e.clientX]
-      };
-    };
+    /* Bam vao mot the ben canh = chon the do, chu khong phai bam nut ben
+       trong no; nut cua the khong duoc chon da bi tat o CSS.
 
-    const onMove = function (e) {
-      const d = drag.current;
-      if (!d.down) return;
-      const dx = e.clientX - d.x;
-      if (!d.moved) {
-        if (Math.abs(dx) < DECK_MIN) return;
-        d.moved = true;
-        setGrab(true);
-        try { vp.current.setPointerCapture(d.id); d.cap = true; } catch (err) {}
-      }
-      const g = geo.current;
-      let p = d.p0 - dx / (g.cw + DECK_GAP);
-      /* Qua dau bo thi cho nhuc nhich mot chut roi ghi lai -- co phan hoi de
-         biet la minh dang keo, dong thoi biet la het duong. */
-      if (p < 0) p = p * EDGE_PULL;
-      else if (p > n - 1) p = (n - 1) + (p - (n - 1)) * EDGE_PULL;
-      pos.current = p;
-      paint();
-      /* Ghi vet tay: tung cap (thoi diem, toa do), lat nua do van toc tren ca
-         doan ~100ms cuoi chu khong chi nhin khung hinh chot. */
-      const s = d.s;
-      s.push(performance.now(), e.clientX);
-      if (s.length > 24) s.splice(0, s.length - 24);
-    };
-
-    const onUp = function () {
-      const d = drag.current;
-      if (d.cap && vp.current) { try { vp.current.releasePointerCapture(d.id); } catch (err) {} }
-      d.down = false;
-      d.cap = false;
-      if (!d.moved) return;
-      setGrab(false);
-      /* Nha tay xong trinh duyet ban them mot su kien "bam" ngay sau do. Neu
-         khong chan, keo tu the nay sang the kia se bi hieu nham thanh bam vao
-         the dang nam duoi con tro. Chan bang MOC THOI GIAN chu khong bang mot
-         cai co, vi co thi phai co cho xoa -- ma quen xoa la tu day tro di moi
-         cu bam vao the ben canh deu bi nuot. */
-      noClick.current = performance.now() + 220;
-      const s = d.s;
-      const m = s.length;
-      let v = 0;
-      if (m >= 4) {
-        let i = m - 2;
-        while (i >= 2 && s[m - 2] - s[i - 2] < 100) i -= 2;
-        const dt = s[m - 2] - s[i];
-        if (dt > 8) v = (s[m - 1] - s[i + 1]) / dt;
-      }
-      const step = geo.current.cw + DECK_GAP;
-      /* Keo cham thi ve the gan nhat; vuot nhanh thi cong them toi da mot the
-         theo huong vua vuot, nen chi can hat nhe co tay la sang the ke ben. */
-      glide(pos.current - clamp(v * FLICK / step, -1, 1));
-    };
-
-    /* Bam vao mot the ben canh = chon the do, chu khong phai bam nut ben trong
-       no. Cac nut cua the khong duoc chon da bi tat o CSS. */
+       Truoc day cho phep KEO TAY va LAN CHUOT. Bo ca hai. Keo ngang o giua
+       mot trang von cuon doc duoc thi rat de bi hieu nham thanh keo trang,
+       con lan chuot thi cuop mat cu cuon trang tren man hinh thap -- dung
+       luc nguoi dung can cuon nhat. Nay chi con BAM: bam the ben canh, bam
+       cham tron ben duoi, hoac phim mui ten. */
     const pick = function (i) {
-      if (performance.now() < noClick.current) return;
       if (i !== dest.current) glide(i);
     };
-
-    /* ---- con lan chuot ---- */
-    useEffect(function () {
-      const el = vp.current;
-      if (!el) return undefined;
-      const onWheel = function (e) {
-        const sc = document.querySelector('.nx-scroll');
-        const pageScrolls = !!sc && sc.scrollHeight > sc.clientHeight + 2;
-        const ax = Math.abs(e.deltaX);
-        const ay = Math.abs(e.deltaY);
-        /* Con lan doc chi duoc dung de lat the KHI trang khong con gi de cuon.
-           Neu khong, tren man hinh thap nguoi dung se khong cuon noi trang. */
-        const use = ax > ay ? e.deltaX : (pageScrolls ? 0 : e.deltaY);
-        if (!use) return;
-        e.preventDefault();
-        const now = performance.now();
-        if (now < lock.current) return;
-        lock.current = now + WHEEL_LOCK;
-        go(use > 0 ? 1 : -1);
-      };
-      el.addEventListener('wheel', onWheel, { passive: false });
-      return function () { el.removeEventListener('wheel', onWheel); };
-    }, [go]);
 
     /* ---- phim mui ten ---- */
     useEffect(function () {
@@ -769,12 +697,8 @@
     return (
       <div className="ig__deck">
         <div
-          className={'ig__vp' + (grab ? ' is-grab' : '')}
+          className="ig__vp"
           ref={vp}
-          onPointerDown={onDown}
-          onPointerMove={onMove}
-          onPointerUp={onUp}
-          onPointerCancel={onUp}
           role="group"
           aria-label={label}
         >
@@ -794,15 +718,6 @@
             })}
           </div>
         </div>
-
-        <button className="ig__nav ig__nav--l" onClick={function () { go(-1); }}
-                disabled={active === 0} aria-label={TX('Lùi lại')}>
-          <i className="ph-bold ph-caret-left"></i>
-        </button>
-        <button className="ig__nav ig__nav--r" onClick={function () { go(1); }}
-                disabled={active === n - 1} aria-label={TX('Tiến tới')}>
-          <i className="ph-bold ph-caret-right"></i>
-        </button>
 
         <div className="ig__dots" role="tablist">
           {items.map(function (it, i) {

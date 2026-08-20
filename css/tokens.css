@@ -198,12 +198,23 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Chi tat ANIMATION -- tuc cac keyframes tu dong chay: khoi troi len khi
+     cuon toi, anh nen dap dinh, thanh sang chay ngang. KHONG tat transition
+     nua.
+
+     Ban cu co them mot dong transition-duration: 0.001ms !important, tuc la
+     tat sach ca hieu ung bam nut, ro chuot, mo dong, truot the. Tren may co
+     TAT Hieu ung hoat anh cua Windows -- rat nhieu may nhu vay, ke ca do bi
+     tool toi uu he thong tat ho -- ca ung dung dung im nhu mot tam anh chup:
+     bam gi cung nhay cai rup, khong con biet vua co gi thay doi.
+
+     Transition la PHAN HOI chu khong phai trang tri: no tra loi cau hoi vua
+     bam co an khong, va cai do vua bien di dau. Giu lai. */
   *:not(.nx-spin):not(.prog__bar),
   *:not(.nx-spin):not(.prog__bar)::before,
   *:not(.nx-spin):not(.prog__bar)::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
   }
   /* Vong quay va thanh tien trinh la chi bao trang thai: luon phai chay,
      neu khong nguoi dung tuong ung dung bi treo. */

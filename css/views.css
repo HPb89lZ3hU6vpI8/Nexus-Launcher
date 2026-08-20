@@ -1615,12 +1615,7 @@ video.gd__media.is-on { opacity: 1; }
   overflow-x: clip;
   overflow-y: visible;
   padding: 6px 0 8px;
-  cursor: grab;
-  /* Doc nhuong cho trang, ngang minh tu xu ly */
-  touch-action: pan-y;
 }
-.ig__vp.is-grab { cursor: grabbing; }
-.ig__vp.is-grab * { cursor: grabbing !important; }
 
 .ig__track {
   display: flex;
@@ -1643,47 +1638,36 @@ video.gd__media.is-on { opacity: 1; }
   will-change: transform;
 }
 
-/* KHONG dat transition cho .ig__cell: transform duoc ghi tay tung khung hinh
-   trong mot vong requestAnimationFrame, them transition nua la hai thu giang
-   co nhau va sinh ra do tre. */
+/* KHONG cho transition chay tren transform hay opacity cua .ig__cell: hai
+   thu do duoc JS ghi tay tung khung hinh trong mot vong requestAnimationFrame,
+   them transition nua la hai ben giang co va sinh ra do tre. Rieng filter thi
+   an toan, vi JS khong he dung toi no. */
 .ig__cell {
   width: var(--cw);
   flex: none;
   display: flex;
   will-change: transform, opacity;
+  transition: filter var(--t-base) var(--e-out);
 }
 .ig__cell > * { flex: 1; min-width: 0; }
 
-/* The khong duoc chon: bam vao la chon no chu khong bam trung nut ben trong,
-   va cac hieu ung ro chuot cung tat het cho khoi gay hieu nham. */
+/* The khong duoc chon: ca the la mot cai nut. Bam bat cu dau tren no cung la
+   chon no, chu khong lo bam trung Kich hoat ngay cua mot dich vu ma minh con
+   chua kip doc. Nen chan het chuot xuong ben trong, va bo luon hieu ung ro
+   chuot cua rieng cai the con -- de mot minh cai the ngoai phan hoi thoi. */
 .ig__cell:not(.is-on) { cursor: pointer; }
 .ig__cell:not(.is-on) .sc { pointer-events: none; }
-.ig__cell:not(.is-on) .sc:hover { transform: none; box-shadow: none; border-color: var(--line); }
+.ig__cell:not(.is-on) .sc:hover { transform: none; box-shadow: none; }
+
+/* Da bo hai nut mui ten, nen ban than the ben canh phai tu noi len rang no
+   bam duoc. Re chuot vao thi no sang han len va vien dam lai. Sang bang
+   filter chu khong bang opacity: opacity dang bi JS ghi thang vao style cua
+   o the moi khung hinh, CSS khong the gianh lai duoc. */
+.ig__cell:not(.is-on):hover { filter: brightness(1.55) saturate(1.06); }
+.ig__cell:not(.is-on):hover .sc { border-color: var(--line-strong); }
 
 /* Rieng the dang xem thi noi han len khoi nen */
 .ig__cell.is-on .sc { border-color: var(--line-strong); box-shadow: var(--sh-4); }
-
-.ig__nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 42px; height: 42px;
-  display: grid; place-items: center;
-  border-radius: 50%;
-  background: rgba(11, 15, 23, 0.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--line-mid);
-  color: var(--tx-hi);
-  font-size: 16px;
-  z-index: 6;
-  box-shadow: var(--sh-2);
-  transition: background var(--t-fast), transform var(--t-base) var(--e-out), opacity var(--t-base);
-}
-.ig__nav:hover { background: var(--bg-raised); transform: translateY(-50%) scale(1.09); }
-.ig__nav:disabled { opacity: 0; pointer-events: none; }
-.ig__nav--l { left: 12px; }
-.ig__nav--r { right: 12px; }
 
 /* Cham tron: vach dai la the dang xem. Doc duoc so muc va vi tri hien tai chi
    bang mot cai liec, khong can dem. */
