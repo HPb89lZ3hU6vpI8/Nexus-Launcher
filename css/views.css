@@ -1534,8 +1534,8 @@ video.gd__media.is-on { opacity: 1; }
 .bn--discord:hover { border-color: rgba(88, 101, 242, 0.5); }
 /* Ban gon mot dong: dung o cuoi trang Tich hop, noi tung px chieu cao deu
    phai tiet kiem de ca trang lot trong mot man hinh. */
-.bn--slim { width: 100%; max-width: 700px; padding: 9px 13px; }
-.bn--slim .bn__ico { width: 28px; height: 28px; font-size: 15px; border-radius: var(--r-xs); }
+.bn--slim { width: 100%; max-width: 700px; padding: 8px 13px; }
+.bn--slim .bn__ico { width: 26px; height: 26px; font-size: 14px; border-radius: var(--r-xs); }
 .bn--slim .bn__d { margin-top: 0; padding-left: 12px; border-left: 1px solid var(--line-mid); }
 @media (max-width: 1180px) { .bn--slim .bn__d { display: none; } }
 
@@ -1624,12 +1624,21 @@ video.gd__media.is-on { opacity: 1; }
 
 .ig__track {
   display: flex;
-  /* center chu KHONG phai stretch. Trong mot cai luoi thi keo moi the cao bang
+  /* stretch: ca nam the cao BANG NHAU, lay theo the cao nhat. De moi the tu
+     cao theo ruot no thi the ngan (480px) troi lo lung giua dai 650px, ho
+     tren ho duoi moi ben gan 90px -- va moi lan keo sang the khac thi nut
+     CTA lai nhay len nhay xuong mot doan. Cho bang nhau thi dai deck dac
+     kin, nam nut KICH HOAT NGAY nam dung mot duong ngang, va the thanh dang
+     doc 461x643 -- dung ti le the cu ben Thu vien. Cho trong doi ra nam BEN
+     TRONG the (co nen, co vien) thay vi lo ra ngoai, nhin gon han. */
+  align-items: stretch;
+  /* --- ban cu, giu de biet vi sao khong dung ---
+     center chu KHONG phai stretch. Trong mot cai luoi thi keo moi the cao bang
      nhau la dep, vi cac the nam canh nhau nen so sanh duoc. O day moi luc chi
      nhin mot the, ma keo bang nhau thi the ngan nhat bi doi ra mot khoang
      trong to tuong giua noi dung va nut bam. Cho moi the dung dung chieu cao
-     that cua no roi canh giua theo truc ngang. */
-  align-items: center;
+     that cua no roi canh giua theo truc ngang.
+     align-items: center; */
   gap: 24px;
   will-change: transform;
 }
@@ -1702,7 +1711,6 @@ video.gd__media.is-on { opacity: 1; }
 }
 
 .sc {
-  container: sc / inline-size;
   display: flex;
   flex-direction: column;
   border-radius: var(--r-lg);
@@ -1744,7 +1752,7 @@ video.gd__media.is-on { opacity: 1; }
   display: flex;
   align-items: center;
   gap: 13px;
-  padding: 18px 20px 14px;
+  padding: 16px 20px 12px;
 }
 .sc__ico {
   width: 46px; height: 46px;
@@ -1761,28 +1769,24 @@ video.gd__media.is-on { opacity: 1; }
 .sc__ttl { font-family: var(--f-display); font-size: 16.5px; font-weight: 800; color: var(--tx-hi); letter-spacing: -0.02em; line-height: 1.2; }
 .sc__sub { font-size: 10.5px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--sc-b); margin-top: 4px; }
 
-/* Than the xep hai cot: trai la tinh nang, phai la bang thong tin + ghi chu.
-   Nho vay the beo ngang ra ma lun han xuong -- day la dieu kien de ca bo the
-   nam vua mot man hinh. The nao hep qua thi tu gop lai mot cot (do bang
-   container query, tuc do CHINH be rong cua the chu khong phai cua man hinh
-   -- the o giua va the ben canh rong khac nhau nen media query khong dung). */
+/* Than the xep MOT cot doc. Ban truoc chia hai cot cho the lun xuong, nhung
+   hai cot khong bao gio dai bang nhau nen cot ngan hon de lai mot mang trong
+   to tuong -- nhin ra ngay la lech. Mot cot doc thi khong the lech duoc. */
 .sc__body {
   position: relative;
   z-index: 1;
   flex: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
-  gap: 18px;
-  padding: 0 20px 18px;
-}
-.sc__col {
   display: flex;
   flex-direction: column;
-  gap: 13px;
-  min-width: 0;
-}
-@container sc (max-width: 440px) {
-  .sc__body { grid-template-columns: minmax(0, 1fr); }
+  /* Ca cum noi dung CAN GIUA theo chieu doc. Vi ca nam the cao bang nhau nen
+     the it chu se thua ra chung 160px; neu de cum dinh len tren thi ho mot
+     mang duoi, con neu keo gian tung dong ra cho day thi moi dong cach nhau
+     55-70px, nhin nhu the bi keo giao. Can giua thi cho thua thanh le tren
+     va le duoi bang nhau -- doc ra la "the co le rong rai", khong ai doc ra
+     la "the bi hut". Tung dong van sat nhau dung 9px nhu the day chu. */
+  justify-content: center;
+  gap: 11px;
+  padding: 0 20px 14px;
 }
 
 .sc__feats { display: flex; flex-direction: column; gap: 9px; }
@@ -1836,22 +1840,34 @@ video.gd__media.is-on { opacity: 1; }
 }
 .sc__note i { flex: none; margin-top: 2px; font-size: 13px; color: var(--sc-b); }
 
-.sc__unsup { display: flex; flex-direction: column; gap: 8px; }
+/* Dong "khong ho tro" nam trong bang thong tin, tach bang mot duong ke mo. */
+.sc__unsup {
+  margin-top: 2px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line-mid);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+}
+/* Danh sach xuong hang RIENG chu khong chay tiep ben phai cai nhan. Nhan
+   dai gan 200px, chen chung mot dong thi danh sach chi con 185px va vo ra
+   bon dong; cho no an tron be ngang thi vua dung hai dong. */
+.sc__unsup-l { flex: 1 1 100%; min-width: 0; font-size: 12px; line-height: 1.5; color: #ff92a6; }
 .sc__unsup-h {
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--bad);
-  display: flex; align-items: center; gap: 7px;
+  display: inline-flex; align-items: center; gap: 6px;
+  flex: none;
 }
-.sc__unsup-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.sc__unsup-tags .nx-tag { background: var(--bad-soft); border-color: rgba(255, 79, 109, 0.24); color: #ff92a6; }
 
 .sc__foot {
   position: relative;
   z-index: 1;
-  padding: 14px 20px 18px;
+  padding: 12px 20px 15px;
   border-top: 1px solid var(--line);
   display: flex;
   flex-direction: column;
@@ -1859,8 +1875,12 @@ video.gd__media.is-on { opacity: 1; }
   margin-top: auto;
 }
 
-/* O nhap AppID trong the EASY-INSTALL */
-.sc__appid { display: flex; gap: 8px; }
+/* O nhap AppID trong the EASY-INSTALL -- cung hang voi nut kich hoat */
+.sc__appid { display: flex; align-items: center; gap: 8px; }
+/* Nut hep bot mot chut so voi nut cua bon the kia: o nhap can du cho hien het
+   cau goi y "Nhap AppID, vi du 1245620", thieu vai px la cau bi cat cut giua
+   chung -- nhin nhu loi. Chu tren nut van y nguyen. */
+.sc__appid .nx-btn { flex: none; padding-left: 17px; padding-right: 17px; }
 .sc__appid input {
   flex: 1;
   min-width: 0;
@@ -1871,7 +1891,7 @@ video.gd__media.is-on { opacity: 1; }
   border: 1px solid var(--line-mid);
   color: var(--tx-hi);
   font-family: var(--f-num);
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   transition: border-color var(--t-base), box-shadow var(--t-base);
@@ -1890,19 +1910,27 @@ video.gd__media.is-on { opacity: 1; }
 @media (max-height: 900px) {
   .ig__hero { padding: 12px var(--pad-page) 6px; }
   .ig__title { font-size: clamp(19px, 1.9vw, 24px); margin-bottom: 4px; }
-  .ig__sub { font-size: 12px; line-height: 1.45; }
-  .ig__vp { padding: 4px 0 6px; }
-  .ig__dots { padding: 8px 0 0; }
-  .ig__foot { padding: 8px var(--pad-page) 10px; }
-  .bn--slim { padding: 7px 12px; }
+  /* Noi rong ra cho cau mo ta nam gon mot dong thay vi hai -- bot 17px ma
+     khong phai cat bo chu nao. */
+  .ig__sub { font-size: 12px; line-height: 1.45; max-width: 1260px; }
+  .ig__vp { padding: 3px 0 4px; }
+  .ig__dots { padding: 6px 0 0; }
+  .ig__foot { padding: 6px var(--pad-page) 8px; }
+  .bn--slim { padding: 6px 12px; }
+  /* Siet nhe ruot the ngay tu bac nay: chi bot vai px khoang dem, mat
+     thuong khong nhan ra, nhung du de the cao nhat con du cho o man hinh
+     1080p ke ca khi doi sang tieng Phap (cau mo ta dai thanh hai dong). */
+  .sc__head { padding: 15px 20px 11px; }
+  .sc__body { gap: 10px; padding-bottom: 13px; }
+  .sc__foot { padding: 11px 20px 14px; }
 }
 
 /* Bac chat hon: cua so cang thap thi bop luon ruot the lai. Chi cham vao
    khoang dem, khong dong den co chu, nen the van de doc. */
 @media (max-height: 820px) {
-  .sc__head { padding: 14px 20px 12px; }
-  .sc__body { padding-bottom: 14px; gap: 14px; }
-  .sc__foot { padding: 12px 20px 14px; }
+  .sc__head { padding: 13px 20px 10px; }
+  .sc__body { padding-bottom: 12px; gap: 9px; }
+  .sc__foot { padding: 10px 20px 12px; }
   .ig__hero { padding: 10px var(--pad-page) 4px; }
 }
 
@@ -1910,8 +1938,9 @@ video.gd__media.is-on { opacity: 1; }
    giai thich o nut Discord -- do la thu doc mot lan la biet, giu lai chi de
    day mat ban the xuong. Duoi nguong nay noi dung that su khong con nhet vua
    mot man hinh, luc do cho trang cuon mot doan ngan la chap nhan duoc: keo
-   ngang van chay binh thuong. */
-@media (max-height: 745px) {
+   ngang van chay binh thuong. Nguong 800px chu khong phai 745px, vi tu ban
+   nay the cao hon (mot cot doc) nen no cham tran som hon. */
+@media (max-height: 800px) {
   .ig__sub { display: none; }
   .ig__title { margin-bottom: 0; }
   .bn--slim .bn__d { display: none; }

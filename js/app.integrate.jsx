@@ -145,12 +145,7 @@
      KHUNG THE
      ------------------------------------------------------------------------ */
 
-  /* extra: phan nhap lieu rieng cua tung dich vu, dat o cuoi cot phai cua
-     THAN the chu khong phai o chan the. De duoi chan thi rieng the co o nhap
-     se cao vot len ~66px so voi bon the con lai -- ma trong mot ban the, the
-     nen cao hon the dang xem trong rat ky. Dat vao than the thi ca nam the
-     deu ket thuc bang dung mot nut CTA giong het nhau. */
-  function ServiceCard({ card, children, note, extra }) {
+  function ServiceCard({ card, children, note }) {
     return (
       <article className="sc" style={{ '--sc-a': card.a, '--sc-b': card.b, '--sc-glow': card.glow }}>
         <header className="sc__head">
@@ -161,59 +156,56 @@
           </div>
         </header>
 
-        {/* Than the chia doi: cot TRAI noi dich vu lam duoc gi va khong lam
-            duoc gi, cot PHAI la bang thong so + ghi chu. Xep ngang nhu vay the
-            beo ra ma lun han xuong, nho do ca bo the nam gon trong mot man
-            hinh -- day chinh la dieu kien de bo duoc thanh cuon doc.
-            Khoi "khong ho tro" nam ben trai chu khong nam chung voi bang
-            thong so, vi neu don het sang phai thi rieng the Easy-Install se
-            cao vot len ~180px so voi bon the con lai, ma the cao nhat quyet
-            dinh chieu cao ca ban the. */}
+        {/* Than the xep MOT cot doc. Ban truoc chia hai cot cho the lun
+            xuong, nhung hai cot khong bao gio dai bang nhau nen cot ngan hon
+            de lai mot mang trong to tuong, nhin ra ngay la lech. Mot cot doc
+            thi khong the lech duoc, va the giu dung dang cao thanh quen
+            thuoc. */}
         <div className="sc__body">
-          <div className="sc__col">
-            <div className="sc__feats">
-              {card.features.map(function (f, i) {
-                return (
-                  <div className="sc__feat" key={i}>
-                    <i className="ph-fill ph-check-circle"></i>
-                    <span>{TX(f)}</span>
+          <div className="sc__feats">
+            {card.features.map(function (f, i) {
+              return (
+                <div className="sc__feat" key={i}>
+                  <i className="ph-fill ph-check-circle"></i>
+                  <span>{TX(f)}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {card.info && (
+            <div className="sc__info">
+              <div className="sc__info-h">{TX(card.infoHead)}</div>
+              <div className="sc__info-b">
+                {card.info.map(function (kv) {
+                  return (
+                    <div className="sc__kv" key={kv[0]}>
+                      <b>{TX(kv[0])}</b><span>{TX(kv[1])}</span>
+                    </div>
+                  );
+                })}
+
+                {/* Danh sach "khong ho tro" nam NGAY TRONG bang thong tin,
+                    cach cac dong tren bang mot duong ke mo. Truoc kia no la
+                    mot khoi rieng gom bon vien pill; bon pill do xep tran ra
+                    ba dong so le nhau, vua lech vua an mat 90px chieu cao.
+                    Viet lien thanh mot cau, ngan cach bang dau cham giua, thi
+                    chi ton hai dong va thang hang voi Buoc 1/2/3 ben tren. */}
+                {card.unsup && (
+                  <div className="sc__unsup">
+                    <span className="sc__unsup-h"><i className="ph-fill ph-prohibit"></i>{TX(card.unsupHead)}</span>
+                    <span className="sc__unsup-l">
+                      {card.unsup.map(function (u) { return TX(u); }).join(' · ')}
+                    </span>
                   </div>
-                );
-              })}
+                )}
+              </div>
             </div>
+          )}
 
-            {card.unsup && (
-              <div className="sc__unsup">
-                <div className="sc__unsup-h"><i className="ph-fill ph-prohibit"></i>{TX(card.unsupHead)}</div>
-                <div className="sc__unsup-tags">
-                  {card.unsup.map(function (u) { return <span className="nx-tag" key={u}>{TX(u)}</span>; })}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="sc__col">
-            {card.info && (
-              <div className="sc__info">
-                <div className="sc__info-h">{TX(card.infoHead)}</div>
-                <div className="sc__info-b">
-                  {card.info.map(function (kv) {
-                    return (
-                      <div className="sc__kv" key={kv[0]}>
-                        <b>{TX(kv[0])}</b><span>{TX(kv[1])}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {card.note && (
-              <div className="sc__note"><i className="ph-fill ph-info"></i><span>{TX(card.note)}</span></div>
-            )}
-
-            {extra}
-          </div>
+          {card.note && (
+            <div className="sc__note"><i className="ph-fill ph-info"></i><span>{TX(card.note)}</span></div>
+          )}
         </div>
 
         <footer className="sc__foot">
@@ -439,7 +431,14 @@
       <ServiceCard
         card={card}
         note={note ? <Note tone={tone}>{stripTone(note)}</Note> : null}
-        extra={
+      >
+        {/* O nhap AppID dung CHUNG mot hang voi nut kich hoat. Truoc kia no
+            chiem rieng mot dong trong than the, lam the nay cao hon bon the
+            kia 61px -- ma ca nam the phai cao bang nhau nen bon the con lai
+            bi keo theo, ho ra mot mang trong. Bo luon nut kinh lup ben canh
+            o nhap: no chi mo trang tim kiem Steam, ma viec do thanh ben trai
+            da co san muc "Tra cuu AppID", con dong Buoc 1 trong bang cung da
+            chi cho tra o SteamDB. */}
         <div className="sc__appid">
           <input
             type="text"
@@ -451,19 +450,12 @@
             spellCheck="false"
             disabled={st === 'activating'}
           />
-          <button className="nx-btn nx-btn--ghost" style={{ height: 40, flex: 'none' }}
-                  onClick={function () { openExternal('https://store.steampowered.com/search/?term=' + encodeURIComponent(appid || '')); }}
-                  title={TX('Tra AppID trên Steam')}>
-            <i className="ph-bold ph-magnifying-glass"></i>
+          <button className="nx-btn nx-btn--accent nx-btn--lg" onClick={click} disabled={st === 'activating'}>
+            {st === 'activating'
+              ? <Busy label={TX('Đang kích hoạt...')} />
+              : <React.Fragment><i className="ph-fill ph-lightning"></i>{TX('KÍCH HOẠT NGAY')}</React.Fragment>}
           </button>
         </div>
-        }
-      >
-        <button className="nx-btn nx-btn--accent nx-btn--full nx-btn--lg" onClick={click} disabled={st === 'activating'}>
-          {st === 'activating'
-            ? <Busy label={TX('Đang kích hoạt...')} />
-            : <React.Fragment><i className="ph-fill ph-lightning"></i>{TX('KÍCH HOẠT NGAY')}</React.Fragment>}
-        </button>
       </ServiceCard>
     );
   }
@@ -618,11 +610,15 @@
       /* Be rong the KHONG phai mot ti le co dinh. Cua so cang hep thi the phai
          chiem ti le cang LON, vi the hep lai la chu xuong dong nhieu hon va
          the cao vot len -- dung luc man hinh nho cung thap di. Cho ti le chay
-         muot tu 62% (cua so nho) ve 44% (man hinh 1080p tro len): the luon du
-         ngan de lot man hinh, ma hai the ben canh van tho ra du de nhin thay.
-         Chay muot chu khong nhay bac, de keo gian cua so khong bi giat. */
-      const f = clamp(0.62 - (w - 900) * (0.62 - 0.44) / 540, 0.44, 0.62);
-      const cw = Math.round(clamp(w * f, 380, 700));
+         muot tu 49% (cua so nho) ve 32% (man hinh 1080p tro len), ket qua la
+         the luon rong quanh 440-475px. Do KHONG phai con so chon bua: chieu
+         cao that cua the gan nhu khong doi theo be rong (do luoc rat it khi
+         hep lai), nen be rong la thu duy nhat quyet dinh the trong cao hay
+         bet. 460px dat canh chieu cao 480-645px cho ra dang the doc quen
+         thuoc, ma hai the ben canh van tho ra du de nhin thay. Chay muot chu
+         khong nhay bac, de keo gian cua so khong bi giat. */
+      const f = clamp(0.49 - (w - 900) * (0.49 - 0.32) / 540, 0.32, 0.49);
+      const cw = Math.round(clamp(w * f, 400, 520));
       geo.current = { w: w, cw: cw };
       el.style.setProperty('--cw', cw + 'px');
       paint();
