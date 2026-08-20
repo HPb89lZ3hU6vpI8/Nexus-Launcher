@@ -1192,7 +1192,7 @@ video.gd__media.is-on { opacity: 1; }
 }
 .rev__num {
   font-family: var(--f-num);
-  font-size: 26px;
+  font-size: 23px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.045em;
@@ -1209,7 +1209,7 @@ video.gd__media.is-on { opacity: 1; }
    31px chi bang 0.42 lan, nho toi muc doc ra nhu mot vet mo bi bo quen chu
    khong phai mot don vi. Nang ty le len ~0.58 va bot mo di. */
 .rev__plate.is-na { color: var(--tx-faint); }
-.rev__plate.is-na .rev__num { font-size: 22px; text-shadow: none; }
+.rev__plate.is-na .rev__num { font-size: 20px; text-shadow: none; }
 
 /* --- Cot chu ben phai ----------------------------------------------------- */
 .rev__main { position: relative; flex: 1; min-width: 0; }

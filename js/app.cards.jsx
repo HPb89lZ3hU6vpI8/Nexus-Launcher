@@ -82,9 +82,10 @@ function GameCard({ game, onOpen, eager }) {
             Khong co diem thi rot lai ve dau cham mau nhu cu. */}
         <div className="gc__meta">
           <span className={'gc__rev ' + (pct === null ? 'gc__rev--dot ' : '') +
-            (TX(game.reviewText).length >= 21 ? 'gc__rev--xlong ' :
-             TX(game.reviewText).length >= 16 ? 'gc__rev--long ' : '') + 'gc__rev--' + tone}>
-            {pct !== null && <b className="gc__rev__n">{Math.round(pct)}</b>}
+            (TX(game.reviewText).length >= 22 ? 'gc__rev--xxl ' :
+             TX(game.reviewText).length >= 20 ? 'gc__rev--xlong ' :
+             TX(game.reviewText).length >= 15 ? 'gc__rev--long ' : '') + 'gc__rev--' + tone}>
+            {pct !== null && <b className="gc__rev__n">{Math.round(pct)}<i>%</i></b>}
             <span className="gc__rev__t">{TX(game.reviewText)}</span>
           </span>
           {/* Mot con so tran nhu "1K" khong noi len duoc no dem cai gi, nen chu
@@ -126,7 +127,7 @@ function GameRow({ game, onOpen }) {
           </span>
           {n !== null && (
             <span className={'gc__rev gc__rev--dot gc__rev--' + tone}>
-              <b className="gc__rev__n">{Math.round(n)}%</b> · {TX(game.reviewText)}
+              <b className="gc__rev__n">{Math.round(n)}<i>%</i></b> · {TX(game.reviewText)}
             </span>
           )}
           {count > 0 && <span className="gc__revn">{fmtCount(count)}<em>{TX('lượt đánh giá')}</em></span>}
@@ -238,7 +239,27 @@ function UpcomingCard({ game, steam }) {
    nen bam vao the game khong bao gio bi hieu nham thanh keo.
    -------------------------------------------------------------------------- */
 
+/* Vat ly cuon ngang -------------------------------------------------------
+   DRAG_MIN : keo qua bao nhieu px moi tinh la keo (duoi nguong van la mot cu bam)
+   FRICTION : ma sat cho MOI 16.67ms, roi quy doi theo thoi gian that -> man
+              144Hz va man 60Hz truot giong het nhau. Truoc day code tru cung
+              mot luong moi khung hinh nen man cang nhanh truot cang vot xa.
+   V_MIN    : buong tay cham hon muc nay thi khong truot theo da
+   V_STOP   : cham hon muc nay thi coi nhu da dung han
+   BRAKE    : phanh khi sap cham hai dau. Toc do toi da cho phep = BRAKE * so px
+              con lai, nen xe tu nha ga va do nhe vao mep -- khoang 100px
+              cuoi la bat dau ha toc. Day chinh la cho truoc kia dam thang
+              vao tuong roi dung khuc mot cai.                               */
 const DRAG_MIN = 6;
+const FRICTION = 0.94;
+const V_MIN = 0.055;
+const V_STOP = 0.015;
+const BRAKE = 0.022;
+const NUDGE_MS = 460;
+
+/* Nhanh luc dau, cham dan luc ve dich. Dung chung cho mui ten va cu truot
+   theo da nen ca hai cho cung mot cam giac tay. */
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
 function Shelf({ title, icon, sub, children, action }) {
   const ref = useRef(null);
@@ -247,15 +268,16 @@ function Shelf({ title, icon, sub, children, action }) {
   const [grab, setGrab] = useState(false);
   const drag = useRef({
     down: false, moved: false, cap: false,
-    x: 0, left: 0, id: 0, px: 0, t: 0, v: 0
+    x: 0, left: 0, id: 0, s: []
   });
 
-  /* Cu truot theo da sau khi tha tay */
-  const glide = useRef(0);
-  const stopGlide = useCallback(() => {
-    if (glide.current) { cancelAnimationFrame(glide.current); glide.current = 0; }
+  /* MOT vong requestAnimationFrame duy nhat dung chung cho ca cu truot theo da
+     lan cu bam mui ten, de hai thu khong bao gio chay chong len nhau. */
+  const anim = useRef(0);
+  const stopAnim = useCallback(() => {
+    if (anim.current) { cancelAnimationFrame(anim.current); anim.current = 0; }
   }, []);
-  useEffect(() => stopGlide, [stopGlide]);
+  useEffect(() => stopAnim, [stopAnim]);
 
   const measure = useCallback(() => {
     const el = ref.current;
@@ -268,16 +290,45 @@ function Shelf({ title, icon, sub, children, action }) {
     measure();
     const el = ref.current;
     if (!el) return;
+    /* Lan chuot ngang la nguoi dung tu lai: nhuong quyen ngay, dung de cu
+       truot cu con lai giang co voi ho. */
+    const onWheel = () => stopAnim();
     el.addEventListener('scroll', measure, { passive: true });
+    el.addEventListener('wheel', onWheel, { passive: true });
     const ro = new ResizeObserver(measure);
     ro.observe(el);
-    return () => { el.removeEventListener('scroll', measure); ro.disconnect(); };
-  }, [measure, children]);
+    return () => {
+      el.removeEventListener('scroll', measure);
+      el.removeEventListener('wheel', onWheel);
+      ro.disconnect();
+    };
+  }, [measure, stopAnim, children]);
 
+  /* Mui ten: nhay dung mot so nguyen the (be rong the + khe) nen hang the van
+     dung thang hang sau moi cu bam. Truoc day viec canh hang nay do scroll-snap
+     lo, ma chinh scroll-snap lai la thu lam giat cu keo tay -- nay tu tinh lay
+     thi vua thang hang vua khong con ai giang co voi ai. */
   const nudge = dir => {
     const el = ref.current;
     if (!el) return;
-    el.scrollBy({ left: dir * Math.max(280, el.clientWidth * 0.82), behavior: 'smooth' });
+    stopAnim();
+    const first = el.firstElementChild;
+    const cell = first ? first.getBoundingClientRect().width + 18 : 280;
+    const span = Math.max(cell, Math.floor(el.clientWidth / cell) * cell);
+    const max = el.scrollWidth - el.clientWidth;
+    const from = el.scrollLeft;
+    const to = Math.max(0, Math.min(max, from + dir * span));
+    if (to === from) return;
+    if (prefersCalm()) { el.scrollLeft = to; return; }
+    const t0 = performance.now();
+    const run = ts => {
+      const n = ref.current;
+      if (!n) { anim.current = 0; return; }
+      const k = Math.min(1, (ts - t0) / NUDGE_MS);
+      n.scrollLeft = from + (to - from) * easeOutCubic(k);
+      anim.current = k < 1 ? requestAnimationFrame(run) : 0;
+    };
+    anim.current = requestAnimationFrame(run);
   };
 
   /* --- nam & keo --------------------------------------------------------- */
@@ -285,11 +336,11 @@ function Shelf({ title, icon, sub, children, action }) {
   const onDown = e => {
     const el = ref.current;
     if (!el || e.button !== 0 || e.pointerType === 'touch') return;   /* cham: de trinh duyet tu lo */
-    stopGlide();
+    stopAnim();
     drag.current = {
       down: true, moved: false, cap: false,
       x: e.clientX, left: el.scrollLeft, id: e.pointerId,
-      px: e.clientX, t: performance.now(), v: 0
+      s: [performance.now(), e.clientX]
     };
   };
 
@@ -307,13 +358,12 @@ function Shelf({ title, icon, sub, children, action }) {
          cu click vao the game ben trong. */
       try { el.setPointerCapture(e.pointerId); d.cap = true; } catch (err) {}
     }
-    /* Van toc tuc thoi (px moi ms) — lam min de mot khung hinh giat khong
-       lam hong cu truot theo da phia sau. */
-    const now = performance.now();
-    const dt = Math.max(1, now - d.t);
-    d.v = d.v * 0.7 + ((e.clientX - d.px) / dt) * 0.3;
-    d.px = e.clientX;
-    d.t = now;
+    /* Ghi lai vet tay: tung cap (thoi diem, toa do). Lat nua do van toc tren
+       ca doan ~100ms cuoi chu khong chi nhin khung hinh chot, nen mot khung
+       hinh bi giat khong con lam hong cu truot. */
+    const s = d.s;
+    s.push(performance.now(), e.clientX);
+    if (s.length > 24) s.splice(0, s.length - 24);
 
     el.scrollLeft = d.left - dx;
   };
@@ -326,19 +376,43 @@ function Shelf({ title, icon, sub, children, action }) {
     d.cap = false;
     if (!d.moved) return;
     setGrab(false);
+    if (!el || prefersCalm()) return;
 
-    /* Tha tay van con da: truot tiep roi cham dan lai, giong lat trang tren
-       dien thoai. Nguoi dung tat hieu ung chuyen dong thi dung ngay. */
-    let v = d.v;
-    if (Math.abs(v) < 0.09 || prefersCalm()) return;
-    const step = () => {
-      const n = ref.current;
-      if (!n) { glide.current = 0; return; }
-      v *= 0.93;
-      n.scrollLeft -= v * 16;
-      glide.current = Math.abs(v) > 0.02 ? requestAnimationFrame(step) : 0;
+    /* Van toc luc buong tay, do tren quang duong ~100ms cuoi cung (px moi ms) */
+    const s = d.s || [];
+    const n = s.length;
+    let v = 0;
+    if (n >= 4) {
+      let i = n - 2;
+      while (i >= 2 && s[n - 2] - s[i - 2] < 100) i -= 2;
+      const dt = s[n - 2] - s[i];
+      if (dt > 8) v = (s[n - 1] - s[i + 1]) / dt;
+    }
+    if (Math.abs(v) < V_MIN) return;
+
+    let last = performance.now();
+    const step = ts => {
+      const el2 = ref.current;
+      if (!el2) { anim.current = 0; return; }
+      const dt = Math.min(48, ts - last);    /* tab bi treo thi khong nhay coc */
+      last = ts;
+      v *= Math.pow(FRICTION, dt / 16.667);
+
+      const max = el2.scrollWidth - el2.clientWidth;
+      const cur = el2.scrollLeft;
+      /* v duong = tay keo sang phai = scrollLeft dang giam ve 0 */
+      const room = Math.max(0, v > 0 ? cur : max - cur);
+      const lim = BRAKE * room + V_STOP;
+      if (Math.abs(v) > lim) v = v > 0 ? lim : -lim;
+
+      let next = cur - v * dt;
+      if (next <= 0) { next = 0; v = 0; }
+      else if (next >= max) { next = max; v = 0; }
+      el2.scrollLeft = next;
+
+      anim.current = Math.abs(v) > V_STOP ? requestAnimationFrame(step) : 0;
     };
-    glide.current = requestAnimationFrame(step);
+    anim.current = requestAnimationFrame(step);
   };
 
   /* Vua keo xong thi chan cu click de khong lo mo nham game */

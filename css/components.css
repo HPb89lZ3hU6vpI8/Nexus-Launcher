@@ -144,17 +144,40 @@
   letter-spacing: -0.02em;
   color: currentColor;
 }
-/* Rieng tren the game: dong khung nho lai cho tach bach voi dong chu ben canh,
-   nen to nhat theo dung mau sac thai nen doc mot cai la biet no di voi chu nao. */
+/* Dau phan tram di lien con so nhung nho hon han: mat doc ra "93" truoc roi
+   moi thay don vi, khong bi tuong nham la mot chu so thu ba. */
+.gc__rev__n i {
+  font-style: normal;
+  font-size: 0.66em;
+  font-weight: 700;
+  letter-spacing: 0;
+  opacity: 0.78;
+}
+
+/* Rieng tren the game: do dac ca o mau sac thai, chu doi thanh mau nen toi.
+   Day la loi trinh bay diem so quen thuoc cua Metacritic / OpenCritic -- mot
+   mieng mau nho dac ruc, liec qua la biet tot hay xau ma khong can doc chu.
+   Truoc kia o day chi la khung vien mo cung mau voi chu ben canh nen ca cum
+   nhin bet lai thanh mot dam chu dong mau. */
 .gc__meta .gc__rev__n {
   flex: none;
-  padding: 3px 3px;
-  border-radius: 5px;
-  font-size: 12px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5px;
+  padding: 3.5px 3.5px;
+  border-radius: 6px;
+  font-size: 11.5px;
   line-height: 1;
-  background: color-mix(in srgb, currentColor 15%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 26%, transparent);
+  letter-spacing: -0.03em;
+  color: #070b12;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, #ffffff 20%, var(--tone)),
+    var(--tone));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    0 2px 8px color-mix(in srgb, var(--tone) 26%, transparent);
 }
+.gc__meta .gc__rev__n i { opacity: 0.66; }
 
 .gc__body {
   padding: 12px 8px 13px;
@@ -228,16 +251,17 @@
   margin-top: auto;
 }
 /* Nhan sac thai dai rat khac nhau: ban tieng Viet dai nhat 16 ky tu, ban
-   tieng Anh len toi 23 (OVERWHELMINGLY POSITIVE). Chia ba nac co chu theo do
-   dai -- nhan cang dai cang ha mot nac -- de moi nhan deu nam gon mot dong o
-   cot luoi hep nhat. Toan bo nhan tieng Viet roi vao nac lon nhat. */
-.gc__meta .gc__rev--long .gc__rev__t { font-size: 10px; letter-spacing: -0.01em; }
-.gc__meta .gc__rev--xlong .gc__rev__t { font-size: 9px; letter-spacing: -0.02em; }
+   tieng Anh len toi 23 (OVERWHELMINGLY POSITIVE), tieng Tay Ban Nha 25.
+   Chia bon nac co chu theo do dai -- nhan cang dai cang ha mot nac -- de moi
+   nhan deu nam gon mot dong o cot luoi hep nhat. */
+.gc__meta .gc__rev--long .gc__rev__t { font-size: 10px; letter-spacing: -0.016em; }
+.gc__meta .gc__rev--xlong .gc__rev__t { font-size: 9px; letter-spacing: -0.03em; }
+.gc__meta .gc__rev--xxl .gc__rev__t { font-size: 8.5px; letter-spacing: -0.035em; }
 /* Cot the trong luoi chi rong khoang 225px o cua so that. Ca hang phai vua
    trong chung do, nen ban tren the nho hon ban trong che do danh sach mot
    chut, va so luot danh gia bo khung vien -- no la thong tin phu, de tran
    nhu vay vua nhe mat vua tiet kiem duoc gan 15px. */
-.gc__meta .gc__rev { font-size: 11px; gap: 2px; letter-spacing: 0; }
+.gc__meta .gc__rev { font-size: 11px; gap: 3px; letter-spacing: 0; }
 .gc__meta .gc__revn {
   margin-left: auto;
   align-items: baseline;
@@ -247,7 +271,7 @@
   border: 0;
   font-size: 11px;
 }
-.gc__meta .gc__revn em { font-size: 10px; }
+.gc__meta .gc__revn em { font-size: 9.5px; }
 /* Chot chan cuoi. Chi mot so muc rong cua so hiem hoi -- dung ngay diem luoi
    them mot cot -- nhan tieng Anh dai nhat moi thieu vai px. Luc do cho chu
    xuong hai dong chu khong cat bang ba cham: cat se mat han chu POSITIVE la
@@ -277,9 +301,10 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent);
   flex: none;
 }
-.gc__rev--pos { color: var(--ok); }
-.gc__rev--mix { color: var(--warn); }
-.gc__rev--neg { color: var(--bad); }
+.gc__rev { --tone: var(--tx-dim); }
+.gc__rev--pos { color: var(--ok);   --tone: var(--ok); }
+.gc__rev--mix { color: var(--warn); --tone: var(--warn); }
+.gc__rev--neg { color: var(--bad);  --tone: var(--bad); }
 
 /* So luot danh gia: vien nho, chu so canh deu */
 .gc__revn {
@@ -397,20 +422,22 @@
   gap: 18px;
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-snap-type: x proximity;
+  /* KHONG dung scroll-snap o day. Nam cham hut dinh se giat lai tung khung
+     hinh trong luc cu truot theo da dang chay, nen buong tay ra la khuc mot
+     cai roi dinh cung vao mep the. Viec canh thang hang nay do nut mui ten
+     tu tinh (nhay dung mot so nguyen the), con keo tay thi de tu do. */
+  overscroll-behavior-x: contain;
   scroll-padding-left: var(--pad-page);
   padding: 4px var(--pad-page) 18px;
   scrollbar-width: none;
 }
 .shelf__track::-webkit-scrollbar { height: 0; }
-.shelf__track > * { scroll-snap-align: start; }
 
 /* Nam keo bang chuot trai: doi con tro, va chan keo-tha anh cua trinh duyet */
 .shelf__track { cursor: grab; }
 .shelf__track img { -webkit-user-drag: none; user-drag: none; }
 .shelf__track.is-grab {
   cursor: grabbing;
-  scroll-snap-type: none;      /* dang keo thi bo hut dinh cho muot tay */
   scroll-behavior: auto;
   -webkit-user-select: none; user-select: none;
 }
