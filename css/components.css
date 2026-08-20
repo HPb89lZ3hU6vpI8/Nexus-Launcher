@@ -148,16 +148,16 @@
    nen to nhat theo dung mau sac thai nen doc mot cai la biet no di voi chu nao. */
 .gc__meta .gc__rev__n {
   flex: none;
-  padding: 3px 5px;
+  padding: 3px 4px;
   border-radius: 5px;
-  font-size: 11.5px;
+  font-size: 11px;
   line-height: 1;
   background: color-mix(in srgb, currentColor 15%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 26%, transparent);
 }
 
 .gc__body {
-  padding: 12px 13px 13px;
+  padding: 12px 10px 13px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -219,24 +219,33 @@
 .gc__meta {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex-wrap: nowrap;
   margin-top: auto;
 }
+/* Cot the trong luoi chi rong khoang 225px o cua so that. Ca hang phai vua
+   trong chung do, nen ban tren the nho hon ban trong che do danh sach mot
+   chut, va so luot danh gia bo khung vien -- no la thong tin phu, de tran
+   nhu vay vua nhe mat vua tiet kiem duoc gan 15px. */
+.gc__meta .gc__rev { font-size: 10px; gap: 4px; letter-spacing: 0; }
 .gc__meta .gc__revn {
   margin-left: auto;
   align-items: center;
-  gap: 3px;
-  padding: 3px 6px;
+  gap: 2px;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: 10px;
 }
-.gc__meta .gc__revn i { font-size: 11px; opacity: 0.62; }
-/* Chot chan cuoi: gap ngon ngu nao co nhan dai bat thuong thi cat bang dau ba
-   cham, tuyet doi khong duoc day nhau xuong dong. */
+.gc__meta .gc__revn i { font-size: 10px; opacity: 0.6; }
+/* Chot chan cuoi. Chi mot so muc rong cua so hiem hoi -- dung ngay diem luoi
+   them mot cot -- nhan tieng Anh dai nhat moi thieu vai px. Luc do cho chu
+   xuong hai dong chu khong cat bang ba cham: cat se mat han chu POSITIVE la
+   phan mang nghia. Ca hang can giua nen so luot danh gia van nam chinh giua
+   ben phai, nhin ra la co y chu khong phai vo bo cuc. */
 .gc__rev__t {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.25;
 }
 .gc__rev {
   display: inline-flex;
