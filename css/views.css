@@ -499,32 +499,33 @@
   display: grid;
   place-items: center;
   border-radius: var(--r-md);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03));
+  background: var(--bg-raised);
   border: 1px solid var(--line-mid);
   color: var(--tx);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 3px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
   transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast),
               box-shadow var(--t-base), transform var(--t-fast) var(--e-out);
 }
 .gd__back i { font-size: 17px; transition: transform var(--t-base) var(--e-out); }
-/* Truoc day hover ve them mot vong "0 0 0 3px" - do la mot vong dac, canh sac,
-   nam cach vien nut 3px nen ban kinh bo goc cua no la 16px trong khi vien nut
-   chi 13px. Hai duong cong khac nhau chay song song ngay canh nhau nhin y het
-   nhu vien bi lech. Nay bo han vong do: chi to nen dam len va them mot quang
-   sang MO (khong co canh) toa ra ngoai - khong con duong thu hai de so lech. */
+/* Hover khong to mau nhat len nen roi doi mau vien nua -- kieu do luon de lo
+   mot duong vien sang chay quanh nut, va vi vien la duong mong nhat man hinh
+   nen chi lech nua pixel la nhin ra ngay. Nay hover do HAN mot khoi xanh dac
+   (dung mau nut "Choi Ngay"), va cho vien thanh trong suot -- nen tran ra
+   duoi vien nen khong con duong thu hai nao de so lech. Nut cung nhac len
+   1px thay vi thut vao, nhan xuong moi ha ve cho cu. */
 .gd__back:hover {
-  color: var(--tx-hi);
-  background: linear-gradient(180deg,
-    color-mix(in srgb, var(--br-1) 20%, transparent),
-    color-mix(in srgb, var(--br-1) 8%, transparent));
-  border-color: color-mix(in srgb, var(--br-1) 52%, transparent);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    0 6px 18px rgba(0, 0, 0, 0.4),
-    0 0 20px -3px color-mix(in srgb, var(--br-1) 58%, transparent);
+  color: #ffffff;
+  background: linear-gradient(180deg, #2f86f7 0%, #1a5fd9 100%);
+  border-color: transparent;
+  box-shadow: 0 7px 16px -6px rgba(47, 134, 247, 0.75);
+  transform: translateY(-1px);
 }
 .gd__back:hover i { transform: translateX(-3px); }
-.gd__back:active { transform: scale(0.93); }
+.gd__back:active {
+  background: linear-gradient(180deg, #2a79e0 0%, #1854c2 100%);
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.32);
+}
 
 .gd__crumb {
   min-width: 0;
@@ -2127,6 +2128,17 @@ video.gd__media.is-on { opacity: 1; }
   color: var(--tx-dim);
   color: color-mix(in srgb, var(--abtn-accent) 78%, var(--tx-dim));
   line-height: 1.25;
+  /* "SUA LOI KET NOI" viet hoa co U va O deo hai tang dau chong len nhau, ngon
+     hon dinh chu hoa thuong toi 3.25px o co chu 10px cua bo chu Be Vietnam Pro.
+     Dong nay lai dat overflow:hidden (de cat bot khi nhan qua dai), ma overflow
+     cat theo vien PADDING -- the la bao nhieu dau nho ra ngoai deu bi got sach,
+     doc ra thanh "SUA LOI KET NOI" khong dau.
+     Noi line-height chi bu duoc nua pixel cho moi pixel noi them va lam nut cao
+     vong len; con padding tren bu dung 1 an 1. Nen dem 5px padding tren lay cho
+     cho dau, roi keo nguoc 5px margin am -- chu dung y cho cu, nut khong cao
+     them mot pixel nao, ma dau thi con nguyen. */
+  padding-top: 5px;
+  margin-top: -5px;
   margin-bottom: 3px;
   overflow: hidden;
   text-overflow: ellipsis;
