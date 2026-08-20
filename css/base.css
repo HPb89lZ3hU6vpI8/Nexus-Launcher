@@ -402,7 +402,14 @@ select:focus-visible { outline: none; }
 /* Doi trang. Chi chay opacity + transform de trinh duyet dua het sang GPU;
    khong dung filter: blur() cho ca cay con vi rat nang o kich thuoc nay. */
 .nx-view { transform-origin: 50% 0; }
-.nx-view.is-in  { animation: nx-view-in 420ms var(--e-out) both; }
+/* KHONG dung "both" o day. Pha "is-in" bam lai tren the vinh vien, ma
+   fill-mode both khien Chromium giu lai ma tran don vi matrix(1,0,0,1,0,0)
+   thay vi transform:none -- va bat ky transform nao (ke ca ma tran don vi)
+   deu tao khung chua moi cho con chau position:fixed. Hau qua: lop phong to
+   anh (.mo--img) neo theo the nay chu khong theo khung nhin -> anh bi day
+   xuong duoi man hinh va tran sang phai. "backwards" cho ket qua nhin y het
+   (khung hinh cuoi cua nx-view-in dung bang net goc) ma khong de lai transform. */
+.nx-view.is-in  { animation: nx-view-in 420ms var(--e-out) backwards; }
 .nx-view.is-out { animation: nx-view-out 180ms ease-in both; pointer-events: none; }
 
 /* Hien dan khi cuon toi: khoi nam yen o duoi man hinh, cuon toi dau hien toi

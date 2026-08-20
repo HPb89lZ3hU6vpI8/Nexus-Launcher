@@ -17,7 +17,7 @@
     coverSources, fetchMedia, buildMedia, fetchTranslation, steamDateVN,
     REV_STATE_CACHE, setRevListener,
     useEscape, useToast,
-    Img, ScoreRing, Note,
+    Img, useCountUp, Note,
     TX, useLang, tagTone, markedTone, stripTone
   } = window.NX;
 
@@ -247,7 +247,16 @@
     const needTr = !!(live && srcLang && srcLang !== lang && (about || hasRaw));
 
     useEffect(function () {
-      if (!needTr || !appId) return undefined;
+      /* PHAI xoa ban dich cu o day.
+
+         Truoc day cho "return" luon khi khong con can dich. Nhung khi nguoi
+         dung dang o trong trang game va doi ngon ngu giao dien ve dung ngon
+         ngu goc cua bai gioi thieu (vd bai viet tieng Anh, doi giao dien sang
+         EN), needTr chuyen tu true sang false -> hieu ung thoat som -> bien
+         "tr" van con giu ban dich tieng Viet cu -> moi thu khac doi ngon ngu
+         het rieng bai gioi thieu thi khong. Dat lai thanh false (= khong co
+         ban dich) de bai viet quay ve ban goc ngay lap tuc. */
+      if (!needTr || !appId) { setTr(false); return undefined; }
       let alive = true;
       setTr(null);
       fetchTranslation(appId, lang).then(function (d) { if (alive) setTr(d || false); });
@@ -381,6 +390,37 @@
           </React.Fragment>
         )}
       </section>
+    );
+  }
+
+  /* --------------------------------------------------------------------------
+     DIEM DANH GIA — BANG SO
+
+     Ban truoc la mot vong tron co con so dat giua. Con so nam de tuyet doi
+     chong len giua vong, nen chi can font tai cham mot nhip, chieu cao dong
+     chu lech mot chut hay so lieu doi tu 2 sang 3 chu so la lai lech tam --
+     da chinh nhieu lan van con.
+
+     Ban nay bo han vong tron. Con so va dau % nam canh nhau trong mot hop
+     flex canh theo CHAN CHU (align-items: baseline) — day la cach trinh duyet
+     xep chu binh thuong, khong he co toa do tuyet doi nao, nen ve mat cau truc
+     KHONG THE lech duoc, du font hay so chu so co doi the nao.
+     ------------------------------------------------------------------------ */
+  function ScorePlate({ percent }) {
+    const shown = useCountUp(percent);
+    if (percent === null || percent === undefined) {
+      return (
+        <div className="rev__plate is-na">
+          <span className="rev__num">—</span>
+        </div>
+      );
+    }
+    const v = Math.round(shown === null ? percent : shown);
+    return (
+      <div className="rev__plate">
+        <span className="rev__num">{v}</span>
+        <span className="rev__sym">%</span>
+      </div>
     );
   }
 
@@ -1447,24 +1487,23 @@
               <div className="pc">
                 {!isUpcoming && (
                   <div className={'rev is-' + tone}>
-                    <ScoreRing percent={game.percent} size={70} thickness={5} />
+                    <ScorePlate percent={pct} />
                     <div className="rev__main">
                       <div className="rev__txt">{TX(game.reviewText || 'Chưa có đánh giá')}</div>
-                      <div className="rev__cnt">
-                        {revCount > 0 ? (
-                          <React.Fragment>
-                            <b>{fmtCount(revCount)}</b>
-                            <span>{TX('lượt đánh giá trên Steam')}</span>
-                          </React.Fragment>
-                        ) : (
-                          <span>{game.reviewCount || TX('Chưa có dữ liệu')}</span>
-                        )}
-                      </div>
                       {pct !== null && (
-                        <div className="rev__bar" aria-hidden="true">
-                          <i style={{ width: Math.max(3, Math.min(100, pct)) + '%' }} />
+                        <div className="rev__meter" aria-hidden="true">
+                          <i style={{ width: Math.max(2, Math.min(100, pct)) + '%' }} />
                         </div>
                       )}
+                      {/* Nhanh du phong cu in thang game.reviewCount -- ma chuoi do nam
+                          san trong du lieu duoi dang tieng Viet ("0 danh gia"), nen khi
+                          giao dien chuyen sang tieng Anh no van la tieng Viet. Con so da
+                          duoc tach ra roi thi cu dung mot khuon duy nhat cho moi truong
+                          hop: fmtCount(0) tra ve "0", va phan chu thi di qua TX. */}
+                      <div className="rev__cnt">
+                        <b>{fmtCount(revCount)}</b>
+                        <span>{TX('lượt đánh giá trên Steam')}</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1626,7 +1665,15 @@
 
   function ZoomView({ src, alt, onClose }) {
     useEscape(onClose, true);
-    return (
+    /* Ve thang vao <body>.
+
+       Lop nay dung position:fixed de phu kin khung nhin. Nhung fixed chi neo
+       theo khung nhin khi KHONG co to tien nao mang transform/filter/perspective
+       -- neu co, no neo theo the do. Cay the cua trang chi tiet co nhieu lop
+       nhu vay (hieu ung chuyen trang, lop lam mo hau canh...), nen chi can them
+       mot lop moi la anh lai bi day lech. Chuyen ra ngoai cung la cach chac
+       chan nhat: tu day ve sau khong lop cha nao trong trang anh huong duoc. */
+    const node = (
       <div className="mo mo--img" onMouseDown={function (e) { if (e.target === e.currentTarget) onClose(); }}>
         <div className="mo__box">
           <img src={src} alt={alt || ''} onClick={onClose} />
@@ -1636,6 +1683,7 @@
         </button>
       </div>
     );
+    return ReactDOM.createPortal(node, document.body);
   }
 
   /* --------------------------------------------------------------------------

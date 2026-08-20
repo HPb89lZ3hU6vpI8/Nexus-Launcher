@@ -893,72 +893,6 @@ function useCountUp(target, ms) {
   return v;
 }
 
-/* ----------------------------------------------------------------------------
-   VONG TRON TI LE DANH GIA
-   Bon lop chong len nhau: quang mo ngoai cung, ranh chim, cung mau chay theo
-   ti le, va mot dau kim sang o cuoi cung. Con so o giua chay tang dan tu 0.
-
-   LOI DA SUA: con so truoc day duoc dat giua bang place-items va dau % thi day
-   len bang vertical-align. Ca hai deu lam lech: vertical-align keo cao hop dong
-   chu nen chu so bi day xuong, con khoang cach chu am (letter-spacing) con cong
-   them mot lan sau ky tu cuoi nen ca nhom bi keo sang trai. Nay dat giua bang
-   flex va tra lai dung khoang thua o ky tu cuoi.
-   -------------------------------------------------------------------------- */
-
-let _ringSeq = 0;
-
-function ScoreRing({ percent, size, thickness }) {
-  const n = pctNum(percent);
-  const s = size || 56;
-  const w = thickness || 5;
-  const r = (s - w - 3) / 2;
-  const c = 2 * Math.PI * r;
-  const p = n === null ? 0 : Math.max(0, Math.min(100, n));
-  const off = n === null ? c : c * (1 - p / 100);
-  const shown = useCountUp(n);
-  /* Moi vong can mot id chuyen sac rieng, neu trung id thi trinh duyet
-     dung chung mot dinh nghia va mau se sai o vong thu hai tro di. */
-  const gid = useMemo(function () { return 'nxring' + (++_ringSeq); }, []);
-  const mid = s / 2;
-  /* nxDigits: so chu so cua ket qua cuoi cung. Giu san dung tung ay cho de
-     luc so dem tang dan (7 -> 93) con so khong bi nhay qua nhay lai. */
-  const nxDigits = n === null ? 1 : String(Math.round(p)).length;
-  return (
-    <div className={'rev__ring' + (nxDigits >= 3 ? ' is-wide' : '')}
-         style={{ width: s, height: s }}>
-      <svg width={s} height={s} aria-hidden="true">
-        <defs>
-          <linearGradient id={gid} x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%"   stopColor="currentColor" stopOpacity="0.32" />
-            <stop offset="55%"  stopColor="currentColor" stopOpacity="0.86" />
-            <stop offset="100%" stopColor="currentColor" stopOpacity="1" />
-          </linearGradient>
-        </defs>
-        <circle className="rev__halo" cx={mid} cy={mid} r={r + w / 2 + 2.5} />
-        <circle className="rev__trk" cx={mid} cy={mid} r={r} strokeWidth={w} />
-        <circle className="rev__val" cx={mid} cy={mid} r={r} strokeWidth={w}
-                stroke={'url(#' + gid + ')'}
-                strokeDasharray={c} strokeDashoffset={off} />
-        {n !== null && p > 1.5 && (
-          <g className="rev__hand"
-             style={{ transform: 'rotate(' + (p * 3.6) + 'deg)', transformOrigin: mid + 'px ' + mid + 'px' }}>
-            <circle className="rev__end" cx={mid + r} cy={mid} r={w * 0.4} />
-          </g>
-        )}
-      </svg>
-      <span className="rev__pct">
-        {/* Dau % nam BEN TRONG the <b> va duoc dat tuyet doi (xem views.css)
-            nen no khong chiem cho trong dong chu. Nho vay con so la thu duy
-            nhat duoc can giua, va no nam dung tam vong tron. */}
-        <b style={{ minWidth: nxDigits * 0.6 + 'em' }}>
-          {n === null ? '—' : Math.round(shown === null ? n : shown)}
-          {n !== null && <em>%</em>}
-        </b>
-      </span>
-    </div>
-  );
-}
-
 /* Khoi ghi chu trang thai duoi nut hanh dong */
 function Note({ tone, children }) {
   if (!children) return null;
@@ -1126,7 +1060,7 @@ window.NX = {
   fetchReleases, mergeRelease, useSteamReleases, steamDateVN,
   prefersCalm, useReveal,
   ToastHost, useToast,
-  Img, ScoreRing, useCountUp, Note, Modal, Empty,
+  Img, useCountUp, Note, Modal, Empty,
   I18N, TX, useLang, tagTone, markedTone, stripTone
 };
 

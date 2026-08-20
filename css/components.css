@@ -97,15 +97,27 @@
 
 .gc__skel { position: absolute; inset: 0; }
 
-/* Dai huy hieu goc tren-trai */
+/* Dai huy hieu.
+
+   TRUOC: neo goc TREN-TRAI va xep doc. Anh bia Steam luon dat ten/logo game o
+   nua tren, nen hai huy hieu chong len nhau che mat phan dep nhat cua anh.
+
+   NAY: neo goc DUOI-TRAI va xep ngang, doi dien voi diem danh gia o duoi-phai.
+   Nua tren cua anh sach hoan toan; day anh von da co lop toi chuyen sac san
+   (.gc__shot::after) nen chu van doc ro. Neo bang "bottom" nen neu co nhieu
+   huy hieu, hang moi se day len TREN chu khong tran xuong duoi. */
 .gc__flags {
   position: absolute;
-  left: 9px; top: 9px;
+  left: 10px;
+  bottom: 11px;
+  /* Chua cho diem danh gia o goc phai (rong ~54px + le 10px) */
+  right: 68px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 4px;
   z-index: 2;
+  pointer-events: none;
 }
 
 /* Huy hieu nen tang goc tren-phai */
@@ -126,6 +138,11 @@
 
 /* Diem danh gia noi tren anh, goc duoi-phai.
 
+   DA BO dau "%": no duoc to theo mau danh gia (xanh/vang/do) nen doc nhu mot
+   ky tu la dinh canh con so, chu khong nhu don vi; o co 8px thi chi con la
+   mot vet mo. Vong cung ben trai da noi ro day la ty le phan tram roi, nen
+   con so dung mot minh vua sach vua de doc hon.
+
    LOI DA SUA: khung cao co dinh 22px + align-items:baseline. Kieu canh theo
    duong chan chu dat nhom chu sao cho chan chu trung nhau, chu khong dua vao
    giua khung — nen con so bi day len sat mep tren, chua ke con thua mot khoang
@@ -142,7 +159,7 @@
   align-items: center;
   gap: 5px;
   height: 25px;
-  padding: 0 9px 0 6px;
+  padding: 0 10px 0 6px;
   border-radius: var(--r-pill);
   /* Cung ly do nhu tren: bo lam mo nen, tang do dam de nhin khong khac. */
   background: linear-gradient(180deg, rgba(14, 19, 28, 0.93), rgba(6, 9, 14, 0.97));
@@ -177,7 +194,7 @@
 }
 .gc__score-n b {
   font-family: var(--f-num);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.03em;
@@ -186,16 +203,6 @@
   margin-right: 0.03em;
   line-height: 1;
   color: var(--tx-hi);
-}
-.gc__score-n em {
-  font-family: var(--f-num);
-  font-style: normal;
-  font-size: 8px;
-  font-weight: 750;
-  line-height: 1;
-  margin-left: 1.5px;
-  color: currentColor;
-  opacity: 0.72;
 }
 .gc__score--pos { color: var(--ok); }
 .gc__score--mix { color: var(--warn); }
@@ -909,7 +916,18 @@
 }
 /* Huy hieu tren the game thi khong: gan 300 the x may huy hieu = qua nang.
    Bu lai bang nen dam hon, mat thuong khong phan biet duoc. */
-.gc__flags .nx-badge { background: rgba(6, 10, 18, 0.92); }
+.gc__flags .nx-badge {
+  background: rgba(6, 10, 18, 0.92);
+  /* Thu gon lai mot nhip cho vua hang ngang, va cao 22px de tam chu ngang
+     bang tam vien cua diem danh gia (cao 25px, cach day 10px) o ben phai. */
+  height: 22px;
+  padding: 0 7px;
+  gap: 3px;
+  font-size: 9px;
+  letter-spacing: 0.035em;
+  border-radius: 7px;
+}
+.gc__flags .nx-badge i { font-size: 10.5px; }
 
 /* Nut bang rong het khung — the <button> mac dinh chi rong bang noi dung */
 .bn { width: 100%; }

@@ -198,7 +198,7 @@
           </p>
 
           <div className="hero__acts">
-            <button className="nx-btn nx-btn--primary nx-btn--lg hero__cta" onClick={function () { onOpen(g); }}>
+            <button className="nx-btn nx-btn--lg hero__cta" onClick={function () { onOpen(g); }}>
               <i className="ph-fill ph-play"></i>{TX('Xem chi tiết')}
             </button>
             <button className="nx-btn nx-btn--ghost nx-btn--lg" onClick={onLibrary}>

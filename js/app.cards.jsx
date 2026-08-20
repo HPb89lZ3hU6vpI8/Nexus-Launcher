@@ -53,7 +53,7 @@ function ScoreChip({ percent, tone, label }) {
         <circle className="gc__gauge-v" cx="7" cy="7" r={R}
                 strokeDasharray={C} strokeDashoffset={C * (1 - p / 100)} />
       </svg>
-      <span className="gc__score-n"><b>{Math.round(p)}</b><em>%</em></span>
+      <span className="gc__score-n"><b>{Math.round(p)}</b></span>
     </div>
   );
 }
