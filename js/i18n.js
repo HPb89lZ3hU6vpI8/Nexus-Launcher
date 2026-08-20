@@ -152,6 +152,7 @@
   D('KÍCH HOẠT', 'ACTIVATION', 'キー認証', 'ACTIVACIÓN', 'ACTIVATION');
   D('MIỄN PHÍ', 'FREE', '無料', 'GRATIS', 'GRATUIT');
   D('đánh giá', 'reviews', '件のレビュー', 'reseñas', 'avis');
+  D('lượt đánh giá', 'reviews', '件のレビュー', 'reseñas', 'avis');
   D('lượt đánh giá trên Steam', 'reviews on Steam', 'Steam のレビュー数', 'reseñas en Steam', 'avis sur Steam');
   D('Đang cập nhật', 'Updating', '更新中', 'Actualizando', 'Mise à jour');
   D('ĐÃ RA MẮT', 'RELEASED', '発売済み', 'LANZADO', 'SORTI');

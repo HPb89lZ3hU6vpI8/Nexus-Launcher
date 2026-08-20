@@ -418,7 +418,7 @@
     const v = Math.round(shown === null ? percent : shown);
     return (
       <div className="rev__plate">
-        <span className="rev__num">{v}</span>
+        <span className="rev__num">{v}%</span>
       </div>
     );
   }

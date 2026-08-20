@@ -1154,11 +1154,10 @@ video.gd__media.is-on { opacity: 1; }
 }
 
 /* --- Bang so --------------------------------------------------------------
-   Khong con dau % trong khung. Ben canh da co ngay chu "CUC KY TICH CUC",
-   duoi la so luot danh gia, canh la thanh do day gan het -- du hieu day la
-   diem danh gia. Bo dau % di thi khung gon hon, con so nam dung giua, va
-   trang chi tiet dung chung mot ngon ngu hinh anh voi the game ngoai luoi.
-   Chieu cao ep cung de truong hop chua co diem trong y het.               */
+   Dau % dinh lien con so thanh mot cum "64%" chu khong tha noi rieng mot
+   ben -- doc mot mach la ra ngay y nghia. Diem cao nhat trong kho la 98 nen
+   con so luon hai chu so, khung luon rong 90px. Ep cung ca rong lan cao de
+   truong hop hiem chua co diem ("--") van ve dung mot khung y het.        */
 .rev__plate {
   position: relative;
   flex: none;
@@ -1166,7 +1165,7 @@ video.gd__media.is-on { opacity: 1; }
   align-items: center;
   justify-content: center;
   min-height: 43px;
-  min-width: 64px;
+  min-width: 90px;
   box-sizing: border-box;
   padding: 6px 15px;
   border-radius: var(--r-md);

@@ -148,16 +148,16 @@
    nen to nhat theo dung mau sac thai nen doc mot cai la biet no di voi chu nao. */
 .gc__meta .gc__rev__n {
   flex: none;
-  padding: 3px 4px;
+  padding: 3px 3px;
   border-radius: 5px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   background: color-mix(in srgb, currentColor 15%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 26%, transparent);
 }
 
 .gc__body {
-  padding: 12px 9px 13px;
+  padding: 12px 8px 13px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -222,31 +222,32 @@
 .gc__meta {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   flex-wrap: nowrap;
-  min-height: 25px;
+  min-height: 28px;
   margin-top: auto;
 }
-/* Nhan sac thai dai nhat cua Steam -- OVERWHELMINGLY POSITIVE -- dai gan gap
-   ruoi ban tieng Viet. Chi rieng nhung nhan tu 20 ky tu tro len moi ha co chu
-   xuong mot nac. Dat canh nhau gan nhu khong nhan ra, nhung du de ca hang nam
-   gon mot dong ngay o cot luoi hep nhat. */
-.gc__meta .gc__rev--long .gc__rev__t { font-size: 9px; letter-spacing: -0.015em; }
+/* Nhan sac thai dai rat khac nhau: ban tieng Viet dai nhat 16 ky tu, ban
+   tieng Anh len toi 23 (OVERWHELMINGLY POSITIVE). Chia ba nac co chu theo do
+   dai -- nhan cang dai cang ha mot nac -- de moi nhan deu nam gon mot dong o
+   cot luoi hep nhat. Toan bo nhan tieng Viet roi vao nac lon nhat. */
+.gc__meta .gc__rev--long .gc__rev__t { font-size: 10px; letter-spacing: -0.01em; }
+.gc__meta .gc__rev--xlong .gc__rev__t { font-size: 9px; letter-spacing: -0.02em; }
 /* Cot the trong luoi chi rong khoang 225px o cua so that. Ca hang phai vua
    trong chung do, nen ban tren the nho hon ban trong che do danh sach mot
    chut, va so luot danh gia bo khung vien -- no la thong tin phu, de tran
    nhu vay vua nhe mat vua tiet kiem duoc gan 15px. */
-.gc__meta .gc__rev { font-size: 10px; gap: 3px; letter-spacing: 0; }
+.gc__meta .gc__rev { font-size: 11px; gap: 2px; letter-spacing: 0; }
 .gc__meta .gc__revn {
   margin-left: auto;
   align-items: baseline;
-  gap: 3px;
+  gap: 2px;
   padding: 0;
   background: none;
   border: 0;
-  font-size: 10px;
+  font-size: 11px;
 }
-.gc__meta .gc__revn em { font-size: 9px; }
+.gc__meta .gc__revn em { font-size: 10px; }
 /* Chot chan cuoi. Chi mot so muc rong cua so hiem hoi -- dung ngay diem luoi
    them mot cot -- nhan tieng Anh dai nhat moi thieu vai px. Luc do cho chu
    xuong hai dong chu khong cat bang ba cham: cat se mat han chu POSITIVE la

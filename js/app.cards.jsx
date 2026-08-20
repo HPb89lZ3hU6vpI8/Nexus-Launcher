@@ -82,7 +82,8 @@ function GameCard({ game, onOpen, eager }) {
             Khong co diem thi rot lai ve dau cham mau nhu cu. */}
         <div className="gc__meta">
           <span className={'gc__rev ' + (pct === null ? 'gc__rev--dot ' : '') +
-            (TX(game.reviewText).length >= 20 ? 'gc__rev--long ' : '') + 'gc__rev--' + tone}>
+            (TX(game.reviewText).length >= 21 ? 'gc__rev--xlong ' :
+             TX(game.reviewText).length >= 16 ? 'gc__rev--long ' : '') + 'gc__rev--' + tone}>
             {pct !== null && <b className="gc__rev__n">{Math.round(pct)}</b>}
             <span className="gc__rev__t">{TX(game.reviewText)}</span>
           </span>
@@ -93,7 +94,7 @@ function GameCard({ game, onOpen, eager }) {
               khong cat bot cum so + chu nay. */}
           {count > 0 && (
             <span className="gc__revn">
-              {fmtCount(count)}<em>{TX('đánh giá')}</em>
+              {fmtCount(count)}<em>{TX('lượt đánh giá')}</em>
             </span>
           )}
         </div>
@@ -128,7 +129,7 @@ function GameRow({ game, onOpen }) {
               <b className="gc__rev__n">{Math.round(n)}%</b> · {TX(game.reviewText)}
             </span>
           )}
-          {count > 0 && <span className="gc__revn">{fmtCount(count)}<em>{TX('đánh giá')}</em></span>}
+          {count > 0 && <span className="gc__revn">{fmtCount(count)}<em>{TX('lượt đánh giá')}</em></span>}
         </div>
       </div>
       <div className="glr__side">
