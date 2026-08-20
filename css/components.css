@@ -157,7 +157,7 @@
 }
 
 .gc__body {
-  padding: 12px 10px 13px;
+  padding: 12px 9px 13px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -215,29 +215,38 @@
    PHAI cho thang hang voi nhan the loai o hang tren -- hai cot deu nhau thay
    vi don het ve mot ben roi bo trong nua hang. */
 /* Hang nay bat buoc chi duoc mot dong. Neu cho phep xuong dong thi so luot
-   danh gia tut xuong duoi, nhin ngang qua mot hang the la thay lech ngay. */
+   danh gia tut xuong duoi, nhin ngang qua mot hang the la thay lech ngay.
+   min-height bang dung hai dong chu: the nao cung cao bang nhau, nen du mot
+   nhan hiem hoi co phai xuong hai dong thi so luot danh gia cua no van nam
+   dung cao do voi cac the ben canh. */
 .gc__meta {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   flex-wrap: nowrap;
+  min-height: 25px;
   margin-top: auto;
 }
+/* Nhan sac thai dai nhat cua Steam -- OVERWHELMINGLY POSITIVE -- dai gan gap
+   ruoi ban tieng Viet. Chi rieng nhung nhan tu 20 ky tu tro len moi ha co chu
+   xuong mot nac. Dat canh nhau gan nhu khong nhan ra, nhung du de ca hang nam
+   gon mot dong ngay o cot luoi hep nhat. */
+.gc__meta .gc__rev--long .gc__rev__t { font-size: 9px; letter-spacing: -0.015em; }
 /* Cot the trong luoi chi rong khoang 225px o cua so that. Ca hang phai vua
    trong chung do, nen ban tren the nho hon ban trong che do danh sach mot
    chut, va so luot danh gia bo khung vien -- no la thong tin phu, de tran
    nhu vay vua nhe mat vua tiet kiem duoc gan 15px. */
-.gc__meta .gc__rev { font-size: 10px; gap: 4px; letter-spacing: 0; }
+.gc__meta .gc__rev { font-size: 10px; gap: 3px; letter-spacing: 0; }
 .gc__meta .gc__revn {
   margin-left: auto;
-  align-items: center;
-  gap: 2px;
+  align-items: baseline;
+  gap: 3px;
   padding: 0;
   background: none;
   border: 0;
   font-size: 10px;
 }
-.gc__meta .gc__revn i { font-size: 10px; opacity: 0.6; }
+.gc__meta .gc__revn em { font-size: 9px; }
 /* Chot chan cuoi. Chi mot so muc rong cua so hiem hoi -- dung ngay diem luoi
    them mot cot -- nhan tieng Anh dai nhat moi thieu vai px. Luc do cho chu
    xuong hai dong chu khong cat bang ba cham: cat se mat han chu POSITIVE la

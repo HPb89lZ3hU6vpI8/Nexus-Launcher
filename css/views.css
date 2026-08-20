@@ -1154,15 +1154,21 @@ video.gd__media.is-on { opacity: 1; }
 }
 
 /* --- Bang so --------------------------------------------------------------
-   align-items: baseline la mau chot. Hai the chu tu dat chan chu tren cung
-   mot duong, nen dau % luon nam dung tam so du co to nho the nao.          */
+   Khong con dau % trong khung. Ben canh da co ngay chu "CUC KY TICH CUC",
+   duoi la so luot danh gia, canh la thanh do day gan het -- du hieu day la
+   diem danh gia. Bo dau % di thi khung gon hon, con so nam dung giua, va
+   trang chi tiet dung chung mot ngon ngu hinh anh voi the game ngoai luoi.
+   Chieu cao ep cung de truong hop chua co diem trong y het.               */
 .rev__plate {
   position: relative;
   flex: none;
   display: flex;
-  align-items: baseline;
-  gap: 1px;
-  padding: 7px 12px 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 43px;
+  min-width: 64px;
+  box-sizing: border-box;
+  padding: 6px 15px;
   border-radius: var(--r-md);
   background:
     linear-gradient(180deg,
@@ -1190,8 +1196,9 @@ video.gd__media.is-on { opacity: 1; }
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.045em;
-  /* Khoang cach chu AM con tru them mot lan sau chu so cuoi, keo dau % xich
-     vao qua sat. Tra lai dung khoang da tru. */
+  /* Khoang cach chu AM con bi tru them mot lan sau chu so cuoi, lam hop chua
+     no ngan hon be rong that cua chu. Cong tra lai dung khoang da tru thi hop
+     ay khop lai voi net chu, va can giua moi ra dung giua. */
   margin-right: 0.045em;
   line-height: 1;
   color: currentColor;
@@ -1201,23 +1208,7 @@ video.gd__media.is-on { opacity: 1; }
    trung khit). Cai lam no TRONG nhu bi lech la ty le: 13px canh mot con so
    31px chi bang 0.42 lan, nho toi muc doc ra nhu mot vet mo bi bo quen chu
    khong phai mot don vi. Nang ty le len ~0.58 va bot mo di. */
-.rev__sym {
-  font-family: var(--f-num);
-  font-size: 15px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.01em;
-  color: currentColor;
-  opacity: 0.72;
-}
-/* Truong hop game chua co diem: chu "-" nho hon nen khung thap hon 4px so voi
-   khung co so. Ep cung chieu cao va can giua de hai truong hop trong nhu mot. */
-.rev__plate.is-na {
-  color: var(--tx-faint);
-  align-items: center;
-  min-height: 43px;
-  box-sizing: border-box;
-}
+.rev__plate.is-na { color: var(--tx-faint); }
 .rev__plate.is-na .rev__num { font-size: 22px; text-shadow: none; }
 
 /* --- Cot chu ben phai ----------------------------------------------------- */

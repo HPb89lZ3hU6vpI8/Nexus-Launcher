@@ -81,19 +81,19 @@ function GameCard({ game, onOpen, eager }) {
             con so, khong ton them mot chu nao ma anh bia thi sach hoan toan.
             Khong co diem thi rot lai ve dau cham mau nhu cu. */}
         <div className="gc__meta">
-          <span className={'gc__rev ' + (pct === null ? 'gc__rev--dot ' : '') + 'gc__rev--' + tone}>
+          <span className={'gc__rev ' + (pct === null ? 'gc__rev--dot ' : '') +
+            (TX(game.reviewText).length >= 20 ? 'gc__rev--long ' : '') + 'gc__rev--' + tone}>
             {pct !== null && <b className="gc__rev__n">{Math.round(pct)}</b>}
             <span className="gc__rev__t">{TX(game.reviewText)}</span>
           </span>
-          {/* Chu "danh gia" dat o day tung an gan 50px chieu ngang. Nhan tieng Anh
-              dai nhat -- OVERWHELMINGLY POSITIVE -- cong them chu do thi vuot khung,
-              day so luot danh gia xuong dong hai va lech han so voi nhung the ben
-              canh cung hang. Thay chu bang mot icon bong thoai: gon hon nhieu, dung
-              duoc cho moi ngon ngu, va van hieu duoc nghia vi no nam ngay sau dong
-              chu danh gia. Chu day du van con o tooltip va o trang chi tiet. */}
+          {/* Mot con so tran nhu "1K" khong noi len duoc no dem cai gi, nen chu
+              "danh gia" bat buoc phai co. Chu duoc thu nho va lam mo hon con so de
+              hang nay khong tranh cho voi nhan sac thai ben trai. Khi nhan sac thai
+              qua dai (ban tieng Anh) thi cho nhan do xuong hai dong -- tuyet doi
+              khong cat bot cum so + chu nay. */}
           {count > 0 && (
-            <span className="gc__revn" title={fmtCount(count) + ' ' + TX('đánh giá')}>
-              <i className="ph-fill ph-chat-circle-text"></i>{fmtCount(count)}
+            <span className="gc__revn">
+              {fmtCount(count)}<em>{TX('đánh giá')}</em>
             </span>
           )}
         </div>

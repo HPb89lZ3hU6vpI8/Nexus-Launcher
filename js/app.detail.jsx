@@ -419,7 +419,6 @@
     return (
       <div className="rev__plate">
         <span className="rev__num">{v}</span>
-        <span className="rev__sym">%</span>
       </div>
     );
   }
