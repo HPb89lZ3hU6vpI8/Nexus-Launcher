@@ -1,5 +1,9 @@
 # =============================================================================
-# Nexus Launcher — repo nay CHI chua phan web ma Vercel can build/serve.
+# Nexus Launcher - repo nay CHI chua phan web ma Vercel can serve.
+# Hai phien ban song song:
+#   /          -> ban THUONG  (UI/GUI goc: index.html + style.css)
+#   /Youtube/  -> ban YOUTUBE (UI/GUI da rework: index.html + css/ + js/)
+#   /api/      -> serverless dung CHUNG cho ca hai
 # Moi thu khac (ma nguon Python, cookie, cache, ban dung thu) deu bi chan.
 # =============================================================================
 
@@ -8,22 +12,30 @@
 
 # 2) Mo lai dung nhung thu can cho Vercel
 !/.gitignore
-!/index.html
-!/package.json
-!/Logo_NexusT.png
 !/README.md
+!/package.json
 
-!/css/
-!/js/
+# --- ban THUONG (goc) o root ---
+!/index.html
+!/style.css
+
+# --- thu muc duoc phep ---
 !/api/
+!/Youtube/
 
 # 3) Trong tung thu muc cung chi cho phep dung loai file
-css/*
-!css/*.css
-
-js/*
-!js/*.js
-!js/*.jsx
-
 api/*
 !api/*.js
+
+Youtube/*
+!Youtube/index.html
+!Youtube/Logo_NexusT.png
+!Youtube/css/
+!Youtube/js/
+
+Youtube/css/*
+!Youtube/css/*.css
+
+Youtube/js/*
+!Youtube/js/*.js
+!Youtube/js/*.jsx
