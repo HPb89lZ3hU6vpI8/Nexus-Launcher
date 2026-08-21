@@ -152,7 +152,7 @@
 
   /* Anh dong Steam nhung giua bai: chi cho chay khi dang nam trong khung nhin,
      cuon qua la dung — do khong lam nong may khi mo ta co toi 10 video. */
-  function RichVideo({ b }) {
+  function RichVideo({ b, onNatural }) {
     const ref = useRef(null);
     const [on, setOn] = useState(false);
 
@@ -183,22 +183,42 @@
         loop
         playsInline
         preload="metadata"
+        onLoadedMetadata={function (e) {
+          if (onNatural) onNatural(e.target.videoWidth || 0);
+        }}
         onLoadedData={function () { setOn(true); }}
       />
     );
   }
 
+  /* Anh minh hoa Steam trong bai gioi thieu do nha phat hanh tu up, be that chi
+     616-780px. Truoc day CSS keo giay cho day khung (~985px) nen phong to ~1.6
+     lan -> nhoe. Gio chan lai: khong bao gio ve to hon be that.
+     Steam co khai bao width= o phan lon anh (b.w), nhung khong phai anh nao cung
+     co, nen doc them naturalWidth luc anh tai xong de phu het truong hop. */
   function RichFigure({ b }) {
     const [ok, setOk] = useState(true);
+    const [nw, setNw] = useState(b.w || 0);
     const ratio = b.w && b.h ? b.w + ' / ' + b.h : undefined;
+
+    const takeNatural = useCallback(function (n) {
+      if (!n) return;
+      setNw(function (prev) { return n === prev ? prev : n; });
+    }, []);
+
     if (!ok) return null;
+
+    const st = { aspectRatio: ratio };
+    if (nw > 0) st['--nw'] = nw + 'px';
+
     return (
       <figure className={'gd__fig' + (b.k === 'vid' ? ' gd__fig--v' : '')}
-              style={{ aspectRatio: ratio }}>
+              style={st}>
         {b.k === 'vid' ? (
-          <RichVideo b={b} />
+          <RichVideo b={b} onNatural={takeNatural} />
         ) : (
           <img className="gd__media" src={b.src} alt="" loading="lazy" decoding="async"
+               onLoad={function (e) { takeNatural(e.target.naturalWidth || 0); }}
                onError={function () { setOk(false); }} />
         )}
       </figure>

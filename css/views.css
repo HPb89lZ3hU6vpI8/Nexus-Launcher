@@ -962,7 +962,11 @@
 /* Anh minh hoa & anh dong Steam chen giua bai gioi thieu */
 .gd__fig {
   position: relative;
-  margin: 20px 0 22px;
+  /* Chan tren: khong bao gio phong anh to hon be that (--nw do JS gan tu
+     naturalWidth). Anh Steam trong bai gioi thieu chi 616-780px, keo giay ra
+     ~985px lam anh nhoe. Canh giua de khung om sat anh. */
+  max-width: min(100%, var(--nw, 100%));
+  margin: 20px auto 22px;
   border-radius: var(--r-md);
   overflow: hidden;
   background:
