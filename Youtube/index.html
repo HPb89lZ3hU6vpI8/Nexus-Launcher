@@ -23,38 +23,157 @@
 <!-- Man hinh khoi dong: to mau ngay lap tuc, khong doi CSS ngoai -->
 <style>
   html, body { height: 100%; margin: 0; overflow: hidden; background: #070b12; }
+
+  /* ======================================================================
+     MAN HINH KHOI DONG
+     Muc tieu: trong 1-2 giay dau, nguoi dung phai THAY giao dien dang duoc
+     dung len, chu khong phai mot tam anh dung yen.
+     Vong sang quanh logo, quang nen va nhip tho cua logo deu chay bang
+     transform/opacity, tuc la do card do hoa lo. Chung VAN QUAY ngay ca luc
+     Babel dang dich .jsx va khoa cung luong chinh — nho vay man hinh khong
+     bao gio dung hinh, ke ca khi con so % tam thoi khung lai.
+     ====================================================================== */
   #nx-boot {
-    position: fixed; inset: 0; z-index: 999;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+    position: fixed; inset: 0; z-index: 999; overflow: hidden;
+    display: grid; place-items: center; gap: 20px;
     background: #070b12;
-    font-family: 'Outfit', system-ui, sans-serif;
-    transition: opacity 420ms cubic-bezier(.22,1,.36,1), visibility 0s linear 420ms;
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    transition: opacity 560ms cubic-bezier(.4, 0, .2, 1),
+                transform 560ms cubic-bezier(.4, 0, .2, 1),
+                filter 560ms cubic-bezier(.4, 0, .2, 1),
+                visibility 0s linear 560ms;
   }
-  #nx-boot.is-gone { opacity: 0; visibility: hidden; pointer-events: none; }
+  /* Luc thoat: phong to mot chut + mo dan -> cam giac "mo ra" vao giao dien,
+     de chiu hon nhieu so voi tat phut mot cai. */
+  #nx-boot.is-gone {
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transform: scale(1.04); filter: blur(8px);
+  }
+
+  /* Hai quang sang troi rat cham o nen -> man hinh khong bao gio "chet" */
+  #nx-boot .boot__aura {
+    position: absolute; inset: -25%; pointer-events: none;
+    background:
+      radial-gradient(38% 38% at 33% 38%, rgba(58, 216, 255, .13), transparent 70%),
+      radial-gradient(34% 34% at 67% 63%, rgba(139, 108, 255, .12), transparent 70%);
+    animation: nxb-drift 19s ease-in-out infinite;
+  }
+
+  #nx-boot .boot__stage {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; gap: 22px;
+    animation: nxb-rise 620ms cubic-bezier(.22, 1, .36, 1) both;
+  }
+
+  /* ---- Logo ---- */
   #nx-boot .boot__logo {
+    position: relative;
     width: 62px; height: 62px; border-radius: 18px;
     display: grid; place-items: center;
     background: linear-gradient(135deg, #3ad8ff, #5aa8ff 55%, #8b6cff);
     color: #04131a; font-size: 30px;
-    box-shadow: 0 12px 40px rgba(58, 216, 255, 0.28);
-    animation: nxb-pulse 1.9s ease-in-out infinite;
+    box-shadow: 0 12px 40px rgba(58, 216, 255, .28);
+    /* Nay len khi xuat hien, xong roi thi tho deu */
+    animation: nxb-pop 760ms cubic-bezier(.34, 1.56, .64, 1) both,
+               nxb-breathe 2.8s ease-in-out 760ms infinite;
   }
+  /* Ve thang SVG chu khong dung icon tu CDN: logo phai hien NGAY, khong doi mang */
+  #nx-boot .boot__logo svg { width: 30px; height: 30px; display: block; }
+
+  /* Vong sang chay quanh logo */
+  #nx-boot .boot__ring {
+    position: absolute; inset: -11px; border-radius: 50%;
+    background: conic-gradient(from 0deg,
+                  transparent 0deg 190deg,
+                  rgba(58, 216, 255, .75) 290deg,
+                  rgba(139, 108, 255, .95) 344deg,
+                  transparent 360deg);
+    /* Chi chua lai vanh ngoai day 2px, ruot duc rong */
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 1.4px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 1.4px));
+    animation: nxb-spin 2.4s linear infinite;
+  }
+
+  /* ---- Ten ---- */
   #nx-boot .boot__t {
-    font-size: 15px; font-weight: 800; letter-spacing: 0.3em; color: #8fa0b8;
+    font-size: 15px; font-weight: 800; color: #8fa0b8;
+    letter-spacing: .3em; text-indent: .3em;   /* text-indent bu khoang trong sau chu cuoi */
+    animation: nxb-letters 920ms cubic-bezier(.22, 1, .36, 1) 130ms both;
+  }
+
+  /* ---- Thanh tien do ---- */
+  #nx-boot .boot__prog {
+    display: flex; flex-direction: column; gap: 9px;
+    animation: nxb-rise 700ms cubic-bezier(.22, 1, .36, 1) 250ms both;
   }
   #nx-boot .boot__trk {
-    width: 190px; height: 3px; border-radius: 99px;
-    background: rgba(255,255,255,0.07); overflow: hidden;
+    position: relative; width: 230px; height: 3px;
+    border-radius: 99px; background: rgba(255, 255, 255, .07); overflow: hidden;
+    /* drop-shadow chay SAU khi cat, nen quang sang om dung phan da chay duoc,
+       khong bi chinh 'overflow: hidden' o tren nuot mat nhu box-shadow. */
+    filter: drop-shadow(0 0 7px rgba(90, 168, 255, .45));
   }
   #nx-boot .boot__bar {
-    height: 100%; width: 40%; border-radius: inherit;
-    background: linear-gradient(135deg, #3ad8ff, #5aa8ff 55%, #8b6cff);
-    animation: nxb-run 1.15s ease-in-out infinite;
+    position: absolute; inset: 0; border-radius: inherit;
+    transform: scaleX(0); transform-origin: left center;
+    will-change: transform;
+    /* Mau chay trong long thanh: doi background-position nen chi ton buoc "to mau",
+       khong tinh lai bo cuc -> muot ca khi luong chinh dang ban dich .jsx */
+    background: linear-gradient(90deg, #3ad8ff, #5aa8ff 38%, #8b6cff 68%, #3ad8ff);
+    background-size: 240% 100%;
+    animation: nxb-flow 2.2s linear infinite;
   }
-  @keyframes nxb-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
-  @keyframes nxb-run { 0% { transform: translateX(-110%); } 100% { transform: translateX(360%); } }
+  #nx-boot .boot__meta {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 10px; font-weight: 700; letter-spacing: .16em;
+    text-transform: uppercase; color: #5c6a80;
+  }
+  #nx-boot .boot__pct {
+    color: #8fa0b8; letter-spacing: .06em;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;   /* so khong nhay ngang khi doi gia tri */
+  }
+
+  @keyframes nxb-rise    { from { opacity: 0; transform: translateY(10px); }
+                           to   { opacity: 1; transform: none; } }
+  @keyframes nxb-pop     { from { opacity: 0; transform: scale(.72) rotate(-8deg); }
+                           to   { opacity: 1; transform: none; } }
+  @keyframes nxb-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.055); } }
+  @keyframes nxb-spin    { to { transform: rotate(360deg); } }
+  @keyframes nxb-flow    { to { background-position: -240% 0; } }
+  @keyframes nxb-letters { from { opacity: 0; letter-spacing: .72em; text-indent: .72em; filter: blur(5px); }
+                           to   { opacity: 1; letter-spacing: .3em;  text-indent: .3em;  filter: blur(0); } }
+  @keyframes nxb-drift   { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+                           50%      { transform: translate3d(2.5%, -2%, 0) scale(1.07); } }
+
+  /* May nay dang TAT "Hieu ung hoat anh" cua Windows (Settings > Accessibility
+     > Visual effects). Khi do trinh duyet bao prefers-reduced-motion: reduce,
+     va css/tokens.css co mot luat quet ca trang tat sach @keyframes bang
+     !important -> man hinh khoi dong dung im nhu mot tam anh chup. Do la dung
+     cai nguoi dung dang phan nan.
+
+     Nen o day chi bo nhung thu de gay chong mat: quang nen troi qua troi lai,
+     logo phong to thu nho, chu gian ra roi thu vao. Con VONG QUAY va MAU CHAY
+     trong thanh thi GIU: chung khong phai trang tri ma la den bao "may van dang
+     chay", cung loai voi .nx-spin ma tokens.css da co san ngoai le.
+
+     Phai co !important vi luat quet ben tokens.css cung dung !important. */
   @media (prefers-reduced-motion: reduce) {
-    #nx-boot .boot__logo, #nx-boot .boot__bar { animation: none; }
+    /* bo han: quang nen troi */
+    #nx-boot .boot__aura { animation: none !important; }
+    /* giu: vong quay, cham lai mot chut cho diu mat */
+    #nx-boot .boot__ring { animation: nxb-spin 3.4s linear infinite !important; }
+    /* giu: mau chay doc thanh, cham lai mot chut */
+    #nx-boot .boot__bar  { animation: nxb-flow 2.8s linear infinite !important; }
+    /* bo: logo nhun nhay va tho ra hit vao */
+    #nx-boot .boot__logo { animation: nxb-pop 1ms both !important; }
+    /* bo: nay tu duoi len, chu gian ra */
+    #nx-boot .boot__stage, #nx-boot .boot__t, #nx-boot .boot__prog {
+      animation-duration: 1ms !important; animation-delay: 0s !important;
+    }
+    /* luc tat chi mo dan, khong phong to khong lam nhoe */
+    #nx-boot { transition: opacity 240ms linear, visibility 0s linear 240ms; }
+    #nx-boot.is-gone { transform: none; filter: none; }
   }
 </style>
 
@@ -69,10 +188,10 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/fill/style.css">
 
 <!-- Giao dien Nexus -->
-<link rel="stylesheet" href="./css/tokens.css?v=32">
-<link rel="stylesheet" href="./css/base.css?v=32">
-<link rel="stylesheet" href="./css/components.css?v=32">
-<link rel="stylesheet" href="./css/views.css?v=32">
+<link rel="stylesheet" href="./css/tokens.css?v=33">
+<link rel="stylesheet" href="./css/base.css?v=33">
+<link rel="stylesheet" href="./css/components.css?v=33">
+<link rel="stylesheet" href="./css/views.css?v=33">
 
 <!-- Tu can giao dien theo man hinh. Phai chay TRUOC khi khung dau tien duoc
      ve len, nen viet thang o day chu khong bo vao file jsx (jsx con phai cho
@@ -132,10 +251,35 @@
 
 <body>
 
-<div id="nx-boot">
-  <div class="boot__logo"><i class="ph-fill ph-lightning"></i></div>
-  <div class="boot__t">NEXUS LAUNCHER</div>
-  <div class="boot__trk"><div class="boot__bar"></div></div>
+<!-- Man hinh khoi dong. The tinh nam san o day de hien NGAY khi cua so vua mo,
+     khong phai cho React. app.shell.jsx se go bo sau khi giao dien dung xong. -->
+<div id="nx-boot" role="status" aria-live="polite">
+  <div class="boot__aura" aria-hidden="true"></div>
+
+  <div class="boot__stage">
+    <div class="boot__logo">
+      <div class="boot__ring" aria-hidden="true"></div>
+      <!-- Ve thang tia set bang SVG thay vi dung icon cua Phosphor: bo icon do
+           phai tai tu mang, mang cham thi o logo trong tron. Ve tay thi no to
+           mau ngay tu khung hinh dau tien. -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M13.9 1.5 L4.3 13.9 H10.5 L9.6 22.5 L19.7 10.1 H13.2 Z" fill="#04131a"/>
+      </svg>
+    </div>
+
+    <div class="boot__t">NEXUS LAUNCHER</div>
+
+    <div class="boot__prog">
+      <div class="boot__trk" role="progressbar" aria-label="Tiến độ khởi động"
+           aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="boot__bar"></div>
+      </div>
+      <div class="boot__meta">
+        <span class="boot__step">Đang khởi động</span>
+        <span class="boot__pct">0%</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="root"></div>
@@ -147,31 +291,189 @@
 </noscript>
 
 <!-- ==========================================================================
+     0. BO DEM TIEN DO CUA MAN HINH KHOI DONG
+        Phai dat o day: sau <div id="root"> (de con theo doi duoc no) nhung
+        TRUOC moi file du lieu / thu vien (de bat duoc luc chung tai xong).
+     ========================================================================== -->
+<script>
+(function () {
+  'use strict';
+
+  var boot = document.getElementById('nx-boot');
+  if (!boot) return;
+
+  var bar   = boot.querySelector('.boot__bar');
+  var trk   = boot.querySelector('.boot__trk');
+  var pct   = boot.querySelector('.boot__pct');
+  var step  = boot.querySelector('.boot__step');
+
+  /* Moc tien do. Con so khong chia deu ma chia theo do NANG cua tung file:
+     data.media.js mot minh gan 800 KB nen duoc 12 diem, data.static.js chi
+     8 KB nen duoc 5. Nho vay thanh chay deu tay chu khong dung mot cuc roi
+     nhay vot. */
+  var MARK = {
+    games: 16, media: 28, static: 33, i18n: 40,
+    react: 47, reactdom: 54, hls: 58, babel: 66,
+    mount: 96
+  };
+
+  /* Chu trang thai doi theo % — cho nguoi dung biet may dang lam gi */
+  var STEPS = [
+    [0,  'Đang khởi động'],
+    [30, 'Đang tải dữ liệu'],
+    [62, 'Đang dựng giao diện'],
+    [97, 'Sẵn sàng']
+  ];
+
+  var ceil = 8;        // muc cao nhat DA that su dat toi
+  var cur = 0;         // muc dang ve ra man hinh, duoi theo ceil
+  var shown = -1;      // so nguyen dang hien, tranh ghi lai DOM moi khung hinh
+  var stepIx = -1;
+  var jsxDone = 0;
+  var finishing = false;
+  var alive = true;
+  var last = 0;
+  var sinceHit = 0;   // bao lau roi chua dat moc moi -> de con noi tiep thanh
+  var onDone = null;
+
+  function raise(v) { if (v > ceil) { ceil = v; sinceHit = 0; } }
+
+  function hit(key) {
+    if (!alive) return;
+    if (key === 'jsx') { jsxDone++; raise(Math.min(90, 66 + jsxDone * 4)); return; }
+    if (MARK[key] != null) raise(MARK[key]);
+  }
+
+  /* Sau moc "babel", sau file .jsx khong do trinh duyet tai ma do chinh Babel
+     keo ve bang XHR — the <script type="text/babel"> khong ban ra su kien
+     onload nao ca. Nen phai nghe qua PerformanceObserver moi thay chung. */
+  function watchJsx() {
+    var seen = {};
+    function scan(list) {
+      for (var i = 0; i < list.length; i++) {
+        var n = (list[i] && list[i].name) || '';
+        if (n.indexOf('.jsx') < 0 || seen[n]) continue;
+        seen[n] = 1;
+        hit('jsx');
+      }
+    }
+    try {
+      new PerformanceObserver(function (l) { scan(l.getEntries()); })
+        .observe({ type: 'resource', buffered: true });
+      return;
+    } catch (e) { /* trinh duyet cu: dung cach do duoi */ }
+    try {
+      var t = setInterval(function () {
+        if (!alive) { clearInterval(t); return; }
+        scan(performance.getEntriesByType('resource'));
+      }, 140);
+    } catch (e) {}
+  }
+
+  /* React ve xong khung dau tien -> coi nhu da dung duoc giao dien */
+  function watchMount() {
+    var root = document.getElementById('root');
+    if (!root) return;
+    try {
+      var mo = new MutationObserver(function () {
+        if (root.childElementCount > 0) { mo.disconnect(); hit('mount'); }
+      });
+      mo.observe(root, { childList: true });
+    } catch (e) {}
+  }
+
+  function frame(now) {
+    if (!alive) return;
+    var dt = last ? Math.min(90, now - last) : 16;
+    last = now;
+    sinceHit += dt;
+
+    /* Giua hai moc, thanh van tu bo len de khong bao gio dung hinh: duoc vuot
+       moc 5 diem, cong them toi da 7 diem nua neu moc ke tiep lau chua toi
+       (data.media.js gan 800 KB, may cham keo kha lau). Du vay van chan cung
+       o 97 chung nao giao dien chua that su dung xong. */
+    var slack = finishing ? 0 : Math.min(7, sinceHit / 380);
+    var target = finishing ? 100 : Math.min(ceil + 5 + slack, 97);
+    if (target < cur) target = cur;
+
+    /* Tien theo TI LE quang duong con lai: vot len luc dau, cham dan khi gan
+       toi — giong da thang. Tinh theo dt nen may yeu tut khung hinh thi toc
+       do van y het. */
+    var k = finishing ? 0.002 : 0.055;
+    var gostep = (target - cur) * (1 - Math.pow(k, dt / 1000));
+    if (finishing) gostep = Math.max(gostep, dt * 0.055);   // ve dich dut khoat
+    cur += gostep;
+    if (target - cur < 0.2) cur = target;
+
+    var v = cur > 100 ? 100 : cur;
+    bar.style.transform = 'scaleX(' + (v / 100).toFixed(4) + ')';
+
+    var iv = Math.round(v);
+    if (iv !== shown) {
+      shown = iv;
+      pct.textContent = iv + '%';
+      trk.setAttribute('aria-valuenow', iv);
+    }
+    for (var i = STEPS.length - 1; i >= 0; i--) {
+      if (v >= STEPS[i][0]) {
+        if (stepIx !== i) { stepIx = i; step.textContent = STEPS[i][1]; }
+        break;
+      }
+    }
+
+    if (finishing && v >= 100) {
+      alive = false;
+      if (onDone) { var f = onDone; onDone = null; setTimeout(f, 190); }
+      return;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  window.NXBOOT = {
+    hit: hit,
+    /* app.shell.jsx goi khi giao dien da san sang: chay not len 100 roi bao lai */
+    done: function (cb) {
+      if (!alive) { if (cb) cb(); return; }
+      hit('mount');
+      finishing = true;
+      onDone = cb || null;
+    },
+    /* luoi an toan goi khi co loi: dung han de khoi ghi de len man hinh bao loi */
+    stop: function () { alive = false; onDone = null; }
+  };
+
+  watchJsx();
+  watchMount();
+  requestAnimationFrame(frame);
+})();
+</script>
+
+<!-- ==========================================================================
      1. DU LIEU — JavaScript thuan, KHONG di qua Babel (nhanh hon rat nhieu)
      ========================================================================== -->
-<script src="./js/data.games.js?v=32"></script>
-<script src="./js/data.media.js?v=32"></script>
-<script src="./js/data.static.js?v=32"></script>
-<script src="./js/i18n.js?v=32"></script>
+<script src="./js/data.games.js?v=33" onload="window.NXBOOT&&NXBOOT.hit('games')" onerror="window.NXBOOT&&NXBOOT.hit('games')"></script>
+<script src="./js/data.media.js?v=33" onload="window.NXBOOT&&NXBOOT.hit('media')" onerror="window.NXBOOT&&NXBOOT.hit('media')"></script>
+<script src="./js/data.static.js?v=33" onload="window.NXBOOT&&NXBOOT.hit('static')" onerror="window.NXBOOT&&NXBOOT.hit('static')"></script>
+<script src="./js/i18n.js?v=33" onload="window.NXBOOT&&NXBOOT.hit('i18n')" onerror="window.NXBOOT&&NXBOOT.hit('i18n')"></script>
 
 <!-- ==========================================================================
      2. THU VIEN
      ========================================================================== -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.22.20/babel.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin onload="window.NXBOOT&&NXBOOT.hit('react')" onerror="window.NXBOOT&&NXBOOT.hit('react')"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin onload="window.NXBOOT&&NXBOOT.hit('reactdom')" onerror="window.NXBOOT&&NXBOOT.hit('reactdom')"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js" onload="window.NXBOOT&&NXBOOT.hit('hls')" onerror="window.NXBOOT&&NXBOOT.hit('hls')"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.22.20/babel.min.js" crossorigin onload="window.NXBOOT&&NXBOOT.hit('babel')" onerror="window.NXBOOT&&NXBOOT.hit('babel')"></script>
 
 <!-- ==========================================================================
      3. GIAO DIEN — chay theo dung thu tu: core -> cards -> detail -> views
                     -> integrate -> shell
      ========================================================================== -->
-<script type="text/babel" data-presets="react" src="./js/app.core.jsx?v=32"></script>
-<script type="text/babel" data-presets="react" src="./js/app.cards.jsx?v=32"></script>
-<script type="text/babel" data-presets="react" src="./js/app.detail.jsx?v=32"></script>
-<script type="text/babel" data-presets="react" src="./js/app.views.jsx?v=32"></script>
-<script type="text/babel" data-presets="react" src="./js/app.integrate.jsx?v=32"></script>
-<script type="text/babel" data-presets="react" src="./js/app.shell.jsx?v=32"></script>
+<script type="text/babel" data-presets="react" src="./js/app.core.jsx?v=33"></script>
+<script type="text/babel" data-presets="react" src="./js/app.cards.jsx?v=33"></script>
+<script type="text/babel" data-presets="react" src="./js/app.detail.jsx?v=33"></script>
+<script type="text/babel" data-presets="react" src="./js/app.views.jsx?v=33"></script>
+<script type="text/babel" data-presets="react" src="./js/app.integrate.jsx?v=33"></script>
+<script type="text/babel" data-presets="react" src="./js/app.shell.jsx?v=33"></script>
 
 <!-- ==========================================================================
      4. LUOI AN TOAN — neu co gi do hong, bao cho nguoi dung thay vi man hinh den
@@ -184,6 +486,7 @@
     var boot = document.getElementById('nx-boot');
     if (!boot || boot.dataset.failed) return;
     boot.dataset.failed = '1';
+    if (window.NXBOOT) NXBOOT.stop();
     boot.innerHTML =
       '<div class="boot__logo" style="background:linear-gradient(135deg,#ff4f6d,#ff9445);animation:none">' +
         '<i class="ph-fill ph-warning"></i></div>' +

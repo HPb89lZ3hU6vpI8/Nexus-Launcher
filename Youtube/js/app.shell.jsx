@@ -314,9 +314,26 @@
 
   function dismissBoot() {
     const el = document.getElementById('nx-boot');
-    if (!el) return;
-    el.classList.add('is-gone');
-    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 700);
+    if (!el || el.dataset.gone) return;
+    el.dataset.gone = '1';
+
+    function hide() {
+      el.classList.add('is-gone');
+      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 900);
+    }
+
+    /* Cho thanh tien do chay not len 100% roi moi tat. Neu khong thi nguoi
+       dung thay no bien mat o 70-80%, trong nhu bi cat ngang. */
+    if (window.NXBOOT && NXBOOT.done) {
+      let fired = false;
+      const go = function () { if (!fired) { fired = true; hide(); } };
+      NXBOOT.done(go);
+      /* Luoi an toan: cua so bi thu nho xuong khay thi requestAnimationFrame
+         ngung chay, bo dem se khong bao gio bao xong — cho toi da 1.2 giay. */
+      setTimeout(go, 1200);
+    } else {
+      hide();
+    }
   }
 
   /* --------------------------------------------------------------------------
