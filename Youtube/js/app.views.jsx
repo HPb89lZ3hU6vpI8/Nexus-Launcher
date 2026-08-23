@@ -15,6 +15,7 @@
     isOnlineGame, customAppIdOf,
     coverSources, heroSources, fetchMedia, fetchTranslation,
     useClickOutside, useReveal,
+    imgCounts, imgAddSeen, imgAddDone, imgDropSeen,
     GameCard, GameRow, UpcomingCard, Shelf, GENRES, GenreCard,
     useSteamReleases,
     Empty, TX, useLang
@@ -31,23 +32,52 @@
     return _tmp.value.replace(/\s+/g, ' ').trim();
   }
 
-  /* Tai anh nen theo danh sach du phong — tra ve URL dau tien tai duoc */
+  /* Tai anh nen theo danh sach du phong — tra ve URL dau tien tai duoc.
+
+     Nguyen tac: KHONG BAO GIO xoa trang tam anh dang co.
+
+     Ban cu dat lai { src: '', ready: false } ngay dong dau moi lan doi game.
+     Bang chuyen hero doi game 7.4 giay mot lan, va tam library_hero cua game
+     ke tiep luon nguoi -- 1 den 2 MB tai tu may chu Steam, tu lan doi thu hai
+     tro di khong con gi trong bo nho dem. Suot ca quang tai do, day hero
+     khong con anh: den thui. O che (.hero__well) da chot cung sau lan dau nen
+     khong the che giup. Man hinh khoi dong dep den may cung vo nghia neu vao
+     trong roi cu 7.4 giay lai chop mot mang den.
+
+     Cach lam dung: tam moi duoc tai am tham bang new Image() ngoai cay DOM,
+     khong dinh gi toi nhung gi dang hien. Tai xong moi trao doi trong dung
+     mot nhip -- tam cu tut xuong o prev lam nen, tam moi phu len tren. Mat
+     nguoi khong bao gio nhin thay mot khung hinh trong nao.
+
+     ready mot khi da bat thi khong tat lai: no co nghia la "da tung co anh
+     that", chu khong phai "tam nay vua tai xong". */
   function useBgImage(list) {
     const key = (list && list[0]) || '';
-    const [st, setSt] = useState({ src: '', ready: false });
+    const [st, setSt] = useState({ src: '', prev: '', ready: false });
 
     useEffect(function () {
       let alive = true;
-      setSt({ src: '', ready: false });
       if (!list || !list.length) return undefined;
 
       let n = 0;
+      const arrive = function (url) {
+        if (!alive) return;
+        setSt(function (p) {
+          /* Cung mot dia chi thi khong dung toi cay DOM -- tranh mot vong ve
+             lai thua va tranh lam moi lop nen dang mo dan. */
+          if (p.src === url) return p;
+          return { src: url, prev: p.src, ready: true };
+        });
+      };
       const step = function () {
         if (!alive) return;
-        if (n >= list.length) { setSt({ src: list[list.length - 1], ready: true }); return; }
+        if (n >= list.length) { arrive(list[list.length - 1]); return; }
         const url = list[n++];
         const im = new Image();
-        im.onload = function () { if (alive) setSt({ src: url, ready: true }); };
+        /* Anh nen hero la tam anh to nhat va de thay nhat tren trang -- xin
+           trinh duyet uu tien no thay vi xep hang chung voi anh bia cac the. */
+        try { im.fetchPriority = 'high'; } catch (e) {}
+        im.onload = function () { arrive(url); };
         im.onerror = step;
         im.src = url;
       };
@@ -115,6 +145,109 @@
       return function () { alive = false; };
     }, [appId, lang]);
 
+    /* ---- O CHO cua anh nen hero ----
+       Anh nen doi game moi 7.4 giay. Moi lan doi, useBgImage dat lai
+       ready = false mot nhip -- neu buoc o cho song theo bg.ready thi cu 7.4
+       giay lai co mot tam man toi quet ngang qua day hero, mai mai. Vi the
+       chot lai: xong lan dau la xong han. Phan tu luon nam tren trang (khong
+       thao ra) nen khong co cu giat nao khi doi anh. */
+    const wellDone = useRef(false);
+    if (appId && bg.ready) wellDone.current = true;
+
+    /* Het sach nguon that su thi useBgImage roi ve tam PLACEHOLDER -- mot tam
+       anh data: nam san trong trang, khong bao gio loi duoc. Do la that bai
+       chu khong phai thanh cong: tat vet sang an mung di.
+
+       Khac voi wellDone, cai nay KHONG duoc chot cung. No mo ta tam anh DANG
+       hien, ma tam anh thi doi moi 7.4 giay. Chot cung thi chi can mot game
+       trong bang chuyen thieu anh la tu do tro di khong game nao con duoc
+       vien sang nua. Tinh thang tu bg.src moi lan ve la luon dung. */
+    const wellNA = String(bg.src).slice(0, 5) === 'data:';
+
+    /* Anh nen hero cung la mot anh dang cho -- gop no vao bo dem chung. */
+    const heroSeen = useRef(false);
+    const heroDone = useRef(false);
+    useEffect(function () {
+      /* Khong co game nao thi khong co anh nen nao de cho -- dung ghi vao mau
+         so, keo theo thanh chi bao khong bao gio day duoc. */
+      if (!appId || heroSeen.current) return;
+      heroSeen.current = true;
+      imgAddSeen();
+    }, [appId]);
+    useEffect(function () {
+      if (heroDone.current || !heroSeen.current || !bg.ready) return;
+      heroDone.current = true;
+      imgAddDone();
+    }, [bg.ready]);
+    /* Roi khoi trang khi anh nen con dang tai thi tra lai suat da ghi. */
+    useEffect(function () {
+      return function () {
+        if (heroSeen.current && !heroDone.current) imgDropSeen();
+      };
+    }, []);
+
+    /* ---- Thanh chi bao anh dot dau ----
+       Doc bo dem trong app.core.jsx qua su kien, khong qua state chung, nen
+       khong component nao khac bi ve lai theo. */
+    const [load, setLoad] = useState(imgCounts);
+    useEffect(function () {
+      const on = function () {
+        /* Moi anh ve xong ban ra mot su kien -- khoang 14 lan cho mot man
+           hinh. Neu lan nao cung dat mot vat the moi vao state thi hero ve
+           lai 14 lan du chang co gi doi. So sanh truoc, giong thi giu nguyen
+           vat the cu, React thay khong doi la bo qua. */
+        setLoad(function (p) {
+          const c = imgCounts();
+          if (p.seen === c.seen && p.done === c.done && p.locked === c.locked) return p;
+          return c;
+        });
+      };
+      window.addEventListener('nx:img-tick', on);
+      on();
+      return function () { window.removeEventListener('nx:img-tick', on); };
+    }, []);
+
+    /* ---- Den bao "van dang cho mang" ----
+       Moi lan co anh ve thi tat den va dat lai dong ho; chi khi 1.8 giay troi
+       qua ma khong co gi ve thi moi bat len. Mang khoe hoac cache nong thi
+       nguoi dung khong bao gio nhin thay no.
+
+       Chuoi nguon anh luon ket thuc bang PLACEHOLDER (anh data: nam san trong
+       trang, khong the loi -- xem useFallbackImg ben app.core.jsx) nen trang
+       thai cho LUON tu giai quyet: den nay khong bao gio ket o trang thai sang
+       vinh vien. */
+    const [waiting, setWaiting] = useState(false);
+    useEffect(function () {
+      if (load.seen === 0 || load.done >= load.seen) { setWaiting(false); return undefined; }
+      setWaiting(false);
+      const t = setTimeout(function () { setWaiting(true); }, 1800);
+      return function () { clearTimeout(t); };
+    }, [load.seen, load.done]);
+
+    /* Han chot cung cho ca thanh chi bao.
+
+       Doan ghi chu ben tren noi trang thai cho "luon tu giai quyet" vi chuoi
+       nguon anh ket bang PLACEHOLDER khong the loi. Dieu do chi dung khi yeu
+       cau BI TU CHOI. Mot ket noi treo thi khac han: khong co su kien load,
+       cung khong co su kien error -- trinh duyet cu ngoi doi, ma <img> thi
+       khong co han cho. Chuyen nay xay ra that voi may chu anh cua Steam nhin
+       tu Viet Nam.
+
+       Hau qua neu khong chan: mau so khong bao gio day, thanh chi bao sang
+       vinh vien, va sau 1.8 giay no chuyen sang lop long lanh chay lap vo
+       han -- ngay tren mot may vua yeu cau giam chuyen dong. Do la trang
+       thai "dang tai" xau nhat co the co.
+
+       12 giay la du rong: anh nao ve duoc thi da ve tu lau. Qua moc do thi
+       coi nhu xong va don thanh chi bao di. Anh van tiep tuc ve binh thuong
+       neu no con den -- moc nay chi tat cai thanh bao, khong huy gi ca. */
+    const [expired, setExpired] = useState(false);
+    useEffect(function () {
+      if (load.seen === 0 || load.done >= load.seen) return undefined;
+      const t = setTimeout(function () { setExpired(true); }, 12000);
+      return function () { clearTimeout(t); };
+    }, [load.seen, load.done]);
+
     /* Dem gio con lai cua slide. Ro chuot vao la dung, roi chuot ra thi chay
        tiep dung cho vua dung — thanh chay duoi cham cung theo nhip nay. */
     const leftRef = useRef(HERO_MS);
@@ -148,11 +281,42 @@
         onMouseEnter={function () { setHold(true); }}
         onMouseLeave={function () { setHold(false); }}
       >
-        <div className={'hero__bg' + (bg.ready ? ' is-in' : '')}
-             style={bg.src ? { backgroundImage: 'url("' + bg.src + '")' } : null}
-             key={appId} />
+        {/* Hai lop nen chong len nhau.
+
+            Lop duoi giu tam anh CU va luon dac. Lop tren mang tam MOI, gan
+            khoa theo dia chi anh nen moi tam la mot phan tu moi: no vao trang
+            o opacity 0 roi mo dan len 1 qua 900ms (xem .hero__bg trong
+            views.css). Trong suot 900ms do, tam cu van nam nguyen ben duoi
+            nen khong he co khoang trong.
+
+            Truoc day lop nay gan khoa theo appId -- tuc la thao ra lap lai
+            moi lan doi game, dung vao dung luc chua co anh moi. */}
+        {bg.prev ? (
+          <div className="hero__bg--prev"
+               style={{ backgroundImage: 'url("' + bg.prev + '")' }}
+               key={'p-' + bg.prev} />
+        ) : null}
+        {bg.src ? (
+          <div className={'hero__bg' + (bg.ready ? ' is-in' : '')}
+               style={{ backgroundImage: 'url("' + bg.src + '")' }}
+               key={bg.src} />
+        ) : null}
+        <div className={'hero__well'
+                        + (wellDone.current ? ' is-done' : '')
+                        + (wellNA ? ' is-na' : '')} />
         <div className="hero__scrim" />
         <div className="hero__aurora"><i /><i /></div>
+
+        {/* Thanh chi bao anh dot dau. Bien han khi da ve du, va khong bao gio
+            song lai vi bo dem tu khoa -- xem imgAddDone ben app.core.jsx. */}
+        {load.seen > 0 && (
+          <div className={'hero__load'
+                          + (load.done >= load.seen || expired ? ' is-done' : '')
+                          + (waiting && !expired ? ' is-waiting' : '')}>
+            <i style={{ transform: 'scaleX(' + (load.done / load.seen) + ')' }} />
+          </div>
+        )}
+
         <div className="hero__edge" />
 
         <div className="hero__in" key={'in-' + appId}>
@@ -261,7 +425,19 @@
         return g.appId && pctNum(g.percent) !== null && pctNum(g.percent) >= 84 && reviewCountNum(g.reviewCount) >= 15000;
       });
       pool.sort(function (a, b) { return reviewCountNum(b.reviewCount) - reviewCountNum(a.reviewCount); });
-      return (pool.length ? pool : games.slice()).slice(0, 5);
+      /* Nhanh du phong cung phai loc appId. Nhanh chinh doi g.appId vi khong
+         co no thi heroSources() khong dung noi duong dan anh nen -> hero roi
+         ve tam anh xam. Nhanh du phong truoc day lay games.slice() nguyen si,
+         nghia la dung luc danh sach khong ai dat nguong (loc theo the loai
+         hep, hoac ban du lieu moi chua co diem danh gia) thi hero lai boc
+         phai game khong co anh — dung luc trang can dep nhat.
+
+         Ba tang chu khong phai hai: neu ca danh sach khong game nao co appId
+         thi van phai tra ve mot cai gi do, vi Hero doc picks[0] ngay khong
+         kiem tra rong. */
+      const withId = games.filter(function (g) { return !!g.appId; });
+      return (pool.length ? pool
+              : (withId.length ? withId : games.slice())).slice(0, 5);
     }, [games]);
 
     const trending = useMemo(function () {
@@ -346,7 +522,7 @@
         {fresh.length > 0 && (
           <Shelf title={TX('Mới cập nhật')} icon="ph-fill ph-sparkle"
                  sub={TX('Vừa được thêm vào thư viện')} action={seeAll()}>
-            {fresh.map(function (g, i) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} eager={i < 6} />; })}
+            {fresh.map(function (g, i) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} />; })}
           </Shelf>
         )}
 
@@ -363,14 +539,14 @@
         {topRated.length > 0 && (
           <Shelf title={TX('Đánh giá cao nhất')} icon="ph-fill ph-star"
                  sub={TX('Người chơi Steam chấm điểm tốt nhất')} action={seeAll()}>
-            {topRated.map(function (g, i) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} eager={i < 6} />; })}
+            {topRated.map(function (g, i) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} />; })}
           </Shelf>
         )}
 
         {viet.length > 0 && (
           <Shelf title={TX('Có Việt hóa')} icon="ph-fill ph-translate"
                  sub={TX('Bản dịch tiếng Việt sẵn sàng')} action={seeAll()}>
-            {viet.map(function (g, i) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} eager={i < 6} />; })}
+            {viet.map(function (g, i) { return <GameCard key={g.id || g.appId} game={g} onOpen={onOpen} />; })}
           </Shelf>
         )}
 

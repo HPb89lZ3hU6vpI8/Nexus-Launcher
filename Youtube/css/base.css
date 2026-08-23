@@ -250,7 +250,10 @@ select:focus-visible { outline: none; }
   border-radius: 0 3px 3px 0;
   background: var(--grad-brand);
   box-shadow: 0 0 12px rgba(58, 216, 255, 0.55);
-  animation: nx-rise 260ms var(--e-spring) both;
+  /* Khong dung nx-rise o day: xem ghi chu tai @keyframes nx-navmark trong
+     tokens.css. Tom tat: nx-rise ket o "transform: none", ghim lai se xoa
+     mat translateY(-50%) ngay tren dong nay va lam vach tut xuong 10px. */
+  animation: nx-navmark 260ms var(--e-spring) backwards;
 }
 .nx-nav.is-on .nx-nav__ico { color: var(--br-1); }
 
@@ -766,13 +769,67 @@ select:focus-visible { outline: none; }
 }
 .nx-spin--lg { width: 30px; height: 30px; border-width: 3px; }
 
-.nx-skel {
-  background: linear-gradient(100deg,
-    rgba(255, 255, 255, 0.035) 30%,
-    rgba(255, 255, 255, 0.085) 50%,
-    rgba(255, 255, 255, 0.035) 70%);
-  background-size: 260% 100%;
-  animation: nx-shimmer 1.5s var(--e-inout) infinite;
+/* ---------------------------------------------------------------------------
+   O CHO ANH
+   Chu, khung, danh sach game deu nam san trong trang truoc khi React chay; thu
+   duy nhat thuc su con dang tai la ANH tu may chu Steam. Vi the khong dung
+   khung xuong gia phu ca trang, ma chi dat dung cho co anh mot o toi, va o do
+   TAN DI dung khoanh khac tam anh ay ve, de lai mot tia sang o vien.
+
+   DOC TRUOC KHI SUA: hieu ung nay chay hoan toan bang transition, khong dung
+   mot @keyframes nao. Do la co y. Xem tokens.css:212-239 -- khoi
+   prefers-reduced-motion o do tat sach animation nhung CO Y GIU transition
+   (transition la phan hoi chu khong phai trang tri). Neu doi sang animation
+   thi tren may da tat hieu ung cua Windows, moi o cho se dong bang vinh vien
+   va che het anh.
+   ------------------------------------------------------------------------- */
+.nx-well {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  /* Nam TREN lop phu den cua the (.gc__shot::after, .uc__shot::after,
+     .gd__cover::after). Nhung lop do la pseudo-element sinh ra cuoi cung
+     trong cay, nen o cung muc z-index thi chung ve de len o cho -- nua duoi
+     moi tam panel bi toi di va anh chop cyan luc anh ve bi an mat mot nua.
+     z-index 1 khong cham vao gi khac: huy hieu tren the la z2/z3, con
+     .uc__glow tuy cung z1 nhung dung SAU trong cay nen van ve de len. */
+  z-index: 1;
+  background:
+    radial-gradient(120% 96% at 50% 0%, rgba(90, 168, 255, 0.075), transparent 62%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.022) 0 2px, transparent 2px 7px),
+    linear-gradient(180deg, #0e1420 0%, #0a0e18 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  opacity: 1;
+  visibility: visible;
+  /* Mot lan doi class sinh ra hai nhip: vien loe xanh xong o 140ms, than o moi
+     bat dau tan (cho 90ms roi mo trong 420ms). Khong can keyframes. */
+  transition: opacity 420ms var(--e-out) 90ms,
+              box-shadow 140ms var(--e-out),
+              visibility 0s linear 0s;
+}
+.nx-well.is-done {
+  opacity: 0;
+  /* Delay nam o day chu khong o base. Transition khong biet chieu di: de o
+     base thi luc o phai HIEN LAI (anh doi sang nguon du phong) no cung cho
+     nua giay moi chiu ve. De o .is-done thi delay chi ap cho luot AN. */
+  transition-delay: 90ms, 0ms, 520ms;
+  /* Xong roi thi thoi ton cong ve, nhung khong thao khoi cay: thao ra thi lan
+     sau anh doi nguon se khong con o cho nao de hien lai. */
+  visibility: hidden;
+  box-shadow: inset 0 0 0 1px rgba(58, 216, 255, 0.5),
+              inset 0 0 26px -6px rgba(58, 216, 255, 0.42);
+}
+/* Khong co anh that nao ve (da roi xuong anh thay the): khep lai lang le. */
+.nx-well.is-done.is-na { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Van tan, chi gon hon cho diu mat. Dat o day chu khong o tokens.css vi day
+     la transition -- khoi ben do khong dung toi. */
+  .nx-well { transition-duration: 300ms, 110ms, 0s; }
+  /* O nam ngoai ke/luoi/danh sach thi khong co bac thang -- van can cot thu
+     ba lon hon (delay + duration) cua opacity. */
+  .nx-well.is-done { transition-delay: 60ms, 0ms, 370ms; }
 }
 
 .nx-empty {

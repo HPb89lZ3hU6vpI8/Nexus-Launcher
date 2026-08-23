@@ -505,8 +505,27 @@ function useFallbackImg(sources) {
     ? sources.filter(Boolean).join('|')
     : String(sources || '');
 
+  /* Phai loc trung sau khi noi them PLACEHOLDER.
+
+     coverSources() va heroSources() deu da tu ket thuc bang PLACEHOLDER roi.
+     Noi them mot lan nua o day (van can giu, de bat ky ai goi Img voi danh
+     sach tu che cung chac chan co diem dung) lam danh sach ket bang HAI tam
+     giong het nhau.
+
+     Tai sao chuyen do lam hong: isNA = idx >= list.length - 1. Tam PLACEHOLDER
+     la anh data: nam san trong trang, tai bao gio cung thanh cong -- nen khi
+     roi xuong tam thu nhat (vi tri length - 2) thi onError khong bao gio chay
+     nua, idx dung lai vinh vien, isNA mai mai la false. Ket qua: game khong co
+     anh bia van "an mung" bang vet vien xanh tren mot o mau xam. An mung mot
+     that bai.
+
+     Loc trung xong thi chi con dung mot PLACEHOLDER o cuoi, isNA bat dung luc. */
   const list = useMemo(
-    () => (Array.isArray(sources) ? sources.filter(Boolean) : [sources]).concat(PLACEHOLDER),
+    () => {
+      const raw = (Array.isArray(sources) ? sources.filter(Boolean) : [sources])
+        .concat(PLACEHOLDER);
+      return raw.filter(function (v, i, a) { return a.indexOf(v) === i; });
+    },
     [key]
   );
 
@@ -540,7 +559,11 @@ function useFallbackImg(sources) {
     else if (idx < list.length - 1) { setIdx(idx + 1); }
   });
 
-  return { src: list[idx], loaded: loaded, onError: onError, onLoad: markLoaded, ref: elRef };
+  /* Da roi xuong den anh thay the cuoi chuoi tuc la khong co anh that nao ve.
+     Bao ra ngoai de o cho khep lai bang mep xam lang thay vi mep xanh mung. */
+  const isNA = idx >= list.length - 1;
+
+  return { src: list[idx], loaded: loaded, isNA: isNA, onError: onError, onLoad: markLoaded, ref: elRef };
 }
 
 /* ----------------------------------------------------------------------------
@@ -844,19 +867,123 @@ function useToast() { return React.useContext(ToastCtx); }
    9. COMPONENT NGUYEN TU
    -------------------------------------------------------------------------- */
 
-/* Anh co khung xuong khi dang tai + tu doi nguon khi loi.
+/* ---------------------------------------------------------------------------
+   BO DEM ANH DOT DAU
+   Toan bo du lieu game da nam san trong trang truoc khi React chay, nen thu
+   duy nhat thuc su con dang tai la ANH tu may chu Steam. Thanh chi bao mong o
+   day hero doc bo dem nay de biet da ve bao nhieu tren tong bao nhieu.
+
+   Chi dem anh eager -- tuc anh chac chan nam trong tam nhin ngay tu dau. Dem
+   ca anh lazy thi mau so cu phinh mai, thanh chi bao khong bao gio day.
+
+   Dung bien module + su kien thay vi Context hay state chung: khong mot
+   component nao bi ve lai vi bo dem nay.
+
+   Khoa lai ngay khi dot dau ve du: nguoi dung doi qua Thu vien roi quay lai
+   thi thanh chi bao khong duoc song lai, va mau so khong duoc phinh ra.
+   ------------------------------------------------------------------------- */
+let _imgSeen = 0;
+let _imgDone = 0;
+let _imgLocked = false;
+
+function imgTick() {
+  try { window.dispatchEvent(new CustomEvent('nx:img-tick')); } catch (e) {}
+}
+function imgCounts() { return { seen: _imgSeen, done: _imgDone, locked: _imgLocked }; }
+function imgAddSeen() {
+  if (_imgLocked) return;
+  _imgSeen += 1;
+  imgTick();
+}
+function imgAddDone() {
+  if (_imgLocked) return;
+  _imgDone += 1;
+  /* Tat ca the deu gan vao trang trong cung mot luot ve cua React, con su kien
+     anh-da-tai thi luon den sau do -- nen luc anh dau tien ve thi mau so da
+     dung du. Van doi seen >= 2 cho chac, phong truong hop hi huu. */
+  if (_imgSeen >= 2 && _imgDone >= _imgSeen) _imgLocked = true;
+  imgTick();
+}
+/* Anh bi thao khoi trang khi con dang tai (doi tab, loc lai danh sach) thi
+   phai rut no khoi mau so. Khong lam viec nay thi mau so vinh vien lon hon tu
+   so: thanh chi bao dung khung giua chung, va den "van dang cho mang" bat len
+   roi khong bao gio tat -- tuc la mot hieu ung lap vo han tren dung cai may
+   da yeu cau giam chuyen dong. */
+function imgDropSeen() {
+  if (_imgLocked || _imgSeen <= 0) return;
+  _imgSeen -= 1;
+  if (_imgSeen >= 2 && _imgDone >= _imgSeen) _imgLocked = true;
+  imgTick();
+}
+
+/* Anh co O CHO phu len khi dang tai + tu doi nguon khi loi.
    eager = anh chac chan dang nam trong tam nhin (thanh dau, ke dau trang):
-   tai ngay va uu tien cao thay vi cho trinh duyet thong thai quyet dinh. */
-function Img({ sources, alt, className, imgClass, style, draggable, eager }) {
-  const { src, loaded, onError, onLoad, ref } = useFallbackImg(sources);
+   tai ngay va uu tien cao thay vi cho trinh duyet thong thai quyet dinh.
+
+   O cho nam SAU the anh trong cay DOM va co position: absolute.
+
+   O cho co z-index: 1 (dat o base.css). Da ra soat toan bo thu nam chong len
+   no truoc khi dat con so nay:
+     - .gc__flags / .gc__plat / .uc__tag / .uc__moved deu la z-index 2 hoac 3
+       -> van nam tren, khong bi che.
+     - .uc__glow va .gd__cover-t cung la z-index 1, nhung dung SAU o cho trong
+       cay DOM; bang diem thi thu tu cay quyet dinh -> van nam tren.
+     - .gc__shot / .uc__shot / .uc / .gd__cover deu la position: relative voi
+       z-index: auto, tuc KHONG tao ngu canh xep chong rieng -> ba gach dau
+       dong tren so sanh truc tiep duoc voi nhau.
+   Con so 1 la de o cho phu duoc lop toi .gc__shot::after / .uc__shot::after /
+   .gd__cover::after -- khong co no thi nua duoi tam panel bi den di.
+
+   wellClass (khong phai className) di vao O CHO chu khong vao the <img>; the
+   anh dung imgClass. Dat ten the nay cho khoi ai doc nham. */
+function Img({ sources, alt, wellClass, imgClass, style, draggable, eager }) {
+  const { src, loaded, isNA, onError, onLoad, ref } = useFallbackImg(sources);
+
+  /* Gop vao bo dem dot dau -- moi the dung mot lan, khong bao gio dem lai.
+
+     eager duoc tinh tu VI TRI trong danh sach (eager={i < 12}) nhung the lai
+     duoc dinh danh bang key={g.id}. Nguoi dung doi kieu sap xep hay go vao o
+     tim kiem thi React giu nguyen the cu va chi doi prop: mot the dang o vi
+     tri thu 3 co the nhay xuong thu 30, eager tu true thanh false.
+
+     Neu de hai hieu ung ben duoi doc thang prop do thi co canh nay: the da
+     kip ghi mot suat vao mau so (imgAddSeen), roi eager tat truoc khi anh ve
+     -- luc anh ve xong thi hieu ung "done" thoat ngay dong dau, imgAddDone
+     khong bao gio duoc goi. Mau so khong bao gio duoc lap day, thanh chi bao
+     tren hero sang mai mai va sau 1.8 giay chuyen sang trang thai "cho".
+
+     Chot lai gia tri luc gan vao trang la du: mot the chi duoc dem mot lan
+     trong doi no, nen chi co gia tri dau tien la co y nghia. */
+  const eagerRef = useRef(eager);
+  const isEager = eagerRef.current;
+
+  const seenRef = useRef(false);
+  const doneRef = useRef(false);
+  useEffect(function () {
+    if (!isEager || seenRef.current) return;
+    seenRef.current = true;
+    imgAddSeen();
+  }, [isEager]);
+  useEffect(function () {
+    if (!isEager || doneRef.current || !loaded) return;
+    doneRef.current = true;
+    imgAddDone();
+  }, [isEager, loaded]);
+  /* Thao ra giua chung thi tra lai suat da ghi. Deps rong: chi chay dung mot
+     lan luc go bo. */
+  useEffect(function () {
+    return function () {
+      if (seenRef.current && !doneRef.current) imgDropSeen();
+    };
+  }, []);
+
   return (
     <React.Fragment>
-      {!loaded && <div className={'nx-skel ' + (className || '')} style={Object.assign({ position: 'absolute', inset: 0 }, style)} />}
       <img
         ref={ref}
         src={src}
         alt={alt || ''}
-        className={(imgClass || '') + (loaded ? ' is-in' : '')}
+        className={imgClass || ''}
         onError={onError}
         onLoad={onLoad}
         loading={eager ? 'eager' : 'lazy'}
@@ -865,6 +992,10 @@ function Img({ sources, alt, className, imgClass, style, draggable, eager }) {
         draggable={draggable === undefined ? false : draggable}
         style={style}
       />
+      <div className={'nx-well'
+                      + (loaded ? ' is-done' : '')
+                      + (isNA ? ' is-na' : '')
+                      + (wellClass ? ' ' + wellClass : '')} />
     </React.Fragment>
   );
 }
@@ -1061,6 +1192,7 @@ window.NX = {
   prefersCalm, useReveal,
   ToastHost, useToast,
   Img, useCountUp, Note, Modal, Empty,
+  imgCounts, imgAddSeen, imgAddDone, imgDropSeen,
   I18N, TX, useLang, tagTone, markedTone, stripTone
 };
 

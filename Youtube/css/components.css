@@ -76,12 +76,11 @@
   width: 100%; height: 100%;
   object-fit: cover;
   display: block;
-  opacity: 0;
-  transform: scale(1.03);
-  transition: opacity 480ms var(--e-out), transform 620ms var(--e-out), filter var(--t-base) var(--e-out);
+  /* Anh khong tu mo dan nua: o cho .nx-well phu ben tren tan di de lo anh ra.
+     Hai lop cung mo dan thi thanh nhoe. Giu lai transition cho luc ro chuot. */
+  transition: transform 620ms var(--e-out), filter var(--t-base) var(--e-out);
 }
-.gc__img.is-in { opacity: 1; transform: scale(1); }
-.gc:hover .gc__img { transform: scale(1); filter: brightness(1.06) saturate(1.05); }
+.gc:hover .gc__img { transform: scale(1.03); filter: brightness(1.06) saturate(1.05); }
 
 /* Lop phu chuyen sang khi hover */
 .gc__shot::after {
@@ -95,7 +94,6 @@
 }
 .gc:hover .gc__shot::after { opacity: 0.95; }
 
-.gc__skel { position: absolute; inset: 0; }
 
 /* Dai huy hieu.
 
@@ -349,7 +347,7 @@
   gap: 20px;
   padding: 0 var(--pad-page) 48px;
 }
-.nx-grid > * { animation: nx-rise 460ms var(--e-out) both; }
+.nx-grid > * { animation: nx-rise 460ms var(--e-out) backwards; }
 /* Do tre theo vi tri — tao hieu ung do vao man hinh */
 .nx-grid > *:nth-child(1)  { animation-delay: 0ms; }
 .nx-grid > *:nth-child(2)  { animation-delay: 26ms; }
@@ -372,7 +370,7 @@
   gap: 9px;
   padding: 0 var(--pad-page) 48px;
 }
-.nx-list > * { animation: nx-rise 380ms var(--e-out) both; }
+.nx-list > * { animation: nx-rise 380ms var(--e-out) backwards; }
 
 .glr {
   display: flex;
@@ -855,7 +853,18 @@
 }
 @media (max-width: 1560px) { .gen__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 1040px) { .gen__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.gen__grid > * { animation: nx-rise 480ms var(--e-out) both; }
+/* fill-mode phai la "backwards", khong duoc la "both" -- y het .nx-grid va
+   .nx-list ben tren. nx-rise ket thuc o "transform: none". Voi "both", frame
+   ket do bi ghim lai o goc animation ngay ca sau khi chay xong, ma goc
+   animation thang moi khai bao thuong bat ke diem chon loc -- ke ca luat
+   .gen:hover { transform: translateY(-5px) scale(1.015); } o dong 804 ngay
+   phia tren. Ket qua: ro chuot vao the loai thi vien va bong doi, nhung the
+   khong nhac len mot ly nao, trong nhu hong.
+
+   "backwards" chi giu frame DAU trong luc the con dang cho toi luot minh
+   (bac thang delay ben duoi); chay xong la buong ra, tra transform lai cho
+   luat hover. */
+.gen__grid > * { animation: nx-rise 480ms var(--e-out) backwards; }
 .gen__grid > *:nth-child(2) { animation-delay: 55ms; }
 .gen__grid > *:nth-child(3) { animation-delay: 110ms; }
 .gen__grid > *:nth-child(4) { animation-delay: 165ms; }
@@ -939,3 +948,70 @@
 
 /* Nut bang rong het khung — the <button> mac dinh chi rong bang noi dung */
 .bn { width: 100%; }
+
+/* ============================================================================
+   NHIP TAN CUA O CHO ANH -- TRAI SANG PHAI
+
+   Dung transition-delay chu KHONG dung animation-delay: khoi
+   prefers-reduced-motion o tokens.css tat sach animation nhung co y giu
+   transition. The dau tien tan truoc, moi the sau tre them 28ms, toi the thu
+   8 thi dung -- keo dai hon nua thi the cuoi cho lau den muc kho chiu.
+
+   Bac thang bam vao ".nx-well.is-done", KHONG bam vao ".nx-well". Ly do:
+   transition khong biet chieu di. Neu de delay o trang thai goc thi luc o
+   phai HIEN LAI (anh loi, doi sang nguon du phong) no cung an theo cung con
+   so do -- o dung hinh nua giay roi moi chiu ve, dung y dinh. De o .is-done
+   thi delay chi ap cho luot AN; luot hien lai an theo base = 0ms, tuc thi.
+
+   Ba con so ung voi ba doi tuong trong transition cua .nx-well:
+   opacity / box-shadow / visibility. Con so thu ba luon lon hon
+   (delay + duration) cua opacity mot chut, de o chi bi cat khoi luong ve
+   SAU khi da mo hoan toan.
+   ========================================================================== */
+.shelf__track > * .nx-well.is-done,
+.nx-grid > * .nx-well.is-done,
+.nx-list > * .nx-well.is-done { transition-delay: 90ms, 0ms, 520ms; }
+.shelf__track > :nth-child(2) .nx-well.is-done,
+.nx-grid > :nth-child(2) .nx-well.is-done,
+.nx-list > :nth-child(2) .nx-well.is-done { transition-delay: 118ms, 28ms, 548ms; }
+.shelf__track > :nth-child(3) .nx-well.is-done,
+.nx-grid > :nth-child(3) .nx-well.is-done,
+.nx-list > :nth-child(3) .nx-well.is-done { transition-delay: 146ms, 56ms, 576ms; }
+.shelf__track > :nth-child(4) .nx-well.is-done,
+.nx-grid > :nth-child(4) .nx-well.is-done,
+.nx-list > :nth-child(4) .nx-well.is-done { transition-delay: 174ms, 84ms, 604ms; }
+.shelf__track > :nth-child(5) .nx-well.is-done,
+.nx-grid > :nth-child(5) .nx-well.is-done,
+.nx-list > :nth-child(5) .nx-well.is-done { transition-delay: 202ms, 112ms, 632ms; }
+.shelf__track > :nth-child(6) .nx-well.is-done,
+.nx-grid > :nth-child(6) .nx-well.is-done,
+.nx-list > :nth-child(6) .nx-well.is-done { transition-delay: 230ms, 140ms, 660ms; }
+.shelf__track > :nth-child(7) .nx-well.is-done,
+.nx-grid > :nth-child(7) .nx-well.is-done,
+.nx-list > :nth-child(7) .nx-well.is-done { transition-delay: 258ms, 168ms, 688ms; }
+.shelf__track > :nth-child(n + 8) .nx-well.is-done,
+.nx-grid > :nth-child(n + 8) .nx-well.is-done,
+.nx-list > :nth-child(n + 8) .nx-well.is-done { transition-delay: 286ms, 196ms, 716ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Bac thang ngan lai con mot nua: 14ms moi the, toi da 130ms.
+     Cot thu ba = 10ms sau khi opacity ket thuc (o day duration con 300ms). */
+  .shelf__track > * .nx-well.is-done,
+  .nx-grid > * .nx-well.is-done,
+  .nx-list > * .nx-well.is-done { transition-delay: 60ms, 0ms, 370ms; }
+  .shelf__track > :nth-child(2) .nx-well.is-done,
+  .nx-grid > :nth-child(2) .nx-well.is-done,
+  .nx-list > :nth-child(2) .nx-well.is-done { transition-delay: 74ms, 14ms, 384ms; }
+  .shelf__track > :nth-child(3) .nx-well.is-done,
+  .nx-grid > :nth-child(3) .nx-well.is-done,
+  .nx-list > :nth-child(3) .nx-well.is-done { transition-delay: 88ms, 28ms, 398ms; }
+  .shelf__track > :nth-child(4) .nx-well.is-done,
+  .nx-grid > :nth-child(4) .nx-well.is-done,
+  .nx-list > :nth-child(4) .nx-well.is-done { transition-delay: 102ms, 42ms, 412ms; }
+  .shelf__track > :nth-child(5) .nx-well.is-done,
+  .nx-grid > :nth-child(5) .nx-well.is-done,
+  .nx-list > :nth-child(5) .nx-well.is-done { transition-delay: 116ms, 56ms, 426ms; }
+  .shelf__track > :nth-child(n + 6) .nx-well.is-done,
+  .nx-grid > :nth-child(n + 6) .nx-well.is-done,
+  .nx-list > :nth-child(n + 6) .nx-well.is-done { transition-delay: 130ms, 70ms, 440ms; }
+}

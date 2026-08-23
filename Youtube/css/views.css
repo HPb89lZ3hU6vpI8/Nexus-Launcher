@@ -8,7 +8,42 @@
 
 .hero {
   position: relative;
-  min-height: 462px;
+  /* Bang chuyen doi game moi 7.4 giay. Ten game dai ngan khac nhau nen khoi
+     chu cao thap khac nhau, keo ca trang nhun len xuong ma nguoi dung khong
+     he cham vao gi. Ten bi cat o dong thu hai (xem .hero__title) nen chi can
+     chua vua hai dong la khung dung yen tuyet doi.
+
+     Con so o day da sai HAI lan truoc khi do dung. Ca hai lan deu cung mot
+     kieu nham: lay chieu cao hero DANG CO roi tru bot so dong de suy ra
+     "neu chi mot dong". Phep tru do chi dung khi hero dang cao hon san.
+     Khi min-height da chen len bang hoac cao hon noi dung thi chieu cao dang
+     co CHINH LA cai san — tru ra chi con la so cua chinh cai san, khong noi
+     gi ve noi dung. Do la nguon goc cua "469.7px" roi "472.0px".
+
+     Cach do dung, chay thang tren trinh duyet: tam dat min-height ve 0 cho
+     noi dung tu do, doi textContent cua .hero__title thanh mot ky tu roi do,
+     sau do doi thanh mot chuoi dai chac chan tran hai dong roi do lai.
+     Ket qua that o co chu 58px:  mot dong = 415.9px,  hai dong = 475.1px.
+
+     Vay san can >= 475.1px, khong phai 531px. Muc 413px cu (ra 531.3px) van
+     chay dung — khung dung yen — nhung keo hero cao them 56px vo co, an mat
+     mot mang man hinh o ban 940px. Muc 472px nguyen thuy that ra chi thieu
+     3.1px chu khong phai 59px nhu da ket luan truoc do.
+
+     Khong dat cung 476px duoc: co chu la clamp(34px .. 58px) chay theo be
+     ngang man hinh, man hep thi hai dong chi con khoang 426px va 476px se de
+     lai mot mang trong. Vi the tach ra: 475.1 - 2.05 x 58 = 356.2 la phan
+     khong phu thuoc co chu (khoang dem, dong nut, dong thong tin), cong hai
+     dong chu. Moi dong do duoc 59.2px o co chu 58px, tuc 1.0207 lan — lay
+     tron 2.05 cho hai dong de du mot chut. Cong thuc tu co gian theo man
+     hinh: co chu 58px -> 475.9px, co chu 34px -> 426.7px, deu vua khit.
+
+     Cho khoang du ra nay len chinh .hero chu khong len .hero__title la co ly
+     do: .hero__in la con duy nhat nam trong dong chay, va .hero can le
+     flex-end. Them chieu cao thi phan lo ra nam PHIA TREN chu -- tuc la thay
+     duoc nhieu anh nen hon. Neu de o .hero__title thi voi display:-webkit-box
+     cho trong se roi xuong DUOI chu, day dong thong tin ra xa. */
+  min-height: calc(357px + 2.05 * clamp(34px, calc(4.3 * var(--vw)), 58px));
   display: flex;
   align-items: flex-end;
   padding: 52px var(--pad-page) 40px;
@@ -29,6 +64,140 @@
   transition: opacity 900ms var(--e-out), transform 1500ms var(--e-out);
 }
 .hero__bg.is-in { opacity: 1; transform: scale(1); }
+
+/* Lop nen phia sau, giu tam anh CU trong luc tam moi dang mo dan len.
+
+   Co y KHONG mang class .hero__bg: khoi giam chuyen dong ep .hero__bg thanh
+   opacity: 1 !important -- neu lop nay cung dinh luat do thi khong sao, nhung
+   giu no doc lap thi y dinh ro rang hon va sau nay sua .hero__bg cung khong
+   vo tinh keo theo. Vi vay chep lai day du nhung gi can.
+
+   Khong co transition va khong co trang thai nao khac: nhiem vu duy nhat cua
+   no la "luon dac", de day hero khong bao gio thung mot lo den. */
+.hero__bg--prev {
+  position: absolute;
+  inset: -8%;
+  z-index: -4;
+  background-size: cover;
+  background-position: center 22%;
+  filter: saturate(1.06) contrast(1.03);
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   O CHO CUA ANH NEN HERO
+   Cung y tuong voi .nx-well ben base.css nhung to hon, sang hon mot chut vi
+   day la manh lon nhat tren trang. Nam ngay tren anh nen (z-index -3) va duoi
+   lop phu (-2), nen khi tan di la lo dung anh ra.
+
+   Loi bat ngo: .hero__bg bi khoi prefers-reduced-motion ep opacity: 1 nen tren
+   may tat hieu ung, anh nen von hien dot ngot. .hero__well la class moi, luat
+   ep kia khong voi toi, nen no tra lai duoc cai cam giac anh hien dan.
+   ------------------------------------------------------------------------- */
+.hero__well {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background:
+    radial-gradient(88% 72% at 26% 8%, rgba(90, 168, 255, 0.10), transparent 64%),
+    radial-gradient(72% 66% at 84% 96%, rgba(150, 110, 255, 0.075), transparent 62%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.016) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, #0c1119 0%, #070b12 100%);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 520ms var(--e-out) 60ms,
+              box-shadow 220ms var(--e-out),
+              visibility 0s linear 0s;
+}
+.hero__well.is-done {
+  opacity: 0;
+  visibility: hidden;
+  /* Delay chi ap cho luot AN, khong ap cho luot hien lai -- giong .nx-well. */
+  transition-delay: 60ms, 0ms, 600ms;
+  /* Mep duoi loe len mot nhip khi anh ve, roi tat cung voi ca o. */
+  box-shadow: inset 0 -1px 0 0 rgba(58, 216, 255, 0.42),
+              inset 0 -26px 34px -30px rgba(58, 216, 255, 0.5);
+}
+/* Het sach nguon anh that thi useBgImage roi ve tam PLACEHOLDER xam nam san
+   trong trang. Do khong phai anh game -- tat vet sang an mung di, khong thi
+   hoa ra an mung mot that bai.
+
+   Ba class nen diem chon loc cao hon .hero__well.is-done chi co hai, thang
+   bat ke thu tu viet. Van de ngay duoi cho de doc canh nhau. */
+.hero__well.is-done.is-na { box-shadow: none; }
+
+/* ---------------------------------------------------------------------------
+   THANH CHI BAO ANH DOT DAU
+   Mot soi chi 2px o day hero, chay theo so anh da ve that su. Bien han khi ve
+   du va khong bao gio song lai (bo dem tu khoa ben app.core.jsx).
+   ------------------------------------------------------------------------- */
+.hero__load {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  opacity: 1;
+  transition: opacity 300ms var(--e-out) 180ms;
+}
+.hero__load i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: var(--grad-brand);
+  box-shadow: 0 0 12px -2px rgba(58, 216, 255, 0.55);
+  transition: transform 320ms var(--e-out);
+}
+/* Ve du roi: soi chi mo di, khong de lai gi tren trang. */
+.hero__load.is-done { opacity: 0; }
+
+/* ---- Den bao "van dang cho mang" ----
+   Chi sang sau 1.8 giay khong co anh nao ve, tat ngay khi co anh ve. Day la
+   CHI BAO TRANG THAI chu khong phai trang tri, cung hang voi .nx-spin va
+   .prog__bar -- vi the .hero__load da duoc them vao danh sach :not() cua khoi
+   prefers-reduced-motion. DOC tokens.css:212-239 truoc khi doi thu gi o day.
+
+   Vet sang phai nam tren ::after chu KHONG duoc nam tren the <i> con: mien tru
+   :not() phu cho phan tu va pseudo-element cua no, nhung khong phu cho con. */
+.hero__load::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 34%;                 /* khop hinh hoc cua keyframe nx-indeterminate */
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(58, 216, 255, 0.52),
+    transparent);
+  transform: translateX(-100%);
+  opacity: 0;
+  /* Tat NHANH: luc thoat trang thai cho, vet sang bat lui ve mep trai. 200ms
+     du de mat khong kip bat cu nhay do tren mot soi chi 2px. */
+  transition: opacity 200ms linear;
+}
+.hero__load.is-waiting::after {
+  opacity: 1;
+  transition: opacity 520ms var(--e-out);   /* vao thi sang tu tu nhu den am dan */
+  animation: nx-indeterminate 2.4s var(--e-inout) infinite;
+}
+/* Xong roi thi tat han: khong de lai bat cu thu gi lap vo han tren trang.
+   THU TU QUAN TRONG: dong nay phai nam SAU .hero__load.is-waiting::after.
+   Hai luat bang diem chon loc nhu nhau, cai viet sau moi thang. Doi cho la
+   vet sang chay mai mai. */
+.hero__load.is-done::after { opacity: 0; animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Giu chay, nhung cham lai cho diu mat -- dung cach #nx-boot da lam voi vong
+     quay. Dat o day chu khong o tokens.css vi views.css nap SAU, nen thang tu
+     nhien ma khong can !important. */
+  .hero__load.is-waiting::after { animation-duration: 3.2s; }
+}
 
 /* Hai lop phu: mot doc cho chu noi tren nen, mot ngang cho cot chu ben trai */
 .hero__scrim {
@@ -109,6 +278,13 @@
 .hero__eyebrow i { font-size: 12px; animation: nx-breathe 2.8s var(--e-inout) infinite; }
 
 .hero__title {
+  /* Cat o dong thu hai. Doi lai la mat text-wrap: balance (thuoc tinh do
+     khong ap cho -webkit-box) -- danh doi xung dang de trang thoi giat. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
   font-family: var(--f-display);
   font-size: clamp(34px, calc(4.3 * var(--vw)), 58px);
   font-weight: 900;
@@ -238,6 +414,10 @@
   color: var(--tx);
   margin-bottom: 26px;
   max-width: 588px;
+  /* Mo ta bat dau rong roi moi duoc dien vao sau khi goi fetchMedia xong, nen
+     khong chua cho san thi ca cot chu nhay len ba dong ngay truoc mat nguoi
+     dung. 5.16em = 3 dong x line-height 1.72. */
+  min-height: 5.16em;
   text-shadow: 0 1px 14px rgba(0, 0, 0, 0.72);
   transition: opacity var(--t-base) var(--e-out);
 }
@@ -576,6 +756,12 @@
 }
 @media (max-width: 1240px) {
   .gd__grid { grid-template-columns: minmax(0, 1fr); }
+  /* !important o day la BAT BUOC, dung go. Luat goc ".gd__panel { position:
+     sticky }" nam mai duoi (khoang dong 1240) — tuc la SAU khoi nay trong
+     file. Cau truy van @media khong cong them do uu tien, nen hai luat bang
+     diem nhau va cai viet sau thang: bo !important la panel dinh lai o ban
+     hep. Neu sau nay don dep muon bo !important thi phai chuyen ca khoi
+     @media nay xuong duoi luat goc, khong phai xoa moi tu khoa. */
   .gd__panel { position: static !important; }
 }
 
@@ -1963,7 +2149,23 @@ video.gd__media.is-on { opacity: 1; }
   border: 1px solid var(--line-mid);
   box-shadow: var(--sh-4);
   overflow: hidden;
-  animation: nx-pop 260ms var(--e-spring) both;
+  /* "backwards" chu khong phai "both", cung ly do da ghi o .nx-view.is-in.
+     Khung hinh cuoi cua nx-pop la transform: scale(1) translateY(0) — nhin
+     thi giong het luc khong co transform, nhung voi trinh duyet do VAN la
+     mot transform. fill-mode "both" ghim no lai vinh vien sau khi chay xong,
+     va bat ky transform nao (ke ca ma tran don vi) cung tao khung chua moi
+     cho con chau position: fixed — chung se neo theo o thoai nay chu khong
+     theo khung nhin. Hien tai chua no ra vi nut dong da duoc dua ra ngoai,
+     nhung do la may chu khong phai thiet ke.
+
+     "backwards" chi giu nua truoc (chan khung hinh dau ro ra trong luc cho),
+     bo nua sau. Ket qua nhin y het: opacity mac dinh la 1 va o thoai khong
+     co transform nen trang thai nghi trung khop khung hinh cuoi.
+
+     Rieng .is-out o duoi thi PHAI giu "both": no chay nguoc, diem ket la
+     khung hinh 0% (mo di, thu nho lai). Bo nua sau thi ngay truoc khi bi go
+     khoi trang o thoai bat lai ro net mot nhip — thay ro thanh mot cai nhay. */
+  animation: nx-pop 260ms var(--e-spring) backwards;
 }
 .mo.is-out .mo__box { animation: nx-pop 200ms var(--e-out) reverse both; }
 

@@ -117,6 +117,20 @@
   to   { opacity: 1; transform: none; }
 }
 
+/* Ban rieng cho vach sang chi muc dang chon o thanh dieu huong trai.
+
+   Phan tu do tu can giua theo chieu doc bang transform: translateY(-50%).
+   Neu cho no chay nx-rise thi frame ket "transform: none" xoa mat cai can
+   giua ay -- vach tut xuong dung 10px, tuc nua chieu cao cua chinh no.
+
+   O day translateY(-50%) co mat trong CA HAI frame nen khong bao gio mat di.
+   Va vach mo ra theo chieu doc tu giua thay vi truot len tu duoi: dung ngon
+   ngu cua mot chi bao vi tri, khong phai cua mot khoi noi dung vua xuat hien. */
+@keyframes nx-navmark {
+  from { opacity: 0; transform: translateY(-50%) scaleY(0.34); }
+  to   { opacity: 1; transform: translateY(-50%) scaleY(1); }
+}
+
 @keyframes nx-fade {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -222,20 +236,86 @@
 
      Transition la PHAN HOI chu khong phai trang tri: no tra loi cau hoi vua
      bam co an khong, va cai do vua bien di dau. Giu lai. */
-  *:not(.nx-spin):not(.prog__bar),
-  *:not(.nx-spin):not(.prog__bar)::before,
-  *:not(.nx-spin):not(.prog__bar)::after {
+  *:not(.nx-spin):not(.prog__bar):not(.hero__load),
+  *:not(.nx-spin):not(.prog__bar):not(.hero__load)::before,
+  *:not(.nx-spin):not(.prog__bar):not(.hero__load)::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
   }
   /* Vong quay va thanh tien trinh la chi bao trang thai: luon phai chay,
      neu khong nguoi dung tuong ung dung bi treo. */
   .nx-spin { animation: nx-spin 640ms linear infinite !important; }
+  /* .hero__load la soi chi bao anh o day hero. No cung hang voi hai cai tren:
+     chi bao trang thai, khong phai trang tri. Chi sang khi da 1.8 giay khong co
+     anh nao ve -- mang khoe thi khong bao gio thay. Mien tru o day de vet sang
+     quet tren .hero__load::after con song; luat "cham lai cho diu mat" nam ben
+     views.css vi file do nap SAU file nay. */
   /* Cac khoi von an cho toi khi cuon toi thi phai hien san */
   .nx-reveal { opacity: 1 !important; transform: none !important; }
-  .nx-reveal .shelf__track > * { opacity: 1 !important; }
+  /* Phai xoa ca FRAME DAU cua nx-slide-x, khong thi the bi dich 28px sang
+     phai roi giat ve.
+
+     NHUNG DUNG "transform: none !important". Mot khai bao !important thang
+     moi khai bao thuong bat ke do manh yeu the nao -- ke ca .gc:hover. Dat
+     no o day la giet luon cu nhac the len khi ro chuot, tren dung may nay,
+     vi may nay bat prefers-reduced-motion vinh vien.
+
+     Tat dung thu can tat: TEN cua animation. Khong con animation thi khong
+     con frame nao de fill nguoc, ma thuoc tinh transform van de trong cho
+     hover dung. Khoi quet ben tren khong bao gio dat animation-name, nen
+     longhand nay khong da nhau voi no. */
+  .nx-reveal .shelf__track > * { opacity: 1 !important; animation-name: none !important; }
+  /* Luoi va danh sach thu vien cung chay nx-rise voi fill-mode nen cung
+     benh: frame dau ghim opacity 0 (nhap trang), frame cuoi ghim transform
+     none (chet hover). Chua o day mot the.
+
+     Luoi the loai (.gen__grid) vao cung cho. No con nang hon hai cai kia:
+     bac thang animation-delay leo toi 275ms cho the thu sau, ma khoi quet
+     ben tren chi bop animation-duration chu khong dong toi animation-delay.
+     Khong tat han TEN animation thi the cuoi nam trang gan mot phan ba giay
+     roi moi bat len -- dung tren cai may vua yeu cau it chuyen dong lai.
+
+     Hai cho cuoi cung mac dung benh do: .cd__cell (bac thang toi 165ms) va
+     .gd__about (tre 60ms). Deu la nx-rise + fill-mode + animation-delay.
+
+     CANH BAO cho lan sua sau: khoi chu thich nay tung co MOT dau dong lac
+     vao giua, do hai lan sua viet noi duoi nhau. CSS dong chu thich ngay tai
+     do; may cau con lai bien thanh ma CSS, va bo phan tich nuot tu do cho
+     toi dau ngoac nhon dau tien -- tuc la nuot luon ca danh sach selector
+     ben duoi. Ca luat bi vut di ma khong he bao loi va khong lech ngoac
+     nhon, nen may cong cu kiem tra can bang ngoac deu bao "sach". Trang van
+     chay binh thuong, chi la nam cho nay am tham mat phan sua. Them doan
+     nao vao day nua thi nho: chi DUNG MOT dau dong o cuoi cung. */
+  .nx-grid > *,
+  .nx-list > *,
+  .gen__grid > *,
+  .cd__cell,
+  .gd__about { opacity: 1 !important; animation-name: none !important; }
   .hero__bg { opacity: 1 !important; transform: none !important; }
-  .hero__dot i { width: 100% !important; }
+  /* Thanh chay trong cham phan trang dem nguoc bang @keyframes nx-hero-fill
+     (width 0 -> 100%). Khoi quet ben tren bop duration con 0.001ms nen no
+     nhay thang toi cuoi -- de lai width: 0 cua luat goc, tuc la chang thay gi.
+     Bu lai bang cach dat thang width: 100%.
+
+     Nhung phai co .is-on. Thieu no thi luat nay khop MOI cham, ke ca nhung
+     cham chua toi luot: tat ca deu sang day mau thuong hieu kem quang phat
+     sang, va nguoi dung mat hoan toan dau hieu cho biet dang xem slide nao --
+     dung cong dung duy nhat cua day cham. */
+  .hero__dot.is-on i { width: 100% !important; }
+  /* Thanh dem nguoc cua toast. .tst__bar dat san width: 100% roi chay
+     @keyframes nx-countdown-bar bop transform: scaleX(1) -> scaleX(0), voi
+     thoi luong do JS gan thang vao the (style="animation-duration: 4000ms").
+
+     Kieu gan thang tren the thua kieu trong bang, NHUNG chi khi hai ben cung
+     hang. Khoi quet ben tren dung "animation-duration: 0.001ms !important" —
+     ma !important thang ca kieu gan thang. Nen thoi luong that o day la
+     0.001ms: thanh nhay ngay toi scaleX(0) va bien mat truoc khi mat kip
+     thay. Nguoi dung mat hoan toan dau hieu con bao lau nua toast tu tat.
+
+     Tat han TEN animation thi khong con gi bop no nua, thanh nam yen o
+     width: 100% ma luat goc da dat. Van khong co chuyen dong nao — dung tinh
+     than "giam chuyen dong" — nhung vach mau van con do de nhin. */
+  .tst__bar { animation-name: none !important; }
 }
 
 /* ============================================================================
