@@ -8,7 +8,7 @@
 <meta name="description" content="Nexus Launcher — thư viện trò chơi Việt hóa, kích hoạt và các dịch vụ tích hợp.">
 <title>Nexus Launcher</title>
 
-<link rel="icon" href="./Logo_NexusT.png?v=46" type="image/png">
+<link rel="icon" href="./Logo_NexusT.png?v=47" type="image/png">
 
 <!-- Mo ket noi som toi cac may chu se dung ngay -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -547,39 +547,52 @@
     animation: nbb-pop 780ms cubic-bezier(.16, 1.1, .3, 1) 1 both;
   }
 
-  /* Cung sang quay. Vien ngoai cung, quay deu, khong lien quan den % -- no la
-     nhip tim cua man hinh, bao "may van dang chay" ke ca luc % dung yen. */
-  #nx-boot .nb-arc {
-    position: absolute; inset: -7px; border-radius: 50%;
-    background: conic-gradient(from 0deg,
-                transparent 0deg, transparent 232deg,
-                rgba(46, 230, 197, .28) 288deg,
-                rgba(56, 189, 248, .85) 344deg,
-                rgba(160, 230, 255, 1) 360deg);
-    -webkit-mask: radial-gradient(circle, transparent 0 68px, #000 68.8px 71px, transparent 71.6px);
-            mask: radial-gradient(circle, transparent 0 68px, #000 68.8px 71px, transparent 71.6px);
-    animation: nbb-spin 3.1s linear infinite;
+  /* overflow: visible LA BAT BUOC. Luat cua trinh duyet la
+     svg:not(:root) { overflow: hidden } -> khung 156x156 cat o ban kinh 78.
+     Than net ngoai cung la dia dau net o 77.00 nen VAN nam trong khung; chi
+     quang sang (toi 89) moi tran ra. Mat dong nay thi quang bi xen thanh mot
+     duong tron cung, con hinh van nguyen -- hong nhe, khong hong nang. */
+  #nx-boot .nb-ring {
+    position: absolute; inset: 0; overflow: visible;
+    transform: rotate(-90deg);
   }
-
-  #nx-boot .nb-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
   #nx-boot .nb-ring circle { fill: none; stroke-linecap: round; }
-  #nx-boot .nb-ring__trk { stroke: rgba(255, 255, 255, .055); stroke-width: 3; }
-  /* Neu vi ly do nao do khong giai duoc url(#nbGrad) thi khai bao nay hong va
-     trinh duyet lui ve thuoc tinh stroke="#4fb6ff" viet thang tren the -> van
-     nhin thay vong, khong bao gio thanh net den tren nen den. */
+
+  /* RANH TOI, nam duoi cung. Alpha PHANG, co y khong dung gradient: nen duoi
+     vong bien thien theo CA hai truc -- non .nb-beam mo xuong duoi (dinh dat
+     dung tam logo nen nua TREN cua vong gan nhu khong duoc chieu sang), cong
+     hai box-shadow ngoai cua .nb-tile ve DE LEN vong va dam hon o bon huong
+     cheo. Mot lop toi phang lam mo di 72% BAT KY thu gi ben duoi nen no tu
+     thich nghi; mot gradient khop tay chi khop dung mot truc roi sai truc kia. */
+  #nx-boot .nb-ring__sock { stroke: rgba(7, 20, 34, .72); stroke-width: 9; }
+
+  /* NET CHUA CHAY, ve de len ranh toi. Day moi la thu danh dau chu vi: rieng
+     ranh toi thi o nua tren vong (nen gan den) se vo hinh. Rong 5 = bang dung
+     net da chay, nen be day bieu kien cua vong khong doi giua doan da chay va
+     doan chua chay -- mat doc duoc ngay day la mot phep do. */
+  #nx-boot .nb-ring__trk { stroke: rgba(150, 206, 240, .16); stroke-width: 5; }
+
+  /* NET DA CHAY. Mau du phong phai nam TRONG gia tri: "url(#nbGrad) #4fb6ff".
+     Thuoc tinh stroke="..." viet tren the la presentation attribute, do uu tien
+     0, thua moi luat CSS nen khong bao gio lam du phong duoc. Theo SVG2, mot
+     paint reference hong ma khong co fallback trong gia tri se ra none, tuc net
+     VO HINH -- dung dieu ma comment cu tuong la minh da chong duoc. */
   #nx-boot .nb-ring__val {
-    stroke: url(#nbGrad); stroke-width: 3.4;
-    filter: drop-shadow(0 0 7px rgba(56, 189, 248, .55));
+    stroke: url(#nbGrad) #4fb6ff; stroke-width: 5;
+    filter: drop-shadow(0 0 5px rgba(72, 200, 255, .55));
   }
 
-  /* Dom sang chay quanh vanh. JS xoay ca lop bao theo % nen dom luon dung o
-     dau net ve -- hai thu khong bao gio lech nhau. */
-  #nx-boot .nb-orb { position: absolute; inset: 0; }
-  #nx-boot .nb-orb i {
-    position: absolute; left: 50%; top: 12px; width: 7px; height: 7px;
-    margin-left: -3.5px; border-radius: 50%; background: #cdf3ff;
-    box-shadow: 0 0 9px 2px rgba(120, 220, 255, .9), 0 0 22px 5px rgba(56, 189, 248, .45);
-    animation: nbb-orb 1.5s cubic-bezier(.45, 0, .55, 1) infinite;
+  /* DAU NET. Mot dash dai .01 voi stroke-linecap: round -> trinh duyet ve dung
+     mot dia tron duong kinh bang stroke-width, nam CHINH XAC tren duong path.
+     JS ghi cho lop nay DUNG cai stroke-dashoffset da ghi cho .nb-ring__val:
+     cung mot con so tren cung mot duong cong -> lech 0.00 ve ca ban kinh lan
+     goc. Khong phai "da can dung" ma la khong co cach nao sai.
+     Ban cu dat dom bang mot <div> o top: 12px -> tam dom roi vao ban kinh 62.5
+     trong khi net ve o 66: lech 3.5px vao trong, dung bang ban kinh cua chinh
+     no. Loi do gio la bat kha thi ve cau truc. */
+  #nx-boot .nb-ring__hd {
+    stroke: #eafcff; stroke-width: 10;
+    filter: drop-shadow(0 0 8px rgba(150, 230, 255, .85));
   }
 
   #nx-boot .nb-tile {
@@ -683,8 +696,6 @@
   @keyframes nbb-pop     { from { opacity: 0; transform: scale(.80); }
                            to   { opacity: 1; transform: none; } }
   @keyframes nbb-spin    { to   { transform: rotate(360deg); } }
-  @keyframes nbb-orb     { 0%, 100% { transform: scale(1);   opacity: 1;   }
-                           50%      { transform: scale(1.4); opacity: .72; } }
   @keyframes nbb-breathe { 0%, 100% { transform: scale(1);     }
                            50%      { transform: scale(1.035); } }
   @keyframes nbb-flow    { to   { background-position: -220% 0; } }
@@ -710,14 +721,12 @@
      ve 0.001ms; luat o day mang tien to #nx-boot nen thang o cot ID va giu
      lai dung nhung chuyen dong noi len tien do.
 
-     Luu y ky thuat: viet "animation: 3.1s linear 0s infinite nbb-spin
+     Luu y ky thuat: viet "animation: 18s linear 0s infinite nbb-spin
      !important" thi CA TAM thuoc tinh con deu thanh important, ke ca
      animation-delay: 0s. Vi vay do tre phai nam ngay trong dong shorthand,
      khong the them mot dong animation-delay rieng o duoi.               */
   @media (prefers-reduced-motion: reduce) {
-    #nx-boot .nb-arc  { animation: 3.1s linear         0s infinite nbb-spin !important; }
     #nx-boot .nb-fill { animation: 2.6s linear         0s infinite nbb-flow !important; }
-    #nx-boot .nb-orb i{ animation: 1.5s cubic-bezier(.45,0,.55,1) 0s infinite nbb-orb !important; }
     #nx-boot .nb-scan { animation: 5.6s cubic-bezier(.55,0,.45,1) 0s infinite nbb-scan !important; }
 
     /* Hat sang tren ba vong quy dao. Shorthand co !important lam CA TAM thuoc
@@ -759,10 +768,10 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/fill/style.css">
 
 <!-- Giao dien Nexus -->
-<link rel="stylesheet" href="./css/tokens.css?v=46">
-<link rel="stylesheet" href="./css/base.css?v=46">
-<link rel="stylesheet" href="./css/components.css?v=46">
-<link rel="stylesheet" href="./css/views.css?v=46">
+<link rel="stylesheet" href="./css/tokens.css?v=47">
+<link rel="stylesheet" href="./css/base.css?v=47">
+<link rel="stylesheet" href="./css/components.css?v=47">
+<link rel="stylesheet" href="./css/views.css?v=47">
 
 <!-- Tu can giao dien theo man hinh. Phai chay TRUOC khi khung dau tien duoc
      ve len, nen viet thang o day chu khong bo vao file jsx (jsx con phai cho
@@ -897,24 +906,34 @@
     </div>
 
     <div class="nb-mark">
-      <div class="nb-arc"></div>
+      <!-- Chu vi = 2 x pi x 72 = 452.39. BON CHO PHAI KHOP, thieu mot cho la
+           net ve va dau net tach roi nhau ma khong bao mot loi nao:
+             1. r="72" tren ca bon <circle>
+             2. pathLength="452.39" tren val va hd
+             3. stroke-dasharray: "452.39" (val) va ".01 452.38" (hd, tong 452.39)
+             4. var RING_C = 452.39 trong JS
+           pathLength khoa phep tinh dash vao dung con so nay, mien nhiem voi
+           cach trinh duyet lam phang cung tron thanh doan thang.
 
-      <!-- Vong tien do ve bang net SVG that: JS ghi stroke-dashoffset moi
-           khung hinh. Chu vi = 2 x pi x 66 = 414.69 -->
+           Truc gradient x1=1 y1=0 -> x2=0 y2=1: sau transform rotate(-90deg)
+           cua .nb-ring thi goc tren-phai cua bbox roi vao goc TREN-TRAI tren
+           man hinh -- cung huong chieu sang voi o logo. Ba chan mau va ba moc
+           0/46/100% lay y het cua o logo, chi sang hon mot bac. -->
       <svg class="nb-ring" viewBox="0 0 156 156" aria-hidden="true">
         <defs>
-          <linearGradient id="nbGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%"   stop-color="#2ee6c5"/>
-            <stop offset="52%"  stop-color="#38bdf8"/>
-            <stop offset="100%" stop-color="#a855f7"/>
+          <linearGradient id="nbGrad" x1="1" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#6ef2da"/>
+            <stop offset="46%"  stop-color="#4cc4fb"/>
+            <stop offset="100%" stop-color="#7d92ff"/>
           </linearGradient>
         </defs>
-        <circle class="nb-ring__trk" cx="78" cy="78" r="66"/>
-        <circle class="nb-ring__val" cx="78" cy="78" r="66" stroke="#4fb6ff"
-                stroke-dasharray="414.69" stroke-dashoffset="414.69"/>
+        <circle class="nb-ring__sock" cx="78" cy="78" r="72"/>
+        <circle class="nb-ring__trk"  cx="78" cy="78" r="72"/>
+        <circle class="nb-ring__val"  cx="78" cy="78" r="72" pathLength="452.39"
+                stroke-dasharray="452.39" stroke-dashoffset="452.39"/>
+        <circle class="nb-ring__hd"   cx="78" cy="78" r="72" pathLength="452.39"
+                stroke-dasharray=".01 452.38" stroke-dashoffset="452.39"/>
       </svg>
-
-      <div class="nb-orb"><i></i></div>
 
       <div class="nb-tile">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -976,7 +995,7 @@
      duoc style viet thang tren the, nen chung chay binh thuong ke ca khi may
      dang tat hieu ung hinh anh. */
   var ring  = boot.querySelector('.nb-ring__val');
-  var orb   = boot.querySelector('.nb-orb');
+  var head  = boot.querySelector('.nb-ring__hd');
   var comet = boot.querySelector('.nb-comet');
   var halo  = boot.querySelector('.nb-halo');
   var ticks = boot.querySelectorAll('.nb-tick');
@@ -990,7 +1009,7 @@
   var oMs   = boot.querySelector('.nb-ms');
   var t0    = (window.performance && performance.now) ? performance.now() : 0;
   var msShown = -1;
-  var RING_C = 414.69;                       /* 2 x pi x 66, khop stroke-dasharray */
+  var RING_C = 452.39;                       /* 2 x pi x 72, khop pathLength + dasharray */
 
   /* Moc tien do. Con so khong chia deu ma chia theo do NANG cua tung file:
      data.media.js mot minh gan 800 KB nen duoc 12 diem, data.static.js chi
@@ -1124,8 +1143,13 @@
       while (gOn < gWant) { gcel[gOn].classList.add('on'); gOn++; }
     }
 
-    if (ring)  ring.style.strokeDashoffset = (RING_C * (1 - v / 100)).toFixed(2);
-    if (orb)   orb.style.transform = 'rotate(' + (v * 3.6).toFixed(2) + 'deg)';
+    /* MOT con so duy nhat cho ca net ve lan dau net. Diem ket thuc cua
+       .nb-ring__val nam o (452.39 - offset); vi tri dia cua .nb-ring__hd cung
+       la (452.39 - offset) vi dasharray cua no cong lai dung bang chu vi. Cung
+       so, cung duong cong -> khong the lech nhau. */
+    var nbOff = (RING_C * (1 - v / 100)).toFixed(2);
+    if (ring)  ring.style.strokeDashoffset = nbOff;
+    if (head)  head.style.strokeDashoffset = nbOff;
     if (comet) comet.style.left = v.toFixed(3) + '%';
 
     var iv = Math.round(v);
@@ -1188,10 +1212,10 @@
 <!-- ==========================================================================
      1. DU LIEU — JavaScript thuan, KHONG di qua Babel (nhanh hon rat nhieu)
      ========================================================================== -->
-<script src="./js/data.games.js?v=46" onload="window.NXBOOT&&NXBOOT.hit('games')" onerror="window.NXBOOT&&NXBOOT.hit('games')"></script>
-<script src="./js/data.media.js?v=46" onload="window.NXBOOT&&NXBOOT.hit('media')" onerror="window.NXBOOT&&NXBOOT.hit('media')"></script>
-<script src="./js/data.static.js?v=46" onload="window.NXBOOT&&NXBOOT.hit('static')" onerror="window.NXBOOT&&NXBOOT.hit('static')"></script>
-<script src="./js/i18n.js?v=46" onload="window.NXBOOT&&NXBOOT.hit('i18n')" onerror="window.NXBOOT&&NXBOOT.hit('i18n')"></script>
+<script src="./js/data.games.js?v=47" onload="window.NXBOOT&&NXBOOT.hit('games')" onerror="window.NXBOOT&&NXBOOT.hit('games')"></script>
+<script src="./js/data.media.js?v=47" onload="window.NXBOOT&&NXBOOT.hit('media')" onerror="window.NXBOOT&&NXBOOT.hit('media')"></script>
+<script src="./js/data.static.js?v=47" onload="window.NXBOOT&&NXBOOT.hit('static')" onerror="window.NXBOOT&&NXBOOT.hit('static')"></script>
+<script src="./js/i18n.js?v=47" onload="window.NXBOOT&&NXBOOT.hit('i18n')" onerror="window.NXBOOT&&NXBOOT.hit('i18n')"></script>
 
 <!-- ==========================================================================
      2. THU VIEN
@@ -1205,12 +1229,12 @@
      3. GIAO DIEN — chay theo dung thu tu: core -> cards -> detail -> views
                     -> integrate -> shell
      ========================================================================== -->
-<script type="text/babel" data-presets="react" src="./js/app.core.jsx?v=46"></script>
-<script type="text/babel" data-presets="react" src="./js/app.cards.jsx?v=46"></script>
-<script type="text/babel" data-presets="react" src="./js/app.detail.jsx?v=46"></script>
-<script type="text/babel" data-presets="react" src="./js/app.views.jsx?v=46"></script>
-<script type="text/babel" data-presets="react" src="./js/app.integrate.jsx?v=46"></script>
-<script type="text/babel" data-presets="react" src="./js/app.shell.jsx?v=46"></script>
+<script type="text/babel" data-presets="react" src="./js/app.core.jsx?v=47"></script>
+<script type="text/babel" data-presets="react" src="./js/app.cards.jsx?v=47"></script>
+<script type="text/babel" data-presets="react" src="./js/app.detail.jsx?v=47"></script>
+<script type="text/babel" data-presets="react" src="./js/app.views.jsx?v=47"></script>
+<script type="text/babel" data-presets="react" src="./js/app.integrate.jsx?v=47"></script>
+<script type="text/babel" data-presets="react" src="./js/app.shell.jsx?v=47"></script>
 
 <!-- ==========================================================================
      4. LUOI AN TOAN — neu co gi do hong, bao cho nguoi dung thay vi man hinh den
