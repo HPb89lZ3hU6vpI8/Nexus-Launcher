@@ -68,11 +68,9 @@
           <button
             className="ag-cb__copy"
             onClick={function () {
-              try {
-                navigator.clipboard.writeText(code);
-                setCopied(true);
-                setTimeout(function () { setCopied(false); }, 1400);
-              } catch (e) { /* trinh duyet chan clipboard -> bo qua */ }
+              copyText(code);          // dung chung duong du phong o tren
+              setCopied(true);
+              setTimeout(function () { setCopied(false); }, 1400);
             }}
           >
             <i className={copied ? 'ph-bold ph-check' : 'ph-bold ph-copy'}></i>
@@ -220,6 +218,68 @@
      DUNG MOT dong duoc ve lai — phan con lai dung yen hoan toan.
      ------------------------------------------------------------------------ */
 
+  /* Chep vao bo nho tam — co duong du phong.
+
+     navigator.clipboard chi chay khi trang o secure context VA co thao tac that
+     cua nguoi dung. Trong WebView2 cua launcher thi trang load qua https nen dat
+     dieu kien, nhung neu vi ly do nao do bi tu choi thi phai con duong khac:
+     tao mot o van ban an, chon het, roi goi execCommand. Cach cu nhung chay o
+     moi noi. Khong lam vay thi nut chep co the im lang khong an gi ca. */
+  function copyText(s) {
+    const t = String(s == null ? '' : s);
+    if (!t) return false;
+
+    function duPhong() {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = t;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        ta.style.top = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      } catch (e) { return false; }
+    }
+
+    /* writeText tra ve mot Promise: khi no bi tu choi thi try/catch thuong
+       KHONG bat duoc, phai bat bang .catch(). Loi nay da xay ra that khi do:
+       "NotAllowedError: Document is not focused" bay ra ngoai, duong du phong
+       khong bao gio chay va nut chep im lang khong an gi. */
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        const p = navigator.clipboard.writeText(t);
+        if (p && typeof p.catch === 'function') p.catch(duPhong);
+        return true;
+      }
+    } catch (e) { /* roi xuong duong du phong ngay ben duoi */ }
+    return duPhong();
+  }
+
+  /* Nut chep — hien mo khi ro chuot vao tin nhan, dam han khi tro toi.
+     Dung chung cho ca tin cua minh lan cau tra loi cua agent. */
+  function CopyBtn({ text, cls }) {
+    const [ok, setOk] = useState(false);
+    if (!text) return null;
+    return (
+      <button className={'ag__cp' + (cls ? ' ' + cls : '') + (ok ? ' is-ok' : '')}
+              title={ok ? TX('Đã chép') : TX('Chép nội dung')}
+              onClick={function () {
+                copyText(text);
+                // Bao "da chep" du sao cung hien: neu ca hai duong deu that bai
+                // thi khong con cach nao chep duoc, va bao that bai cung khong
+                // giup gi cho nguoi dung.
+                setOk(true);
+                setTimeout(function () { setOk(false); }, 1500);
+              }}>
+        <i className={ok ? 'ph-bold ph-check' : 'ph-bold ph-copy'}></i>
+      </button>
+    );
+  }
+
   const Row = React.memo(function Row({ it, onAnswer }) {
     if (it.k === 'me') {
       return (
@@ -232,13 +292,25 @@
                 })}
               </div>
             ) : null}
-            {it.s ? <div className="ag__me">{it.s}</div> : null}
+            {it.s ? (
+              <div className="ag__mebox">
+                <div className="ag__me">{it.s}</div>
+                <CopyBtn text={it.s} cls="ag__cp--me" />
+              </div>
+            ) : null}
           </div>
         </div>
       );
     }
     if (it.k === 'text') {
-      return <div className="ag__row"><div className="ag__ai"><Markdown text={it.s} /></div></div>;
+      return (
+        <div className="ag__row">
+          <div className="ag__ai">
+            <Markdown text={it.s} />
+            <CopyBtn text={it.s} cls="ag__cp--ai" />
+          </div>
+        </div>
+      );
     }
     if (it.k === 'think') {
       return <div className="ag__row ag__row--sub"><ThinkBlock text={it.s} /></div>;
@@ -349,7 +421,6 @@
     return (
       <div className={'ag-think' + (open ? ' is-open' : '')}>
         <button className="ag-think__head" onClick={function () { setOpen(!open); }}>
-          <i className="ph-fill ph-brain"></i>
           <span>{TX('Đang suy nghĩ')}</span>
           <i className={'ph-bold ' + (open ? 'ph-caret-up' : 'ph-caret-down')}></i>
         </button>
@@ -1132,7 +1203,6 @@
              setDrag(false);
              addFiles(e.dataTransfer && e.dataTransfer.files);
            }}>
-        <div className="ag__glow" aria-hidden="true" />
 
         {/* ---- thanh tren ---- */}
         <header className="ag__bar">
@@ -1141,7 +1211,7 @@
                   title={TX('Danh sách cuộc trò chuyện')}>
             <i className="ph-bold ph-sidebar-simple"></i>
           </button>
-          <span className="ag__logo"><i className="ph-fill ph-sparkle"></i></span>
+          <span className="ag__logo"><i className="ph-fill ph-graph"></i></span>
           <div className="ag__id">
             <div className="ag__name">Nexus Agent</div>
             <div className="ag__sub">
@@ -1173,7 +1243,7 @@
           <div className={'ag__inner' + (items.length ? '' : ' ag__inner--empty')}>
             {!items.length ? (
               <div className="ag__hi">
-                <div className="ag__hi__orb"><i className="ph-fill ph-sparkle"></i></div>
+                <div className="ag__hi__orb"><i className="ph-fill ph-graph"></i></div>
                 <h2 className="ag__hi__t">{TX('Tôi có thể giúp được gì cho bạn?')}</h2>
                 <p className="ag__hi__d">
                   {TX('Tôi là trợ lý AI được tích hợp vào Nexus Launcher, luôn sẵn sàng giải đáp thắc mắc và giúp bạn làm việc nhanh hơn ngay trên màn hình chính.')}
@@ -1261,7 +1331,7 @@
                     title={mode === 'bypass'
                       ? TX('Đang tự do. Bấm để chuyển sang cần duyệt.')
                       : TX('Đang cần duyệt. Bấm để chuyển sang tự do.')}>
-              <i className={mode === 'bypass' ? 'ph-fill ph-lightning' : 'ph-fill ph-shield-check'}></i>
+              <i className={mode === 'bypass' ? 'ph-fill ph-shield-slash' : 'ph-fill ph-shield-check'}></i>
               {mode === 'bypass' ? TX('Tự do') : TX('Cần duyệt')}
             </button>
 
@@ -1345,7 +1415,7 @@
     return (
       <button className={'nx-icobtn ag-btn' + (open ? ' is-on' : '')}
               onClick={onToggle} title="Nexus Agent">
-        <i className="ph-fill ph-sparkle"></i>
+        <i className="ph-fill ph-graph"></i>
       </button>
     );
   }

@@ -46,20 +46,6 @@
   font-family: var(--f-ui);
 }
 
-/* Quang sang mo phia sau, cho nen do trong hon mot mang mau phang. */
-.ag__glow {
-  position: absolute;
-  top: -280px; left: 50%;
-  width: 1100px; height: 760px;
-  margin-left: -550px;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(closest-side, rgba(58, 216, 255, .10), transparent 72%),
-    radial-gradient(closest-side, rgba(139, 108, 255, .09), transparent 78%);
-  filter: blur(30px);
-}
-
 /* -------------------------------------------------------------- thanh tren */
 
 .ag__bar {
@@ -77,15 +63,17 @@
   flex: 0 0 auto;
 }
 
+/* Logo thanh tren: cung ngon ngu voi logo man chao — vien mong, nen mo,
+   khong quang sang. */
 .ag__logo {
   display: grid;
   place-items: center;
-  width: 34px; height: 34px;
+  width: 32px; height: 32px;
   border-radius: var(--r-sm);
-  background: var(--grad-brand);
-  color: #04131a;
-  font-size: 17px;
-  box-shadow: 0 6px 18px -6px rgba(58, 216, 255, .55);
+  background: color-mix(in srgb, var(--br-1) 13%, var(--bg-surface));
+  border: 1px solid color-mix(in srgb, var(--br-1) 26%, transparent);
+  color: var(--br-1);
+  font-size: 15px;
   flex: 0 0 auto;
 }
 
@@ -432,18 +420,57 @@
   background: color-mix(in srgb, var(--br-1) 7%, transparent);
 }
 
+/* Bong bong tin cua minh: nen DAC, mau diu, khong con gradient.
+
+   Ban cu dung gradient cyan->tim sang ruc voi chu den. Nhin thi bat mat nhung
+   no la dau hieu ro nhat cua "giao dien do may lam": mot mang mau bao hoa dat
+   giua man hinh toi. Doi sang mot lop nen mo cua chinh mau nhan, chu sang binh
+   thuong — van phan biet duoc ngay dau la loi minh, ma khong choi mat. */
 .ag__me {
   max-width: 100%;
   padding: 10px 15px;
   border-radius: var(--r-lg) var(--r-lg) var(--r-xs) var(--r-lg);
-  background: var(--grad-brand);
-  color: #06161f;
+  background: color-mix(in srgb, var(--br-2) 17%, var(--bg-surface));
+  border: 1px solid color-mix(in srgb, var(--br-2) 26%, transparent);
+  color: var(--tx-hi);
   font-size: 14px;
-  line-height: 1.6;
-  font-weight: 520;
+  line-height: 1.62;
+  font-weight: 450;
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+/* ---- nut chep ---- */
+
+.ag__mebox { position: relative; }
+.ag__ai { position: relative; }
+
+.ag__cp {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 26px; height: 26px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg-raised);
+  color: var(--tx-faint);
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-fast) var(--e-out), color var(--t-fast) var(--e-out),
+              border-color var(--t-fast) var(--e-out);
+}
+/* Tin cua minh: nut nam ben TRAI bong bong. Cua agent: nam duoi, le trai. */
+.ag__cp--me { top: 2px; left: -32px; }
+.ag__cp--ai { bottom: -6px; left: 0; }
+
+.ag__row:hover .ag__cp { opacity: .75; pointer-events: auto; }
+.ag__cp:hover { opacity: 1 !important; color: var(--tx-hi); border-color: var(--line-strong); }
+.ag__cp.is-ok { opacity: 1 !important; color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+
+/* Chua cho nut chep cua agent khoi de len doan sau */
+.ag__row:has(.ag__cp--ai) { margin-bottom: 28px; }
 
 /* Chu cua agent: mau diu, do dam binh thuong, dong thoang.
    Truoc day chu qua sang va qua dam nen doc len rat "may moc" — nhin la biet
@@ -460,27 +487,31 @@
 /* --------------------------------------------------------------- man chao */
 
 .ag__hi { text-align: center; padding: 58px 20px 30px; }
+/* Logo man chao: vien mong + nen mo thay cho khoi gradient co quang sang.
+   Quang sang mau la thu lam giao dien trong "de doa" hon la chuyen nghiep. */
 .ag__hi__orb {
   display: grid;
   place-items: center;
-  width: 62px; height: 62px;
-  margin: 0 auto 20px;
-  border-radius: 20px;
-  background: var(--grad-brand);
-  color: #04131a;
-  font-size: 29px;
-  box-shadow: 0 16px 44px -14px rgba(58, 216, 255, .6);
+  width: 54px; height: 54px;
+  margin: 0 auto 22px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--br-1) 13%, var(--bg-surface));
+  border: 1px solid color-mix(in srgb, var(--br-1) 26%, transparent);
+  color: var(--br-1);
+  font-size: 24px;
 }
+
+/* Tieu de: chu trang thuong, KHONG dung chu gradient.
+   Chu to bang gradient cau vong la dau hieu bi nhan ra ngay la do may lam —
+   nguoi doc thay thieu nghiem tuc. Chu trang, nang nhe co, gian chu ra mot
+   chut thi doc nhu mot san pham that. */
 .ag__hi__t {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-family: var(--f-display);
-  font-weight: 780;
-  font-size: 25px;
-  letter-spacing: -.3px;
-  background: var(--grad-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  font-size: 23px;
+  letter-spacing: -.2px;
+  color: var(--tx-hi);
 }
 /* Cau gioi thieu — rong hon mot chut vi khong con o goi y ben duoi, va day la
    thu duy nhat nguoi dung doc truoc khi bat dau go. */
@@ -591,8 +622,7 @@
 .ag-ask {
   border: 1px solid color-mix(in srgb, var(--br-1) 34%, transparent);
   border-radius: var(--r-md);
-  background: linear-gradient(180deg,
-              color-mix(in srgb, var(--br-1) 7%, var(--bg-surface)), var(--bg-surface));
+  background: color-mix(in srgb, var(--br-1) 5%, var(--bg-surface));
   padding: 14px;
   box-shadow: var(--sh-2);
 }
@@ -640,6 +670,19 @@
 }
 .ag-ask__act { display: flex; gap: 8px; margin-top: 12px; }
 .ag-ask__act .nx-btn { flex: 0 0 auto; }
+
+/* Nut Dong y dung .nx-btn--primary cua launcher, von la gradient cau vong.
+   Trong khung chat thi ghi de sang mot mau dac cho dong bo voi phan con lai —
+   ca panel gio khong con mot vet gradient nao. */
+.ag-ask__act .nx-btn--primary {
+  background: var(--br-2);
+  color: #06161f;
+}
+.ag-ask__act .nx-btn--primary:hover { background: var(--br-1); }
+.ag-ask--danger .ag-ask__act .nx-btn--primary { background: var(--bad); color: #fff; }
+.ag-ask--danger .ag-ask__act .nx-btn--primary:hover {
+  background: color-mix(in srgb, var(--bad) 84%, #fff);
+}
 
 .ag-ask.is-done {
   display: flex; align-items: center; gap: 9px;
@@ -715,7 +758,6 @@
   font-size: 12px;
   cursor: pointer;
 }
-.ag-think__head > i:first-child { color: var(--br-3); font-size: 14px; }
 .ag-think__head > span { flex: 1; text-align: left; }
 .ag-think__body {
   padding: 4px 12px 11px;
@@ -786,9 +828,19 @@
   background: var(--tx-faint);
 }
 
-.ag-h { font-family: var(--f-ui); font-weight: 660; color: var(--tx-hi); margin: 18px 0 9px; }
-.ag-h--1 { font-size: 17px; }
-.ag-h--2 { font-size: 15.5px; }
+/* Tieu de trong cau tra loi. Agent hay viet nhieu tieu de nho lien tiep, nen
+   cai quyet dinh do doc la KHOANG CACH TREN chu khong phai co chu: cach xa phia
+   tren thi mat tu chia duoc khoi, khong can phong to hay to mau. */
+.ag-h {
+  font-family: var(--f-ui);
+  font-weight: 650;
+  color: var(--tx-hi);
+  margin: 22px 0 8px;
+  letter-spacing: -.1px;
+}
+.ag-h:first-child { margin-top: 0; }
+.ag-h--1 { font-size: 16px; }
+.ag-h--2 { font-size: 15px; }
 .ag-h--3 { font-size: 14.5px; }
 .ag-h--4 { font-size: 14px; }
 
@@ -890,20 +942,21 @@
 .ag__ta::placeholder { color: var(--tx-faint); }
 .ag__ta:disabled { cursor: not-allowed; }
 
+/* Nut gui: mot mau dac, khong gradient. Day la nut duy nhat trong khung nen
+   khong can gradient de noi bat — mau nhan dac da du. */
 .ag__send {
   display: grid; place-items: center;
-  width: 38px; height: 38px;
+  width: 36px; height: 36px;
   flex: 0 0 auto;
   border: 0;
-  border-radius: var(--r-md);
-  background: var(--grad-brand);
-  color: #04131a;
-  font-size: 17px;
+  border-radius: var(--r-sm);
+  background: var(--br-2);
+  color: #06161f;
+  font-size: 16px;
   cursor: pointer;
-  transition: opacity var(--t-fast) var(--e-out), transform var(--t-fast) var(--e-out),
-              filter var(--t-fast) var(--e-out);
+  transition: opacity var(--t-fast) var(--e-out), background var(--t-fast) var(--e-out);
 }
-.ag__send:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); }
+.ag__send:hover:not(:disabled) { background: var(--br-1); }
 .ag__send:disabled { opacity: .32; cursor: not-allowed; }
 .ag__send--stop { background: var(--bad); color: #fff; }
 
