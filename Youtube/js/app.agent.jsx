@@ -298,7 +298,24 @@
     const [cwd, setCwd] = useState((st && st.cwd) || '');
     const [thinking, setThinking] = useState(!!(st && st.thinking));
     const [askRead, setAskRead] = useState(!!(st && st.ask_read));
+    /* Ba o ket noi. Bat buoc phai sua duoc ngay tai day: khi may chu chet, thong
+       bao loi bao "mo Cai dat de doi dia chi" — neu cho nay chi hien thi thi loi
+       khuyen do dan nguoi dung vao ngo cut. */
+    const [url, setUrl] = useState((st && st.base_url) || '');
+    const [model, setModel] = useState((st && st.model) || '');
+    const [key, setKey] = useState('');
+    const [saved, setSaved] = useState(false);
     const toast = useToast();
+
+    function saveConn() {
+      const patch = { base_url: url.trim(), model: model.trim() };
+      if (key.trim()) patch.api_key = key.trim();   // bo trong = giu khoa cu
+      onSave(patch);
+      setKey('');
+      setSaved(true);
+      setTimeout(function () { setSaved(false); }, 1800);
+      toast.push({ tone: 'ok', title: TX('Đã lưu kết nối') });
+    }
 
     return (
       <div className="ag-cfg">
@@ -344,9 +361,43 @@
             </span>
           </label>
 
+          <div className="ag-cfg__sep">{TX('Kết nối')}</div>
+
+          <div className="ag-cfg__row">
+            <div className="ag-cfg__lb">{TX('Địa chỉ máy chủ')}</div>
+            <div className="ag-cfg__hint">
+              {TX('Nếu chat báo không tìm thấy máy chủ thì sửa ở đây.')}
+            </div>
+            <input className="ag-in ag-in--w" value={url} spellCheck={false}
+                   placeholder="https://..."
+                   onChange={function (e) { setUrl(e.target.value); }} />
+          </div>
+
+          <div className="ag-cfg__row">
+            <div className="ag-cfg__lb">{TX('Mô hình')}</div>
+            <input className="ag-in ag-in--w" value={model} spellCheck={false}
+                   placeholder="claude-opus-5"
+                   onChange={function (e) { setModel(e.target.value); }} />
+          </div>
+
+          <div className="ag-cfg__row">
+            <div className="ag-cfg__lb">{TX('Khoá API')}</div>
+            <div className="ag-cfg__hint">
+              {st && st.has_key
+                ? TX('Đã có khoá. Để trống nếu không muốn đổi.')
+                : TX('Chưa có khoá. Khoá chỉ lưu trên máy bạn, không gửi lên mạng.')}
+            </div>
+            <input className="ag-in ag-in--w" type="password" value={key} spellCheck={false}
+                   placeholder={st && st.has_key ? '••••••••••••' : TX('Dán khoá vào đây')}
+                   onChange={function (e) { setKey(e.target.value); }} />
+          </div>
+
+          <button className="nx-btn nx-btn--primary nx-btn--sm nx-btn--full" onClick={saveConn}>
+            <i className={saved ? 'ph-bold ph-check' : 'ph-bold ph-floppy-disk'}></i>
+            {saved ? TX('Đã lưu') : TX('Lưu kết nối')}
+          </button>
+
           <div className="ag-cfg__info">
-            <div><span>{TX('Mô hình')}</span><b>{(st && st.model) || '—'}</b></div>
-            <div><span>{TX('Máy chủ')}</span><b>{(st && st.base_url) || '—'}</b></div>
             <div><span>{TX('Tìm web')}</span><b>{st && st.has_exa ? TX('có') : TX('chưa bật')}</b></div>
             <div><span>{TX('Số công cụ')}</span><b>{(st && st.tools && st.tools.length) || 0}</b></div>
           </div>

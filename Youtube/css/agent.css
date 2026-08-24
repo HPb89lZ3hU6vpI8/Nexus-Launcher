@@ -759,6 +759,22 @@
 }
 .ag-in:focus { border-color: var(--focus); box-shadow: var(--focus-ring); }
 
+/* O nhap chiem tron be ngang (cho phan Ket noi), khac voi o chon thu muc
+   von phai chia cho cho nut Chon. */
+.ag-in--w { width: 100%; }
+
+.ag-cfg__sep {
+  margin: 22px 0 14px;
+  padding-top: 15px;
+  border-top: 1px solid var(--line);
+  font-family: var(--f-display);
+  font-weight: 730;
+  font-size: 11px;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--tx-faint);
+}
+
 .ag-cfg__sw {
   display: flex;
   align-items: flex-start;
