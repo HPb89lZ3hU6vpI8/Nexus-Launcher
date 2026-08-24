@@ -366,7 +366,7 @@
           <div className="ag-cfg__row">
             <div className="ag-cfg__lb">{TX('Địa chỉ máy chủ')}</div>
             <div className="ag-cfg__hint">
-              {TX('Nếu chat báo không tìm thấy máy chủ thì sửa ở đây.')}
+              {TX('Mặc định lấy từ file nexus_agent.py trên máy bạn. Chỉ sửa ở đây khi muốn đổi tạm.')}
             </div>
             <input className="ag-in ag-in--w" value={url} spellCheck={false}
                    placeholder="https://..."
@@ -384,8 +384,8 @@
             <div className="ag-cfg__lb">{TX('Khoá API')}</div>
             <div className="ag-cfg__hint">
               {st && st.has_key
-                ? TX('Đã có khoá. Để trống nếu không muốn đổi.')
-                : TX('Chưa có khoá. Khoá chỉ lưu trên máy bạn, không gửi lên mạng.')}
+                ? TX('Đã có khoá sẵn trong nexus_agent.py. Để trống nếu không muốn đổi.')
+                : TX('Chưa có khoá. Khoá chỉ nằm trên máy bạn, không bao giờ lên mạng.')}
             </div>
             <input className="ag-in ag-in--w" type="password" value={key} spellCheck={false}
                    placeholder={st && st.has_key ? '••••••••••••' : TX('Dán khoá vào đây')}
