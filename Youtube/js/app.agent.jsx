@@ -23,7 +23,8 @@
   'use strict';
 
   const { useState, useEffect, useRef, useCallback, useMemo } = React;
-  const { TX, useLang, callApi, hasApi, useToast, useEscape, prefersCalm } = window.NX;
+  const { TX, useLang, callApi, hasApi, useToast, useEscape, useClickOutside,
+          prefersCalm } = window.NX;
 
   /* --------------------------------------------------------------------------
      1. MARKDOWN RUT GON
@@ -296,7 +297,6 @@
 
   function Settings({ st, onClose, onSave }) {
     const [cwd, setCwd] = useState((st && st.cwd) || '');
-    const [thinking, setThinking] = useState(!!(st && st.thinking));
     const [askRead, setAskRead] = useState(!!(st && st.ask_read));
     /* Ba o ket noi. Bat buoc phai sua duoc ngay tai day: khi may chu chet, thong
        bao loi bao "mo Cai dat de doi dia chi" — neu cho nay chi hien thi thi loi
@@ -341,15 +341,8 @@
             </div>
           </div>
 
-          <label className="ag-cfg__sw">
-            <input type="checkbox" checked={thinking} onChange={function (e) {
-              setThinking(e.target.checked); onSave({ thinking: e.target.checked });
-            }} />
-            <span>
-              <b>{TX('Cho agent suy nghĩ kỹ trước khi trả lời')}</b>
-              <i>{TX('Chậm hơn một chút nhưng làm việc khó tốt hơn hẳn.')}</i>
-            </span>
-          </label>
+          {/* Muc suy nghi da chuyen thanh chip Effort o thanh duoi, khong de o day
+              nua — de hai cho cung chinh mot thu thi kieu gi cung co luc lech. */}
 
           <label className="ag-cfg__sw">
             <input type="checkbox" checked={askRead} onChange={function (e) {
@@ -411,6 +404,122 @@
             <i className="ph-bold ph-broom"></i>{TX('Bắt đầu cuộc trò chuyện mới')}
           </button>
         </div>
+      </div>
+    );
+  }
+
+  /* --------------------------------------------------------------------------
+     4B. CHON MODEL VA MUC EFFORT — hai chip o goc phai thanh duoi
+     ------------------------------------------------------------------------ */
+
+  function ModelPicker({ st, onPick }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
+    useClickOutside(ref, function () { setOpen(false); }, open);
+    useEscape(function () { setOpen(false); }, open);
+
+    const list = (st && st.models) || [];
+    const curId = (st && st.model) || '';
+    const cur1m = !!(st && st.ctx_1m);
+    const cur = list.filter(function (m) {
+      return m.id === curId && !!m.ctx1m === cur1m;
+    })[0] || { ten: curId || '—', ctx1m: cur1m };
+
+    /* Phim tat 1..5 khi menu dang mo. Menu co in san so ben phai moi dong, neu
+       bam so ma khong chay thi con so do chi la trang tri gay hieu nham. */
+    useEffect(function () {
+      if (!open) return;
+      function onKey(e) {
+        const n = parseInt(e.key, 10);
+        if (n >= 1 && n <= list.length) {
+          e.preventDefault();
+          e.stopPropagation();
+          const m = list[n - 1];
+          setOpen(false);
+          onPick({ model: m.id, ctx_1m: !!m.ctx1m });
+        }
+      }
+      window.addEventListener('keydown', onKey, true);
+      return function () { window.removeEventListener('keydown', onKey, true); };
+    }, [open, list, onPick]);
+
+    return (
+      <div className="ag-pk" ref={ref}>
+        <button className={'ag-pk__b' + (open ? ' is-on' : '')}
+                onClick={function () { setOpen(!open); }}>
+          <span>{cur.ten}</span>
+          {cur.ctx1m ? <b className="ag-pk__1m">1M</b> : null}
+          <i className="ph-bold ph-caret-up"></i>
+        </button>
+        {open ? (
+          <div className="ag-pk__menu" role="listbox">
+            <div className="ag-pk__h">{TX('Mô hình')}</div>
+            {list.map(function (m, i) {
+              const on = m.id === curId && !!m.ctx1m === cur1m;
+              return (
+                <button key={i} role="option" aria-selected={on}
+                        className={'ag-pk__i' + (on ? ' is-on' : '')}
+                        onClick={function () {
+                          setOpen(false);
+                          onPick({ model: m.id, ctx_1m: !!m.ctx1m });
+                        }}>
+                  <span className="ag-pk__n">
+                    {m.ten}
+                    {m.ctx1m ? <b className="ag-pk__1m">1M</b> : null}
+                  </span>
+                  <span className="ag-pk__g">{m.ghi}</span>
+                  {on ? <i className="ph-bold ph-check"></i> : <em>{i + 1}</em>}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  /* Thanh truot 5 nac. Dung <input type="range"> that chu khong ve tay: no cho
+     keo bang chuot, bam mui ten, va doc duoc bang trinh doc man hinh — mien phi. */
+  function EffortPicker({ st, onPick }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
+    useClickOutside(ref, function () { setOpen(false); }, open);
+    useEscape(function () { setOpen(false); }, open);
+
+    const val = (st && st.effort) || 5;
+    const name = (st && st.effort_name) || '';
+
+    return (
+      <div className="ag-pk" ref={ref}>
+        <button className={'ag-pk__b' + (open ? ' is-on' : '')}
+                onClick={function () { setOpen(!open); }}
+                title={TX('Mức suy nghĩ')}>
+          <span>{TX(name)}</span>
+          <i className="ph-bold ph-caret-up"></i>
+        </button>
+        {open ? (
+          <div className="ag-pk__menu ag-pk__menu--eff">
+            <div className="ag-eff__t">
+              {TX('Mức suy nghĩ')} <b>{TX(name)}</b>
+            </div>
+            <input
+              className="ag-eff__r"
+              type="range" min="1" max="5" step="1" value={val}
+              onChange={function (e) { onPick({ effort: +e.target.value }); }}
+            />
+            <div className="ag-eff__lb">
+              <span>{TX('Nhanh hơn')}</span>
+              <span>{TX('Kỹ hơn')}</span>
+            </div>
+            <div className="ag-eff__d">
+              {val <= 1
+                ? TX('Trả lời ngay, gần như không suy nghĩ. Hợp với việc đơn giản.')
+                : val >= 5
+                  ? TX('Suy nghĩ lâu nhất. Chậm hơn nhưng làm việc khó tốt hơn hẳn.')
+                  : TX('Cân bằng giữa tốc độ và độ kỹ.')}
+            </div>
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -597,19 +706,6 @@
 
           <span className="ag__spacer" />
 
-          <div className="ag__mode" role="group" aria-label={TX('Chế độ quyền')}>
-            <button className={'ag__mode__b' + (mode === 'manual' ? ' is-on' : '')}
-                    onClick={function () { setMode('manual'); }}
-                    title={TX('Hỏi bạn trước khi ghi file hoặc chạy lệnh')}>
-              <i className="ph-fill ph-shield-check"></i>{TX('Cần duyệt')}
-            </button>
-            <button className={'ag__mode__b ag__mode__b--free' + (mode === 'bypass' ? ' is-on' : '')}
-                    onClick={function () { setMode('bypass'); }}
-                    title={TX('Agent tự làm, không hỏi')}>
-              <i className="ph-fill ph-lightning"></i>{TX('Tự do')}
-            </button>
-          </div>
-
           <button className="ag__ib" onClick={function () { setCfgOpen(!cfgOpen); }} title={TX('Cài đặt')}>
             <i className="ph-fill ph-gear-six"></i>
           </button>
@@ -723,10 +819,23 @@
               </button>
             )}
           </div>
-          <div className="ag__tip">
-            {mode === 'bypass'
-              ? <span className="ag__tip--warn"><i className="ph-fill ph-lightning"></i>{TX('Chế độ tự do: agent sửa file và chạy lệnh mà không hỏi bạn.')}</span>
-              : <span><i className="ph-fill ph-shield-check"></i>{TX('Chế độ cần duyệt: agent sẽ hỏi trước khi sửa file hay chạy lệnh.')}</span>}
+          {/* Thanh duoi: ben trai la che do quyen, ben phai la model + muc suy nghi.
+              Bo cuc nay hoc theo Claude App — moi thu dieu khien cuoc tro chuyen
+              deu nam ngay canh o nhap, khong phai lan len thanh tren tim. */}
+          <div className="ag__bot">
+            <button className={'ag__perm' + (mode === 'bypass' ? ' is-free' : '')}
+                    onClick={function () { setMode(mode === 'bypass' ? 'manual' : 'bypass'); }}
+                    title={mode === 'bypass'
+                      ? TX('Đang tự do. Bấm để chuyển sang cần duyệt.')
+                      : TX('Đang cần duyệt. Bấm để chuyển sang tự do.')}>
+              <i className={mode === 'bypass' ? 'ph-fill ph-lightning' : 'ph-fill ph-shield-check'}></i>
+              {mode === 'bypass' ? TX('Tự do') : TX('Cần duyệt')}
+            </button>
+
+            <span className="ag__bot__sp" />
+
+            <ModelPicker st={st} onPick={saveCfg} />
+            <EffortPicker st={st} onPick={saveCfg} />
           </div>
         </footer>
 
