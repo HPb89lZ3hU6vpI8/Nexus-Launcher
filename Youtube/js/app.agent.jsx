@@ -889,7 +889,10 @@
       if (r && r.success) {
         setSes({ list: r.list || [], current: r.current || '' });
         if (r.running) setRunning(r.running);
-        setCurSid(function (p) { return p || r.current || ''; });
+        /* KHONG tu chon phien nao. Truoc day dong nay lay `r.current` — la phien
+           dung gan nhat doc tu file — nen vua mo khung chat len la da thay mot
+           phien sang len o thanh ben du nguoi dung chua bam gi. Gio mo len thi
+           man hinh trong, bam vao mot phien moi tinh la chon no. */
       }
     }, []);
 
@@ -1128,6 +1131,10 @@
       stick.current = true;
       const r = await callApi('ai_send', msg || TX('Xem ảnh này giúp tôi.'),
         pics.map(function (x) { return { media_type: x.media_type, data: x.data }; }), sid);
+      /* Nap lai thanh ben: phien vua gui tin dau tien den luc nay moi thanh mot
+         cuoc tro chuyen that. Khong goi o day thi bam "Cuoc tro chuyen moi" roi
+         go va gui xong van khong thay no hien ra ben trai. */
+      if (r && r.success) loadSes();
       if (!r || !r.success) {
         setBusy(false);
         setById(function (p) {
