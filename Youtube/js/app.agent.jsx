@@ -573,7 +573,11 @@
 
   function whenText(ts) {
     if (!ts) return '';
-    const d = new Date(ts * 1000);
+    /* Python gui ve so giay epoch. Van chan truong hop ban ghi cu hoac la
+       kieu khac: khong chan thi giao dien hien thang "aN/aN" ra man hinh. */
+    const n = Number(ts);
+    const d = new Date(isFinite(n) && n > 0 ? n * 1000 : Date.parse(ts));
+    if (isNaN(d.getTime())) return '';
     const now = new Date();
     const sameDay = d.toDateString() === now.toDateString();
     const hh = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);

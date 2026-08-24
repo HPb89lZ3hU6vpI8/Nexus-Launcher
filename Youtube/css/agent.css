@@ -46,6 +46,38 @@
   font-family: var(--f-ui);
 }
 
+/* ------------------------------------------------- boi den chu de Ctrl+C
+
+   base.css khoa `user-select: none` tren <body> cho ca launcher, vi day la
+   app desktop chu khong phai trang web. Nhung trong khung chat thi nguoc lai:
+   nguoi dung phai to duoc mot doan bat ky roi Ctrl+C, giong Gemini hay Claude.
+   Nut chep ca khoi van con, hai cach bo tro nhau chu khong thay nhau.
+   Mo cho tung khoi chu mot, khong mo ca vung, de nhan nut va nhan cong cu
+   khong bi to nham khi keo chuot. */
+
+.ag__me,
+.ag__ai,
+.ag-md,
+.ag-think__body,
+.ag-tool__out,
+.ag-ask__diff,
+.ag__cap {
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+}
+
+/* Nut nam trong nhung khoi tren thi tra lai nhu cu, khong cho to. */
+.ag__me button, .ag__ai button, .ag-md button,
+.ag-think__body button, .ag-tool__out button {
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+/* Vet boi den: dung mau nhan cua launcher cho dong bo. */
+.ag ::selection { background: color-mix(in srgb, var(--br-2) 34%, transparent); color: var(--tx-hi); }
+
 /* -------------------------------------------------------------- thanh tren */
 
 .ag__bar {
@@ -442,13 +474,13 @@
 
 /* ---- nut chep ---- */
 
-.ag__mebox { position: relative; }
+.ag__mebox { position: relative; display: flex; flex-direction: column; align-items: flex-end; }
 .ag__ai { position: relative; }
 
 .ag__cp {
-  position: absolute;
   display: grid;
   place-items: center;
+  flex: 0 0 auto;
   width: 26px; height: 26px;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
@@ -462,15 +494,16 @@
               border-color var(--t-fast) var(--e-out);
 }
 /* Tin cua minh: nut nam ben TRAI bong bong. Cua agent: nam duoi, le trai. */
-.ag__cp--me { top: 2px; left: -32px; }
-.ag__cp--ai { bottom: -6px; left: 0; }
+/* Nut nam han o dong duoi, chiem cho that.
+   Ban cu dat absolute chong len khoi chu: dong cuoi cua cau tra loi bi nut
+   de mat may chu dau. Khong bo tri chong len chu nua — no cho ra cam giac
+   lam au. Vi nut luon giu cho san nen luc an hay hien bo cuc cung khong nhay. */
+.ag__cp--me { align-self: flex-end; margin-top: 5px; }
+.ag__cp--ai { margin-top: 6px; }
 
-.ag__row:hover .ag__cp { opacity: .75; pointer-events: auto; }
+.ag__row:hover .ag__cp { opacity: .7; pointer-events: auto; }
 .ag__cp:hover { opacity: 1 !important; color: var(--tx-hi); border-color: var(--line-strong); }
 .ag__cp.is-ok { opacity: 1 !important; color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
-
-/* Chua cho nut chep cua agent khoi de len doan sau */
-.ag__row:has(.ag__cp--ai) { margin-bottom: 28px; }
 
 /* Chu cua agent: mau diu, do dam binh thuong, dong thoang.
    Truoc day chu qua sang va qua dam nen doc len rat "may moc" — nhin la biet

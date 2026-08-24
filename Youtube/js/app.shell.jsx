@@ -65,6 +65,13 @@
 
       const onCtx = function (e) {
         if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+        // Dang boi den mot doan chu thi cho menu hien, de con muc Copy.
+        // Khong co ngoai le nay thi to xong bam chuot phai lai khong ra gi,
+        // nguoi dung tuong hong. Ctrl+C van chay du co menu hay khong.
+        try {
+          const sel = window.getSelection && window.getSelection();
+          if (sel && !sel.isCollapsed && String(sel).trim()) return;
+        } catch (err) { /* khong lay duoc vung to thi chan nhu cu */ }
         e.preventDefault();
       };
       const onKey = function (e) {
