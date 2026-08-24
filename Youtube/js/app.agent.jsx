@@ -298,24 +298,7 @@
   function Settings({ st, onClose, onSave }) {
     const [cwd, setCwd] = useState((st && st.cwd) || '');
     const [askRead, setAskRead] = useState(!!(st && st.ask_read));
-    /* Ba o ket noi. Bat buoc phai sua duoc ngay tai day: khi may chu chet, thong
-       bao loi bao "mo Cai dat de doi dia chi" — neu cho nay chi hien thi thi loi
-       khuyen do dan nguoi dung vao ngo cut. */
-    const [url, setUrl] = useState((st && st.base_url) || '');
-    const [model, setModel] = useState((st && st.model) || '');
-    const [key, setKey] = useState('');
-    const [saved, setSaved] = useState(false);
     const toast = useToast();
-
-    function saveConn() {
-      const patch = { base_url: url.trim(), model: model.trim() };
-      if (key.trim()) patch.api_key = key.trim();   // bo trong = giu khoa cu
-      onSave(patch);
-      setKey('');
-      setSaved(true);
-      setTimeout(function () { setSaved(false); }, 1800);
-      toast.push({ tone: 'ok', title: TX('Đã lưu kết nối') });
-    }
 
     return (
       <div className="ag-cfg">
@@ -354,43 +337,12 @@
             </span>
           </label>
 
-          <div className="ag-cfg__sep">{TX('Kết nối')}</div>
-
-          <div className="ag-cfg__row">
-            <div className="ag-cfg__lb">{TX('Địa chỉ máy chủ')}</div>
-            <div className="ag-cfg__hint">
-              {TX('Mặc định lấy từ file nexus_agent.py trên máy bạn. Chỉ sửa ở đây khi muốn đổi tạm.')}
-            </div>
-            <input className="ag-in ag-in--w" value={url} spellCheck={false}
-                   placeholder="https://..."
-                   onChange={function (e) { setUrl(e.target.value); }} />
-          </div>
-
-          <div className="ag-cfg__row">
-            <div className="ag-cfg__lb">{TX('Mô hình')}</div>
-            <input className="ag-in ag-in--w" value={model} spellCheck={false}
-                   placeholder="claude-opus-5"
-                   onChange={function (e) { setModel(e.target.value); }} />
-          </div>
-
-          <div className="ag-cfg__row">
-            <div className="ag-cfg__lb">{TX('Khoá API')}</div>
-            <div className="ag-cfg__hint">
-              {st && st.has_key
-                ? TX('Đã có khoá sẵn trong nexus_agent.py. Để trống nếu không muốn đổi.')
-                : TX('Chưa có khoá. Khoá chỉ nằm trên máy bạn, không bao giờ lên mạng.')}
-            </div>
-            <input className="ag-in ag-in--w" type="password" value={key} spellCheck={false}
-                   placeholder={st && st.has_key ? '••••••••••••' : TX('Dán khoá vào đây')}
-                   onChange={function (e) { setKey(e.target.value); }} />
-          </div>
-
-          <button className="nx-btn nx-btn--primary nx-btn--sm nx-btn--full" onClick={saveConn}>
-            <i className={saved ? 'ph-bold ph-check' : 'ph-bold ph-floppy-disk'}></i>
-            {saved ? TX('Đã lưu') : TX('Lưu kết nối')}
-          </button>
-
+          {/* Khong con phan Ket noi o day. Dia chi may chu, khoa API va mo hinh
+              deu lay tu hang so trong nexus_agent.py — do la nguon duy nhat.
+              De thanh o sua duoc trong giao dien chi tao ra kha nang hai noi
+              lech nhau roi kho lan ra dang chay bang cai nao. */}
           <div className="ag-cfg__info">
+            <div><span>{TX('Máy chủ')}</span><b>{(st && st.base_url) || '—'}</b></div>
             <div><span>{TX('Tìm web')}</span><b>{st && st.has_exa ? TX('có') : TX('chưa bật')}</b></div>
             <div><span>{TX('Số công cụ')}</span><b>{(st && st.tools && st.tools.length) || 0}</b></div>
           </div>
@@ -405,6 +357,106 @@
           </button>
         </div>
       </div>
+    );
+  }
+
+  /* --------------------------------------------------------------------------
+     4A. DANH SACH CUOC TRO CHUYEN
+
+     Python luu messages theo dinh dang cua API (co tool_use, tool_result,
+     thinking). Khi mo lai mot phien cu, phai doi nguoc ve dang hien thi —
+     do la viec cua msgsToItems() ben duoi.
+     ------------------------------------------------------------------------ */
+
+  function msgsToItems(msgs) {
+    const out = [];
+    const toolAt = {};                 // id tool -> vi tri trong out, de ghep ket qua
+    (msgs || []).forEach(function (m, mi) {
+      const role = m.role;
+      const c = m.content;
+
+      if (typeof c === 'string') {
+        out.push({ k: role === 'user' ? 'me' : 'text', s: c, id: 'h' + mi });
+        return;
+      }
+      if (!Array.isArray(c)) return;
+
+      c.forEach(function (b, bi) {
+        const id = 'h' + mi + '_' + bi;
+        if (b.type === 'text') {
+          if (role === 'user') out.push({ k: 'me', s: b.text || '', id: id });
+          else out.push({ k: 'text', s: b.text || '', id: id });
+        } else if (b.type === 'thinking') {
+          out.push({ k: 'think', s: b.thinking || '', id: id });
+        } else if (b.type === 'tool_use') {
+          toolAt[b.id] = out.length;
+          out.push({ k: 'tool', id: b.id, name: b.name, args: b.input || {},
+                     summary: sumOf(b.name, b.input || {}), state: 'ok' });
+        } else if (b.type === 'tool_result') {
+          const at = toolAt[b.tool_use_id];
+          if (at !== undefined && out[at]) {
+            out[at].out = typeof b.content === 'string' ? b.content : '';
+            out[at].state = b.is_error ? 'bad' : 'ok';
+          }
+        }
+      });
+    });
+    return out;
+  }
+
+  /* Ban rut gon cua tool_summary ben Python — chi de dung lai lich su cu. */
+  function sumOf(name, a) {
+    a = a || {};
+    if (name === 'run_command') return String(a.command || '').slice(0, 120);
+    if (name === 'web_search') return String(a.query || '').slice(0, 120);
+    if (name === 'fetch_url') return String(a.url || '').slice(0, 120);
+    if (name === 'glob_files' || name === 'grep_files') return String(a.pattern || '');
+    if (name === 'move_path') return String(a.src || '').split(/[\\/]/).pop();
+    const p = String(a.path || '');
+    return p.split(/[\\/]/).pop() || p;
+  }
+
+  function whenText(ts) {
+    if (!ts) return '';
+    const d = new Date(ts * 1000);
+    const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    const hh = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+    if (sameDay) return hh;
+    return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2);
+  }
+
+  function SessionList({ open, list, cur, onOpen, onNew, onDelete }) {
+    useLang();
+    if (!open) return null;
+    return (
+      <aside className="ag__side">
+        <button className="ag__new" onClick={onNew}>
+          <i className="ph-bold ph-plus"></i>{TX('Cuộc trò chuyện mới')}
+        </button>
+
+        <div className="ag__side__h">{TX('Gần đây')}</div>
+
+        <div className="ag__side__l">
+          {!list.length ? (
+            <div className="ag__side__e">{TX('Chưa có cuộc nào')}</div>
+          ) : list.map(function (s) {
+            return (
+              <div key={s.id} className={'ag__ses' + (s.id === cur ? ' is-on' : '')}>
+                <button className="ag__ses__b" onClick={function () { onOpen(s.id); }}
+                        title={s.title}>
+                  <span className="ag__ses__t">{s.title}</span>
+                  <span className="ag__ses__m">{whenText(s.updated)}</span>
+                </button>
+                <button className="ag__ses__x" title={TX('Xoá')}
+                        onClick={function (e) { e.stopPropagation(); onDelete(s.id); }}>
+                  <i className="ph-bold ph-trash"></i>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </aside>
     );
   }
 
@@ -545,6 +597,8 @@
     const [draft, setDraft] = useState('');
     const [st, setSt] = useState(null);
     const [cfgOpen, setCfgOpen] = useState(false);
+    const [sideOpen, setSideOpen] = useState(true);
+    const [ses, setSes] = useState({ list: [], current: '' });
     const bodyRef = useRef(null);
     const taRef = useRef(null);
     const stick = useRef(true);
@@ -556,7 +610,38 @@
       else setSt({ success: false, error: (r && r.error) || '' });
     }, []);
 
-    useEffect(function () { refresh(); }, [refresh]);
+    const loadSes = useCallback(async function () {
+      const r = await callApi('ai_sessions');
+      if (r && r.success) setSes({ list: r.list || [], current: r.current || '' });
+    }, []);
+
+    useEffect(function () { refresh(); loadSes(); }, [refresh, loadSes]);
+
+    const openSes = useCallback(async function (sid) {
+      const r = await callApi('ai_session_open', sid);
+      if (!r || !r.success) {
+        toast.push({ tone: 'bad', title: TX('Không mở được'), desc: (r && r.error) || '' });
+        return;
+      }
+      setItems(msgsToItems(r.messages));
+      setSes(function (p) { return { list: p.list, current: sid }; });
+      stick.current = true;
+    }, [toast]);
+
+    const newSes = useCallback(async function () {
+      const r = await callApi('ai_reset');
+      setItems([]);
+      if (r && r.sid) setSes(function (p) { return { list: p.list, current: r.sid }; });
+      loadSes();
+    }, [loadSes]);
+
+    const delSes = useCallback(async function (sid) {
+      const r = await callApi('ai_session_delete', sid);
+      if (r && r.success) {
+        if (ses.current === sid) setItems([]);
+        loadSes();
+      }
+    }, [ses.current, loadSes]);
 
     /* --- nhan su kien Python day len ---
        Python goi window.__nxAgentPush(danhSachSuKien) theo tung dot ~50ms. */
@@ -613,10 +698,16 @@
 
     /* --- xoa lich su khi bam "cuoc tro chuyen moi" --- */
     useEffect(function () {
-      function clear() { setItems([]); }
+      function clear() { setItems([]); loadSes(); }
       window.addEventListener('nx-agent-cleared', clear);
       return function () { window.removeEventListener('nx-agent-cleared', clear); };
-    }, []);
+    }, [loadSes]);
+
+    /* Chay xong mot luot thi nap lai danh sach: Python vua ghi phien va co the
+       vua dat tieu de tu tin nhan dau tien. */
+    useEffect(function () {
+      if (!busy) loadSes();
+    }, [busy, loadSes]);
 
     /* --- tu cuon xuong, nhung ton trong khi nguoi dung dang doc o tren --- */
     useEffect(function () {
@@ -629,6 +720,25 @@
       if (!el) return;
       stick.current = (el.scrollHeight - el.scrollTop - el.clientHeight) < 90;
     }
+
+    /* Do be rong thanh cuon roi bao cho o nhap biet ma bu vao.
+
+       Vung cuon bi thanh cuon an mat vai pixel ben phai, nen truc giua cua no
+       lech sang trai so voi o nhap — do duoc 5px. CSS scrollbar-gutter khong
+       giai quyet duoc o trinh duyet nay (thu ca 'stable' lan 'both-edges' deu
+       khong doi). Do bang JS thi chac chan, va tu dung voi moi kieu thanh cuon. */
+    useEffect(function () {
+      function measure() {
+        const el = bodyRef.current;
+        if (!el) return;
+        const sbw = el.offsetWidth - el.clientWidth;
+        el.parentNode.style.setProperty('--ag-sbw', sbw + 'px');
+      }
+      measure();
+      window.addEventListener('resize', measure);
+      const t = setTimeout(measure, 400);   // do lai sau khi font va anh on dinh
+      return function () { window.removeEventListener('resize', measure); clearTimeout(t); };
+    }, [items.length, sideOpen]);
 
     /* --- gui tin nhan --- */
     const send = useCallback(async function (text) {
@@ -690,12 +800,22 @@
       callApi('ai_config', patch).then(function (r) { if (r && r.success) setSt(r); });
     }
 
+    /* Dung onKeyDown (pha noi bot) chu KHONG phai onKeyDownCapture.
+       Capture chay TRUOC khi su kien toi o nhap, nen stopPropagation o do se
+       chan luon handler Enter cua chinh o nhap -> Enter roi ve hanh vi mac dinh
+       la xuong dong. Dat o pha noi bot thi o nhap xu ly xong roi moi chan: vua
+       gui duoc tin, vua khong de phim tat cua launcher cuop mat. */
     return (
-      <div className="ag" onKeyDownCapture={function (e) { e.stopPropagation(); }}>
+      <div className="ag" onKeyDown={function (e) { e.stopPropagation(); }}>
         <div className="ag__glow" aria-hidden="true" />
 
         {/* ---- thanh tren ---- */}
         <header className="ag__bar">
+          <button className={'ag__ib ag__ib--side' + (sideOpen ? ' is-on' : '')}
+                  onClick={function () { setSideOpen(!sideOpen); }}
+                  title={TX('Danh sách cuộc trò chuyện')}>
+            <i className="ph-bold ph-sidebar-simple"></i>
+          </button>
           <span className="ag__logo"><i className="ph-fill ph-sparkle"></i></span>
           <div className="ag__id">
             <div className="ag__name">Nexus Agent</div>
@@ -706,7 +826,8 @@
 
           <span className="ag__spacer" />
 
-          <button className="ag__ib" onClick={function () { setCfgOpen(!cfgOpen); }} title={TX('Cài đặt')}>
+          <button className="ag__ib ag__ib--cfg" onClick={function () { setCfgOpen(!cfgOpen); }}
+                  title={TX('Cài đặt')}>
             <i className="ph-fill ph-gear-six"></i>
           </button>
           <button className="ag__ib ag__ib--x" onClick={onClose} title={TX('Đóng')}>
@@ -714,7 +835,15 @@
           </button>
         </header>
 
-        {/* ---- than ---- */}
+        {/* ---- than: danh sach phien ben trai, cuoc tro chuyen ben phai ---- */}
+        <div className="ag__mid">
+        <SessionList open={sideOpen} list={ses.list} cur={ses.current}
+                     onOpen={openSes} onNew={newSes} onDelete={delSes} />
+
+        {/* Cot phai gom CA vung cuon LAN o nhap. Neu de o nhap ra ngoai, no se
+            can giua toan man hinh con noi dung chat bi thanh ben day sang phai
+            -> hai cai lech truc nhau, nhin ra ngay. */}
+        <div className="ag__col">
         <div className="ag__body" ref={bodyRef} onScroll={onScroll}>
           <div className={'ag__inner' + (items.length ? '' : ' ag__inner--empty')}>
             {!items.length ? (
@@ -752,9 +881,11 @@
                 );
               }
               if (it.k === 'text') {
+                /* Khong gan avatar vao tung tin. Bong bong gradient ben phai da
+                   du de biet dau la loi minh, phan con lai la loi agent. Lap
+                   mot huy hieu sang o moi doan chi lam man hinh nhieu hon. */
                 return (
                   <div key={it.id} className="ag__row">
-                    <span className="ag__av"><i className="ph-fill ph-sparkle"></i></span>
                     <div className="ag__ai"><Markdown text={it.s} /></div>
                   </div>
                 );
@@ -838,6 +969,8 @@
             <EffortPicker st={st} onPick={saveCfg} />
           </div>
         </footer>
+        </div>
+        </div>
 
         {cfgOpen ? <Settings st={st} onClose={function () { setCfgOpen(false); }} onSave={saveCfg} /> : null}
       </div>

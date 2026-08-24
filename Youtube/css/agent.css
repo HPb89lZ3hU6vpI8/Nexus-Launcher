@@ -169,13 +169,133 @@
 
 /* -------------------------------------------------------------------- than */
 
-.ag__body {
+/* ------------------------------------------ than: danh sach phien + hoi thoai */
+
+.ag__mid {
   position: relative;
   z-index: 1;
   flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+}
+
+.ag__side {
+  flex: 0 0 auto;
+  width: 244px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-void) 55%, transparent);
+  padding: 12px 10px;
+  min-height: 0;
+}
+
+.ag__new {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  margin-bottom: 16px;
+  border: 1px solid var(--line-mid);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--tx);
+  font-family: var(--f-ui);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--t-fast) var(--e-out), color var(--t-fast) var(--e-out),
+              background var(--t-fast) var(--e-out);
+}
+.ag__new i { font-size: 13px; }
+.ag__new:hover {
+  border-color: color-mix(in srgb, var(--br-1) 40%, transparent);
+  color: var(--tx-hi);
+  background: rgba(255, 255, 255, .03);
+}
+
+.ag__side__h {
+  padding: 0 6px 8px;
+  color: var(--tx-faint);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+}
+.ag__side__l { flex: 1 1 auto; overflow-y: auto; min-height: 0; margin: 0 -4px; padding: 0 4px; }
+.ag__side__e { padding: 10px 6px; color: var(--tx-faint); font-size: 12px; }
+
+.ag__ses {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: var(--r-sm);
+  transition: background var(--t-fast) var(--e-out);
+}
+.ag__ses:hover { background: rgba(255, 255, 255, .04); }
+.ag__ses.is-on { background: var(--br-1-soft); }
+
+.ag__ses__b {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 8px 8px 9px;
+  border: 0;
+  background: transparent;
+  color: var(--tx-dim);
+  font-family: var(--f-ui);
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.ag__ses.is-on .ag__ses__b { color: var(--tx-hi); }
+.ag__ses__t {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ag__ses__m { flex: 0 0 auto; color: var(--tx-faint); font-family: var(--f-num); font-size: 10.5px; }
+
+.ag__ses__x {
+  flex: 0 0 auto;
+  display: none;
+  place-items: center;
+  width: 24px; height: 24px;
+  margin-right: 5px;
+  border: 0; border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--tx-faint);
+  font-size: 12px;
+  cursor: pointer;
+}
+.ag__ses:hover .ag__ses__x { display: grid; }
+.ag__ses__x:hover { color: var(--bad); background: var(--bad-soft); }
+
+.ag__ib--side.is-on { color: var(--tx-hi); border-color: var(--line-mid); }
+
+/* Cot phai: vung cuon o tren, o nhap o duoi. Ca hai cung mot be ngang nen
+   truc giua cua chat va truc giua cua o nhap trung nhau. */
+.ag__col {
+  --ag-sbw: 0px;          /* JS do be rong thanh cuon roi ghi vao day */
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* KHONG dat scrollbar-gutter o day. Viec chua cho thanh cuon do JS lo: no do
+   be rong that roi ghi vao bien --ag-sbw, o nhap ben duoi bu dung tung do.
+   Dung ca hai thi bu hai lan -> lech nguoc lai 9px (da mac dung loi nay). */
+.ag__body {
+  flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-gutter: stable;
+  min-width: 0;
 }
 .ag__inner {
   width: 100%;
@@ -195,43 +315,33 @@
   padding-bottom: 26px;
 }
 
-.ag__row { display: flex; gap: 12px; margin-bottom: 18px; }
+.ag__row { display: flex; gap: 12px; margin-bottom: 20px; }
 .ag__row--me { justify-content: flex-end; }
-.ag__row--sub { padding-left: 44px; margin-bottom: 12px; }
-
-.ag__av {
-  display: grid;
-  place-items: center;
-  width: 32px; height: 32px;
-  flex: 0 0 auto;
-  border-radius: var(--r-sm);
-  background: var(--grad-brand);
-  color: #04131a;
-  font-size: 15px;
-  margin-top: 1px;
-}
+.ag__row--sub { margin-bottom: 12px; }
 
 .ag__me {
-  max-width: 78%;
-  padding: 11px 16px;
+  max-width: 74%;
+  padding: 10px 15px;
   border-radius: var(--r-lg) var(--r-lg) var(--r-xs) var(--r-lg);
   background: var(--grad-brand);
-  color: #05141c;
-  font-size: 14.5px;
-  line-height: 1.62;
-  font-weight: 560;
+  color: #06161f;
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 520;
   white-space: pre-wrap;
   word-break: break-word;
-  box-shadow: 0 8px 24px -12px rgba(58, 216, 255, .5);
 }
 
+/* Chu cua agent: mau diu, do dam binh thuong, dong thoang.
+   Truoc day chu qua sang va qua dam nen doc len rat "may moc" — nhin la biet
+   ngay may viet. Chu thuong, khoang cach rong mot chut thi de doc hon nhieu. */
 .ag__ai {
   flex: 1 1 auto;
   min-width: 0;
   font-size: 14.5px;
-  line-height: 1.72;
+  line-height: 1.78;
   color: var(--tx);
-  padding-top: 3px;
+  font-weight: 400;
 }
 
 /* --------------------------------------------------------------- man chao */
@@ -571,21 +681,40 @@
 
 .ag-md > *:first-child { margin-top: 0; }
 .ag-md > *:last-child { margin-bottom: 0; }
-.ag-p { margin: 0 0 11px; white-space: pre-wrap; word-break: break-word; }
-.ag-ul { margin: 0 0 11px; padding-left: 21px; }
-.ag-ul li { margin-bottom: 5px; }
-.ag-h { font-family: var(--f-display); font-weight: 730; color: var(--tx-hi); margin: 15px 0 8px; }
-.ag-h--1 { font-size: 19px; }
-.ag-h--2 { font-size: 17px; }
-.ag-h--3 { font-size: 15px; }
+.ag-p { margin: 0 0 12px; white-space: pre-wrap; word-break: break-word; }
+.ag-md strong { font-weight: 620; color: var(--tx-hi); }
+
+/* Gach dau dong tu ve bang dau cham nho, khong dung bullet mac dinh cua trinh
+   duyet — bullet do to va dam, dung nhieu se thanh mot rung cham den. */
+.ag-ul { margin: 0 0 12px; padding-left: 4px; list-style: none; }
+.ag-ul li {
+  position: relative;
+  padding-left: 17px;
+  margin-bottom: 6px;
+}
+.ag-ul li::before {
+  content: '';
+  position: absolute;
+  left: 3px; top: .72em;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--tx-faint);
+}
+
+.ag-h { font-family: var(--f-ui); font-weight: 660; color: var(--tx-hi); margin: 18px 0 9px; }
+.ag-h--1 { font-size: 17px; }
+.ag-h--2 { font-size: 15.5px; }
+.ag-h--3 { font-size: 14.5px; }
 .ag-h--4 { font-size: 14px; }
 
+/* Code trong dong: nen mo, KHONG vien, mau gan voi chu thuong.
+   Ban cu dung vien + mau cyan sang, moi doan van co vai tu nhu vay la ca man
+   hinh lap lanh — do chinh la thu lam giao dien trong "may lam". */
 .ag-code {
-  padding: 2px 6px;
-  border-radius: var(--r-xs);
-  background: var(--bg-void);
-  border: 1px solid var(--line);
-  color: var(--br-1);
+  padding: 1.5px 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, .062);
+  color: #b9d9f2;
   font-family: var(--f-num);
   font-size: 12.5px;
   word-break: break-word;
@@ -626,11 +755,13 @@
 
 /* ----------------------------------------------------------------- o nhap */
 
+/* padding-right cong them be rong thanh cuon: vung cuon o tren bi thanh cuon
+   an mat tung do pixel ben phai, khong bu thi hai khoi lech truc nhau. */
 .ag__foot {
   position: relative;
   z-index: 2;
   flex: 0 0 auto;
-  padding: 12px 26px 14px;
+  padding: 12px calc(26px + var(--ag-sbw, 0px)) 14px 26px;
   border-top: 1px solid var(--line);
   background: color-mix(in srgb, var(--bg-surface) 86%, transparent);
   backdrop-filter: blur(16px);
@@ -650,9 +781,11 @@
   background: var(--bg-sunken);
   transition: border-color var(--t-fast) var(--e-out), box-shadow var(--t-fast) var(--e-out);
 }
+/* Vien khi go: mo len mot bac, KHONG dung vong sang. Vong sang cyan day
+   quanh o nhap nhin rat choi va cung la mot dau hieu "giao dien AI". */
 .ag__in:focus-within {
-  border-color: var(--focus);
-  box-shadow: var(--focus-ring);
+  border-color: color-mix(in srgb, var(--br-1) 42%, var(--line-mid));
+  background: color-mix(in srgb, var(--bg-sunken) 82%, var(--bg-surface));
 }
 
 .ag__ta {
