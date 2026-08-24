@@ -381,11 +381,24 @@
       }
       if (!Array.isArray(c)) return;
 
+      /* Anh trong CUNG mot tin nhan phai gom lai roi gan vao bong bong chu,
+         khong tach thanh dong rieng — nguoi dung gui anh kem cau hoi thi luc
+         xem lai cung phai thay chung o cung mot cho. */
+      const pics = c.filter(function (b) { return b.type === 'image'; })
+                    .map(function (b) {
+                      const s = (b.source || {});
+                      return 'data:' + (s.media_type || 'image/png') + ';base64,' + (s.data || '');
+                    });
+      let picsUsed = false;
+
       c.forEach(function (b, bi) {
         const id = 'h' + mi + '_' + bi;
         if (b.type === 'text') {
-          if (role === 'user') out.push({ k: 'me', s: b.text || '', id: id });
-          else out.push({ k: 'text', s: b.text || '', id: id });
+          if (role === 'user') {
+            const it = { k: 'me', s: b.text || '', id: id };
+            if (pics.length && !picsUsed) { it.pics = pics; picsUsed = true; }
+            out.push(it);
+          } else out.push({ k: 'text', s: b.text || '', id: id });
         } else if (b.type === 'thinking') {
           out.push({ k: 'think', s: b.thinking || '', id: id });
         } else if (b.type === 'tool_use') {
@@ -426,7 +439,58 @@
     return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2);
   }
 
-  function SessionList({ open, list, cur, onOpen, onNew, onDelete }) {
+  function SessionRow({ s, on, onOpen, onDelete, onRename }) {
+    const [edit, setEdit] = useState(false);
+    const [val, setVal] = useState(s.title);
+    const inRef = useRef(null);
+
+    useEffect(function () {
+      if (edit && inRef.current) { inRef.current.focus(); inRef.current.select(); }
+    }, [edit]);
+
+    function done(save) {
+      setEdit(false);
+      const t = val.trim();
+      if (save && t && t !== s.title) onRename(s.id, t);
+      else setVal(s.title);
+    }
+
+    if (edit) {
+      return (
+        <div className="ag__ses is-edit">
+          <input ref={inRef} className="ag__ses__in" value={val} spellCheck={false}
+                 onChange={function (e) { setVal(e.target.value); }}
+                 onBlur={function () { done(true); }}
+                 onKeyDown={function (e) {
+                   e.stopPropagation();
+                   if (e.key === 'Enter') { e.preventDefault(); done(true); }
+                   if (e.key === 'Escape') { e.preventDefault(); done(false); }
+                 }} />
+        </div>
+      );
+    }
+
+    return (
+      <div className={'ag__ses' + (on ? ' is-on' : '')}>
+        <button className="ag__ses__b" onClick={function () { onOpen(s.id); }}
+                onDoubleClick={function () { setVal(s.title); setEdit(true); }}
+                title={s.title + ' — ' + TX('bấm đúp để đổi tên')}>
+          <span className="ag__ses__t">{s.title}</span>
+          <span className="ag__ses__m">{whenText(s.updated)}</span>
+        </button>
+        <button className="ag__ses__i" title={TX('Đổi tên')}
+                onClick={function (e) { e.stopPropagation(); setVal(s.title); setEdit(true); }}>
+          <i className="ph-bold ph-pencil-simple"></i>
+        </button>
+        <button className="ag__ses__x" title={TX('Xoá')}
+                onClick={function (e) { e.stopPropagation(); onDelete(s.id); }}>
+          <i className="ph-bold ph-trash"></i>
+        </button>
+      </div>
+    );
+  }
+
+  function SessionList({ open, list, cur, onOpen, onNew, onDelete, onRename }) {
     useLang();
     if (!open) return null;
     return (
@@ -441,19 +505,8 @@
           {!list.length ? (
             <div className="ag__side__e">{TX('Chưa có cuộc nào')}</div>
           ) : list.map(function (s) {
-            return (
-              <div key={s.id} className={'ag__ses' + (s.id === cur ? ' is-on' : '')}>
-                <button className="ag__ses__b" onClick={function () { onOpen(s.id); }}
-                        title={s.title}>
-                  <span className="ag__ses__t">{s.title}</span>
-                  <span className="ag__ses__m">{whenText(s.updated)}</span>
-                </button>
-                <button className="ag__ses__x" title={TX('Xoá')}
-                        onClick={function (e) { e.stopPropagation(); onDelete(s.id); }}>
-                  <i className="ph-bold ph-trash"></i>
-                </button>
-              </div>
-            );
+            return <SessionRow key={s.id} s={s} on={s.id === cur} onOpen={onOpen}
+                               onDelete={onDelete} onRename={onRename} />;
           })}
         </div>
       </aside>
@@ -476,6 +529,9 @@
     const cur = list.filter(function (m) {
       return m.id === curId && !!m.ctx1m === cur1m;
     })[0] || { ten: curId || '—', ctx1m: cur1m };
+    /* Chi co dung mot model thi khong mo menu — bam vao chi de thay mot dong
+       duy nhat la vo duyen. Luc do chip chi con la nhan. */
+    const single = list.length <= 1;
 
     /* Phim tat 1..5 khi menu dang mo. Menu co in san so ben phai moi dong, neu
        bam so ma khong chay thi con so do chi la trang tri gay hieu nham. */
@@ -497,13 +553,15 @@
 
     return (
       <div className="ag-pk" ref={ref}>
-        <button className={'ag-pk__b' + (open ? ' is-on' : '')}
-                onClick={function () { setOpen(!open); }}>
+        <button className={'ag-pk__b' + (open ? ' is-on' : '') + (single ? ' is-lone' : '')}
+                onClick={function () { if (!single) setOpen(!open); }}
+                disabled={single}
+                title={single ? cur.ten : TX('Chọn mô hình')}>
           <span>{cur.ten}</span>
           {cur.ctx1m ? <b className="ag-pk__1m">1M</b> : null}
-          <i className="ph-bold ph-caret-up"></i>
+          {single ? null : <i className="ph-bold ph-caret-up"></i>}
         </button>
-        {open ? (
+        {open && !single ? (
           <div className="ag-pk__menu" role="listbox">
             <div className="ag-pk__h">{TX('Mô hình')}</div>
             {list.map(function (m, i) {
@@ -599,9 +657,52 @@
     const [cfgOpen, setCfgOpen] = useState(false);
     const [sideOpen, setSideOpen] = useState(true);
     const [ses, setSes] = useState({ list: [], current: '' });
+    const [imgs, setImgs] = useState([]);        // anh dinh kem chua gui
+    const [drag, setDrag] = useState(false);
     const bodyRef = useRef(null);
     const taRef = useRef(null);
+    const fileRef = useRef(null);
     const stick = useRef(true);
+
+    /* --- dinh kem anh: chon file, dan Ctrl+V, hoac keo tha ---
+       Khong gioi han so luong hay dung luong o day. Neu anh qua to thi chinh
+       API se tu bao loi, va thong bao loi da duoc doi sang tieng Viet. */
+    const addFiles = useCallback(function (files) {
+      const arr = Array.prototype.slice.call(files || []).filter(function (f) {
+        return f && f.type && f.type.indexOf('image/') === 0;
+      });
+      arr.forEach(function (f) {
+        const fr = new FileReader();
+        fr.onload = function () {
+          const url = String(fr.result || '');
+          const comma = url.indexOf(',');
+          if (comma < 0) return;
+          setImgs(function (p) {
+            return p.concat([{
+              id: 'i' + Date.now() + '_' + Math.round(Math.random() * 1e6),
+              media_type: f.type,
+              data: url.slice(comma + 1),
+              url: url,
+              name: f.name || 'anh',
+              size: f.size || 0,
+            }]);
+          });
+        };
+        fr.readAsDataURL(f);
+      });
+    }, []);
+
+    function onPaste(e) {
+      const items = (e.clipboardData && e.clipboardData.items) || [];
+      const fs = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].kind === 'file' && items[i].type.indexOf('image/') === 0) {
+          const f = items[i].getAsFile();
+          if (f) fs.push(f);
+        }
+      }
+      if (fs.length) { e.preventDefault(); addFiles(fs); }
+    }
 
     /* --- nap trang thai tu Python --- */
     const refresh = useCallback(async function () {
@@ -633,6 +734,19 @@
       setItems([]);
       if (r && r.sid) setSes(function (p) { return { list: p.list, current: r.sid }; });
       loadSes();
+    }, [loadSes]);
+
+    const renSes = useCallback(async function (sid, title) {
+      // Doi ten ngay tren giao dien roi moi goi xuong Python: bam xong thay doi
+      // lien, khong phai cho mot vong goi qua lai.
+      setSes(function (p) {
+        return { current: p.current,
+                 list: p.list.map(function (x) {
+                   return x.id === sid ? Object.assign({}, x, { title: title }) : x;
+                 }) };
+      });
+      const r = await callApi('ai_session_rename', sid, title);
+      if (!r || !r.success) loadSes();      // that bai -> nap lai ten that
     }, [loadSes]);
 
     const delSes = useCallback(async function (sid) {
@@ -743,12 +857,19 @@
     /* --- gui tin nhan --- */
     const send = useCallback(async function (text) {
       const msg = String(text == null ? draft : text).trim();
-      if (!msg || busy) return;
-      setItems(function (p) { return p.concat([{ k: 'me', id: 'm' + Date.now(), s: msg }]); });
+      const pics = imgs.slice();
+      // Cho gui khi chi co anh ma chua go chu — anh cung la mot cau hoi.
+      if ((!msg && !pics.length) || busy) return;
+      setItems(function (p) {
+        return p.concat([{ k: 'me', id: 'm' + Date.now(), s: msg,
+                           pics: pics.map(function (x) { return x.url; }) }]);
+      });
       setDraft('');
+      setImgs([]);
       setBusy(true);
       stick.current = true;
-      const r = await callApi('ai_send', msg);
+      const r = await callApi('ai_send', msg || TX('Xem ảnh này giúp tôi.'),
+        pics.map(function (x) { return { media_type: x.media_type, data: x.data }; }));
       if (!r || !r.success) {
         setBusy(false);
         setItems(function (p) {
@@ -756,7 +877,7 @@
                              s: (r && r.error) || TX('Không gửi được.') }]);
         });
       }
-    }, [draft, busy]);
+    }, [draft, busy, imgs]);
 
     const answer = useCallback(async function (pid, ok) {
       setItems(function (p) {
@@ -806,7 +927,17 @@
        la xuong dong. Dat o pha noi bot thi o nhap xu ly xong roi moi chan: vua
        gui duoc tin, vua khong de phim tat cua launcher cuop mat. */
     return (
-      <div className="ag" onKeyDown={function (e) { e.stopPropagation(); }}>
+      <div className={'ag' + (drag ? ' is-drag' : '')}
+           onKeyDown={function (e) { e.stopPropagation(); }}
+           onDragOver={function (e) { e.preventDefault(); if (!drag) setDrag(true); }}
+           onDragLeave={function (e) {
+             if (e.currentTarget === e.target) setDrag(false);
+           }}
+           onDrop={function (e) {
+             e.preventDefault();
+             setDrag(false);
+             addFiles(e.dataTransfer && e.dataTransfer.files);
+           }}>
         <div className="ag__glow" aria-hidden="true" />
 
         {/* ---- thanh tren ---- */}
@@ -838,7 +969,7 @@
         {/* ---- than: danh sach phien ben trai, cuoc tro chuyen ben phai ---- */}
         <div className="ag__mid">
         <SessionList open={sideOpen} list={ses.list} cur={ses.current}
-                     onOpen={openSes} onNew={newSes} onDelete={delSes} />
+                     onOpen={openSes} onNew={newSes} onDelete={delSes} onRename={renSes} />
 
         {/* Cot phai gom CA vung cuon LAN o nhap. Neu de o nhap ra ngoai, no se
             can giua toan man hinh con noi dung chat bi thanh ben day sang phai
@@ -876,7 +1007,16 @@
               if (it.k === 'me') {
                 return (
                   <div key={it.id} className="ag__row ag__row--me">
-                    <div className="ag__me">{it.s}</div>
+                    <div className="ag__mewrap">
+                      {it.pics && it.pics.length ? (
+                        <div className="ag__pics">
+                          {it.pics.map(function (u, i) {
+                            return <img key={i} className="ag__pic" src={u} alt="" />;
+                          })}
+                        </div>
+                      ) : null}
+                      {it.s ? <div className="ag__me">{it.s}</div> : null}
+                    </div>
                   </div>
                 );
               }
@@ -926,17 +1066,41 @@
 
         {/* ---- o nhap ---- */}
         <footer className="ag__foot">
+          {imgs.length ? (
+            <div className="ag__att">
+              {imgs.map(function (im) {
+                return (
+                  <div key={im.id} className="ag__att__i">
+                    <img src={im.url} alt="" />
+                    <button title={TX('Bỏ ảnh này')} onClick={function () {
+                      setImgs(function (p) { return p.filter(function (x) { return x.id !== im.id; }); });
+                    }}><i className="ph-bold ph-x"></i></button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+
           <div className={'ag__in' + (busy ? ' is-busy' : '')}>
+            <button className="ag__clip" disabled={!ready} title={TX('Đính kèm ảnh')}
+                    onClick={function () { if (fileRef.current) fileRef.current.click(); }}>
+              <i className="ph-bold ph-plus"></i>
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" multiple
+                   style={{ display: 'none' }}
+                   onChange={function (e) { addFiles(e.target.files); e.target.value = ''; }} />
+
             <textarea
               ref={taRef}
               className="ag__ta"
               rows={1}
               value={draft}
               disabled={!ready}
-              placeholder={ready ? TX('Nhắn gì đó cho agent... (Enter để gửi, Shift+Enter xuống dòng)')
+              placeholder={ready ? TX('Nhắn gì đó... (Enter để gửi, Shift+Enter xuống dòng, dán ảnh bằng Ctrl+V)')
                                  : TX('Chưa cấu hình khoá API')}
               onChange={function (e) { setDraft(e.target.value); }}
               onKeyDown={onKeyDown}
+              onPaste={onPaste}
             />
             {busy ? (
               <button className="ag__send ag__send--stop" onClick={function () { callApi('ai_stop'); }}
@@ -944,7 +1108,7 @@
                 <i className="ph-fill ph-stop"></i>
               </button>
             ) : (
-              <button className="ag__send" disabled={!draft.trim() || !ready}
+              <button className="ag__send" disabled={(!draft.trim() && !imgs.length) || !ready}
                       onClick={function () { send(); }} title={TX('Gửi')}>
                 <i className="ph-fill ph-paper-plane-right"></i>
               </button>
