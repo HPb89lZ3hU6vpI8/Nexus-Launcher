@@ -284,9 +284,13 @@
     );
   }
 
-  function TopBar({ tab }) {
+  function TopBar({ tab, agentOn, onAgent }) {
     useLang();
     const c = TOP_COPY[tab] || TOP_COPY.home;
+    /* Doc thang tu window.NX luc render chu khong destructure o dau file:
+       neu vi ly do nao do app.agent.jsx chua nap kip, cho nay chi la null
+       thay vi nem loi lam trang trang. */
+    const AgentBtn = window.NX && window.NX.AgentButton;
     return (
       <header className="nx-top">
         <span className="nx-top__ico" aria-hidden="true"><i className={c.i}></i></span>
@@ -298,6 +302,8 @@
         <span className="nx-top__spacer" />
 
         <SteamPill />
+
+        {AgentBtn ? <AgentBtn open={agentOn} onToggle={onAgent} /> : null}
 
         <LangPicker />
 
@@ -420,6 +426,9 @@
 
     const [tab, setTab] = useState(route.tab);
     const [active, setActive] = useState(route.game);
+    /* Khung chat AI. De o day chu khong o Rail vi thanh tren luon hien o moi
+       trang, con Rail bi an khi cua so hep. */
+    const [agentOn, setAgentOn] = useState(false);
     const [genre, setGenre] = useState('');
 
     const backTab = useRef(route.tab);
@@ -538,17 +547,21 @@
       );
     }
 
+    const AgentUI = window.NX && window.NX.AgentOverlay;
+
     return (
       <div className="nx-shell">
         <Rail tab={active ? backTab.current : tab} onTab={goTab} counts={counts} />
         <main className="nx-main">
-          <TopBar tab={view} />
+          <TopBar tab={view} agentOn={agentOn}
+                  onAgent={function () { setAgentOn(function (v) { return !v; }); }} />
           <div className="nx-scroll" ref={scrollRef} onScroll={remember}>
             <ViewSwap vkey={narrow ? 'narrow' : (active ? 'game:' + (active.id || active.appId) : tab)}>
               {body}
             </ViewSwap>
           </div>
         </main>
+        {AgentUI ? <AgentUI open={agentOn} onClose={function () { setAgentOn(false); }} /> : null}
       </div>
     );
   }
