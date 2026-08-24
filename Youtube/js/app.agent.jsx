@@ -725,14 +725,10 @@
      5. KHUNG CHAT CHINH
      ------------------------------------------------------------------------ */
 
-  /* Cau goi y giu ngan de moi the vua dung mot dong — hai the canh nhau ma mot
-     cai hai dong, mot cai mot dong thi nhin lech han. */
-  const GOI_Y = [
-    { i: 'ph-fill ph-folder-open',     t: 'Thư mục này có những gì?' },
-    { i: 'ph-fill ph-bug',             t: 'Đọc file này tìm lỗi giúp tôi' },
-    { i: 'ph-fill ph-globe',           t: 'Tìm trên web giúp tôi' },
-    { i: 'ph-fill ph-terminal-window', t: 'Chạy lệnh rồi báo kết quả' },
-  ];
+  /* Man chao co y de trong: chi logo, mot cau hoi va mot cau gioi thieu.
+     Truoc day co bon o goi y san ("Thu muc nay co nhung gi?", "Doc file nay tim
+     loi giup toi"...) nhung nguoi dung thay chung thua — go thang cau minh muon
+     van nhanh hon la doc bon lua chon roi chon mot. */
 
   function AgentPanel({ onClose }) {
     useLang();
@@ -1178,26 +1174,16 @@
             {!items.length ? (
               <div className="ag__hi">
                 <div className="ag__hi__orb"><i className="ph-fill ph-sparkle"></i></div>
-                <h2 className="ag__hi__t">{TX('Tôi giúp được gì cho bạn?')}</h2>
+                <h2 className="ag__hi__t">{TX('Tôi có thể giúp được gì cho bạn?')}</h2>
                 <p className="ag__hi__d">
-                  {TX('Tôi đọc và sửa được file trên máy bạn, chạy lệnh, và tra cứu trên mạng.')}
+                  {TX('Tôi là trợ lý AI được tích hợp vào Nexus Launcher, luôn sẵn sàng giải đáp thắc mắc và giúp bạn làm việc nhanh hơn ngay trên màn hình chính.')}
                 </p>
                 {!ready ? (
                   <div className="ag__hi__warn">
                     <i className="ph-fill ph-warning-circle"></i>
                     <span>{TX('Chưa có khoá API nên chưa dùng được. Khoá được đọc từ máy bạn, không nằm trên mạng.')}</span>
                   </div>
-                ) : (
-                  <div className="ag__hi__chips">
-                    {GOI_Y.map(function (g, i) {
-                      return (
-                        <button key={i} className="ag__chip" onClick={function () { send(g.t); }}>
-                          <i className={g.i}></i>{TX(g.t)}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                ) : null}
               </div>
             ) : null}
 
