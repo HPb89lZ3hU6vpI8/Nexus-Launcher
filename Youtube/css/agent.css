@@ -259,6 +259,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Cho quay nho bao phien nay dang chay — nhieu phien chay cung luc nen phai
+   nhin thay ngay cai nao con dang lam. Dung .nx-spin vi class do da duoc mien
+   tru khoi bo quet giam-chuyen-dong o tokens.css. */
+.ag__ses__run {
+  width: 11px; height: 11px;
+  flex: 0 0 auto;
+  align-self: center;
+}
+.ag__ses .ag__ses__m { transition: color var(--t-fast) var(--e-out); }
 .ag__ses__m { flex: 0 0 auto; color: var(--tx-faint); font-family: var(--f-num); font-size: 10.5px; }
 
 .ag__ses__x,

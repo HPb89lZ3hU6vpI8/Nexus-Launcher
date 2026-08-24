@@ -85,8 +85,13 @@
   }
 
   function Markdown({ text }) {
+    /* useDeferredValue: khi chu dang chay ve lien tuc, React duoc phep ve phan
+       Markdown o muc uu tien THAP. Nghia la neu khung hinh dang ban, no hoan
+       viec phan tich lai mot nhip thay vi chan luong — go phim va cuon chuot
+       van nhay ngay. Text cuoi cung luon dung, chi la co the cham mot nhip. */
+    const shown = React.useDeferredValue ? React.useDeferredValue(text) : text;
     const nodes = useMemo(function () {
-      const src = String(text || '');
+      const src = String(shown || '');
       const out = [];
       // Tach khoi code ba dau huyen truoc tien.
       const chunks = src.split(/```/g);
@@ -146,7 +151,7 @@
         flushPara(); flushList();
       });
       return out;
-    }, [text]);
+    }, [shown]);
     return <div className="ag-md">{nodes}</div>;
   }
 
@@ -167,6 +172,7 @@
     run_command:  { i: 'ph-fill ph-terminal-window', t: 'Chạy lệnh',       tone: 'run' },
     web_search:   { i: 'ph-fill ph-globe',           t: 'Tìm trên web',    tone: 'read' },
     fetch_url:    { i: 'ph-fill ph-link',            t: 'Đọc trang web',   tone: 'read' },
+    download_file:{ i: 'ph-fill ph-download-simple', t: 'Tải file về',     tone: 'write' },
   };
 
   function metaOf(name) {
@@ -201,6 +207,67 @@
       </div>
     );
   }
+
+  /* --------------------------------------------------------------------------
+     4C. MOT DONG TRONG CUOC TRO CHUYEN — boc React.memo
+
+     Day la thu quyet dinh do muot. Truoc day moi lan model tra ve them mot manh
+     chu (khoang 20 lan/giay), React dung lai TOAN BO danh sach: hoi thoai 80
+     dong thi 80 dong deu duoc so lai, va moi doan van deu duoc phan tich
+     Markdown lai tu dau. Cang chat lau cang giat.
+
+     Boc memo thi dong nao khong doi se khong dung lai. Luc dang tra loi chi con
+     DUNG MOT dong duoc ve lai — phan con lai dung yen hoan toan.
+     ------------------------------------------------------------------------ */
+
+  const Row = React.memo(function Row({ it, onAnswer }) {
+    if (it.k === 'me') {
+      return (
+        <div className="ag__row ag__row--me">
+          <div className="ag__mewrap">
+            {it.pics && it.pics.length ? (
+              <div className="ag__pics">
+                {it.pics.map(function (u, i) {
+                  return <img key={i} className="ag__pic" src={u} alt="" />;
+                })}
+              </div>
+            ) : null}
+            {it.s ? <div className="ag__me">{it.s}</div> : null}
+          </div>
+        </div>
+      );
+    }
+    if (it.k === 'text') {
+      return <div className="ag__row"><div className="ag__ai"><Markdown text={it.s} /></div></div>;
+    }
+    if (it.k === 'think') {
+      return <div className="ag__row ag__row--sub"><ThinkBlock text={it.s} /></div>;
+    }
+    if (it.k === 'tool') {
+      return <div className="ag__row ag__row--sub"><ToolCard item={it} /></div>;
+    }
+    if (it.k === 'ask') {
+      return <div className="ag__row ag__row--sub"><AskCard item={it} onAnswer={onAnswer} /></div>;
+    }
+    if (it.k === 'err') {
+      return (
+        <div className="ag__row ag__row--sub">
+          <div className="ag__err"><i className="ph-fill ph-warning-octagon"></i><div>{it.s}</div></div>
+        </div>
+      );
+    }
+    return <div className="ag__row ag__row--sub"><div className="ag__note">{it.s}</div></div>;
+  }, function (a, b) {
+    // Chi ve lai khi noi dung that su doi. So tung truong thay vi so ca object:
+    // moi lan nhan su kien minh tao object moi nen so bang === se luon khac.
+    const x = a.it, y = b.it;
+    return x === y || (
+      x.k === y.k && x.id === y.id && x.s === y.s &&
+      x.state === y.state && x.out === y.out &&
+      x.answered === y.answered && x.ok === y.ok &&
+      x.denied === y.denied && x.pics === y.pics
+    );
+  });
 
   function ToolCard({ item }) {
     const [open, setOpen] = useState(false);
@@ -423,6 +490,10 @@
     if (name === 'run_command') return String(a.command || '').slice(0, 120);
     if (name === 'web_search') return String(a.query || '').slice(0, 120);
     if (name === 'fetch_url') return String(a.url || '').slice(0, 120);
+    if (name === 'download_file') {
+      const u = String(a.url || '');
+      return (u.split('?')[0].replace(/\/+$/, '').split('/').pop() || u).slice(0, 120);
+    }
     if (name === 'glob_files' || name === 'grep_files') return String(a.pattern || '');
     if (name === 'move_path') return String(a.src || '').split(/[\\/]/).pop();
     const p = String(a.path || '');
@@ -439,7 +510,7 @@
     return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2);
   }
 
-  function SessionRow({ s, on, onOpen, onDelete, onRename }) {
+  function SessionRow({ s, on, run, onOpen, onDelete, onRename }) {
     const [edit, setEdit] = useState(false);
     const [val, setVal] = useState(s.title);
     const inRef = useRef(null);
@@ -475,8 +546,9 @@
         <button className="ag__ses__b" onClick={function () { onOpen(s.id); }}
                 onDoubleClick={function () { setVal(s.title); setEdit(true); }}
                 title={s.title + ' — ' + TX('bấm đúp để đổi tên')}>
+          {run ? <span className="nx-spin ag__ses__run" /> : null}
           <span className="ag__ses__t">{s.title}</span>
-          <span className="ag__ses__m">{whenText(s.updated)}</span>
+          <span className="ag__ses__m">{run ? TX('đang chạy') : whenText(s.updated)}</span>
         </button>
         <button className="ag__ses__i" title={TX('Đổi tên')}
                 onClick={function (e) { e.stopPropagation(); setVal(s.title); setEdit(true); }}>
@@ -490,7 +562,7 @@
     );
   }
 
-  function SessionList({ open, list, cur, onOpen, onNew, onDelete, onRename }) {
+  function SessionList({ open, list, cur, running, onOpen, onNew, onDelete, onRename }) {
     useLang();
     if (!open) return null;
     return (
@@ -505,8 +577,9 @@
           {!list.length ? (
             <div className="ag__side__e">{TX('Chưa có cuộc nào')}</div>
           ) : list.map(function (s) {
-            return <SessionRow key={s.id} s={s} on={s.id === cur} onOpen={onOpen}
-                               onDelete={onDelete} onRename={onRename} />;
+            return <SessionRow key={s.id} s={s} on={s.id === cur}
+                               run={(running || []).indexOf(s.id) > -1}
+                               onOpen={onOpen} onDelete={onDelete} onRename={onRename} />;
           })}
         </div>
       </aside>
@@ -650,8 +723,23 @@
   function AgentPanel({ onClose }) {
     useLang();
     const toast = useToast();
-    const [items, setItems] = useState([]);        // dong thoi gian hien thi
-    const [busy, setBusy] = useState(false);
+    /* Tin nhan luu THEO TUNG PHIEN, khong phai mot mang chung.
+       Nhieu cuoc tro chuyen chay cung luc: dang xem phien A ma phien B tra ve
+       thi ket qua cua B phai roi vao nhanh cua B, khong duoc chen vao man hinh
+       dang mo. Chuyen qua lai giua cac phien thi noi dung van con nguyen. */
+    const [byId, setById] = useState({});          // sid -> danh sach hien thi
+    const [curSid, setCurSid] = useState('');
+    const [running, setRunning] = useState([]);    // cac sid dang chay
+    const items = byId[curSid] || [];
+    const busy = running.indexOf(curSid) > -1;
+    const setBusy = useCallback(function (on) {
+      setRunning(function (p) {
+        const has = p.indexOf(curSid) > -1;
+        if (on && !has) return p.concat([curSid]);
+        if (!on && has) return p.filter(function (x) { return x !== curSid; });
+        return p;
+      });
+    }, [curSid]);
     const [draft, setDraft] = useState('');
     const [st, setSt] = useState(null);
     const [cfgOpen, setCfgOpen] = useState(false);
@@ -713,7 +801,11 @@
 
     const loadSes = useCallback(async function () {
       const r = await callApi('ai_sessions');
-      if (r && r.success) setSes({ list: r.list || [], current: r.current || '' });
+      if (r && r.success) {
+        setSes({ list: r.list || [], current: r.current || '' });
+        if (r.running) setRunning(r.running);
+        setCurSid(function (p) { return p || r.current || ''; });
+      }
     }, []);
 
     useEffect(function () { refresh(); loadSes(); }, [refresh, loadSes]);
@@ -724,15 +816,26 @@
         toast.push({ tone: 'bad', title: TX('Không mở được'), desc: (r && r.error) || '' });
         return;
       }
-      setItems(msgsToItems(r.messages));
+      // Phien dang chay san thi giu nguyen noi dung dang co tren man hinh,
+      // khong nap de — nap de se xoa mat phan agent vua viet them.
+      setById(function (p) {
+        if (r.busy && p[sid] && p[sid].length) return p;
+        const n = Object.assign({}, p);
+        n[sid] = msgsToItems(r.messages);
+        return n;
+      });
+      setCurSid(sid);
       setSes(function (p) { return { list: p.list, current: sid }; });
       stick.current = true;
     }, [toast]);
 
     const newSes = useCallback(async function () {
       const r = await callApi('ai_reset');
-      setItems([]);
-      if (r && r.sid) setSes(function (p) { return { list: p.list, current: r.sid }; });
+      if (r && r.sid) {
+        setById(function (p) { const n = Object.assign({}, p); n[r.sid] = []; return n; });
+        setCurSid(r.sid);
+        setSes(function (p) { return { list: p.list, current: r.sid }; });
+      }
       loadSes();
     }, [loadSes]);
 
@@ -752,67 +855,127 @@
     const delSes = useCallback(async function (sid) {
       const r = await callApi('ai_session_delete', sid);
       if (r && r.success) {
-        if (ses.current === sid) setItems([]);
+        setById(function (p) { const n = Object.assign({}, p); delete n[sid]; return n; });
+        setRunning(function (p) { return p.filter(function (x) { return x !== sid; }); });
+        if (curSid === sid) setCurSid('');
         loadSes();
       }
-    }, [ses.current, loadSes]);
+    }, [curSid, loadSes]);
 
     /* --- nhan su kien Python day len ---
-       Python goi window.__nxAgentPush(danhSachSuKien) theo tung dot ~50ms. */
+
+       Python goi window.__nxAgentPush(danhSachSuKien) moi ~50ms. O day KHONG
+       goi setState ngay: don su kien vao mot cai gio (ref) roi moi khung hinh
+       mot lan do het gio vao state. Lam vay thi du Python co ban su kien day
+       hon, giao dien van chi ve lai theo nhip man hinh — khong bi don ung.
+
+       Ket hop voi React.memo o Row: moi khung hinh chi ve lai dung mot dong. */
+    const inbox = useRef([]);
+    const rafId = useRef(0);
+    const applyRef = useRef(null);
+
+    /* drain PHAI doc applyEvents qua ref, khong duoc bat cung vao closure.
+       Neu viet useCallback(..., []) thi no giu mai ban applyEvents cua lan dung
+       dau tien — luc do chua co phien nao. Su kien nao thieu sid se roi vao
+       nhanh rong va co "dang chay" khong bao gio duoc tat, o nhap ket luon.
+       Loi nay tim ra khi do: bam nut Gui thi chay, bam Enter thi khong. */
+    const drain = useCallback(function () {
+      rafId.current = 0;
+      const batch = inbox.current;
+      if (!batch.length) return;
+      inbox.current = [];
+      if (applyRef.current) applyRef.current(batch);
+    }, []);
+
+    const applyEvents = useCallback(function (batch) {
+      /* Danh sach phien vua chay xong PHAI tinh o day, TRUOC khi goi setById.
+
+         Ban dau minh gom no ben trong ham cap nhat cua setById — nhung React
+         chi chay ham do luc ve lai, nen dong kiem tra ngay sau luon thay rong
+         va co "dang chay" khong bao gio duoc tat: o nhap khoa cung sau luot dau
+         tien. Tim ra khi do runtime: nut van la nut Dung du agent da tra loi
+         xong. */
+      const endedIn = [];
+      for (let i = 0; i < batch.length; i++) {
+        const e = batch[i];
+        if (e.t === 'done' || e.t === 'error' || e.t === 'stopped') {
+          endedIn.push(e.sid || curSid);
+        }
+      }
+      if (endedIn.length) {
+        setRunning(function (p) {
+          return p.filter(function (x) { return endedIn.indexOf(x) < 0; });
+        });
+      }
+
+      setById(function (prev) {
+        const next = Object.assign({}, prev);
+
+        batch.forEach(function (ev) {
+          const sid = ev.sid || curSid;
+          if (!sid) return;
+          // Chi sao chep nhanh cua phien co su kien — cac phien khac giu nguyen
+          // tham chieu cu nen React khong dung lai chung.
+          const list = (next[sid] === prev[sid]) ? (prev[sid] || []).slice() : next[sid];
+          next[sid] = list;
+
+          const t = ev.t;
+          if (t === 'text' || t === 'think') {
+            const kind = (t === 'text') ? 'text' : 'think';
+            const last = list.length ? list[list.length - 1] : null;
+            if (last && last.k === kind) {
+              // Thay bang object MOI chu khong sua tai cho: React.memo o Row so
+              // tung truong, sua tai cho thi no tuong khong doi va bo qua.
+              list[list.length - 1] = Object.assign({}, last, { s: (last.s || '') + (ev.s || '') });
+            } else {
+              list.push({ k: kind, s: ev.s || '',
+                          id: kind.charAt(0) + list.length + '_' + Date.now() });
+            }
+          } else if (t === 'tool_call') {
+            list.push({ k: 'tool', id: ev.id, name: ev.name, summary: ev.summary,
+                        args: ev.args, state: 'run' });
+          } else if (t === 'tool_done') {
+            for (let i = list.length - 1; i >= 0; i--) {
+              if (list[i].k === 'tool' && list[i].id === ev.id) {
+                list[i] = Object.assign({}, list[i], {
+                  state: ev.ok ? 'ok' : 'bad', out: ev.text || '', denied: !!ev.denied });
+                break;
+              }
+            }
+          } else if (t === 'ask') {
+            list.push({ k: 'ask', id: ev.id, tool: ev.tool, summary: ev.summary,
+                        args: ev.args, preview: ev.preview, answered: false, sid: sid });
+          } else if (t === 'error') {
+            list.push({ k: 'err', id: 'e' + Date.now() + '_' + list.length, s: ev.msg || '' });
+          } else if (t === 'stopped') {
+            list.push({ k: 'note', id: 'n' + Date.now() + '_' + list.length,
+                        s: TX('Đã dừng theo yêu cầu của bạn.') });
+          }
+          // 'done' khong them dong nao vao man hinh — no chi tat co dang chay,
+          // va viec do da lam o tren truoc khi goi setById.
+        });
+        return next;
+      });
+    }, [curSid]);
+
+    // Luon tro toi ban applyEvents moi nhat (co curSid dung o thoi diem hien tai)
+    applyRef.current = applyEvents;
+
     useEffect(function () {
       window.__nxAgentPush = function (batch) {
         if (!batch || !batch.length) return;
-        setItems(function (prev) {
-          const list = prev.slice();
-
-          function lastOf(kind) {
-            for (let i = list.length - 1; i >= 0; i--) if (list[i].k === kind) return list[i];
-            return null;
-          }
-
-          batch.forEach(function (ev) {
-            const t = ev.t;
-            if (t === 'text') {
-              const last = list.length ? list[list.length - 1] : null;
-              if (last && last.k === 'text') last.s = (last.s || '') + (ev.s || '');
-              else list.push({ k: 'text', s: ev.s || '', id: 'x' + list.length + '_' + Date.now() });
-            } else if (t === 'think') {
-              const last = list.length ? list[list.length - 1] : null;
-              if (last && last.k === 'think') last.s = (last.s || '') + (ev.s || '');
-              else list.push({ k: 'think', s: ev.s || '', id: 'k' + list.length + '_' + Date.now() });
-            } else if (t === 'tool_call') {
-              list.push({ k: 'tool', id: ev.id, name: ev.name, summary: ev.summary,
-                          args: ev.args, state: 'run' });
-            } else if (t === 'tool_done') {
-              for (let i = list.length - 1; i >= 0; i--) {
-                if (list[i].k === 'tool' && list[i].id === ev.id) {
-                  list[i] = Object.assign({}, list[i], {
-                    state: ev.ok ? 'ok' : 'bad', out: ev.text || '', denied: !!ev.denied });
-                  break;
-                }
-              }
-            } else if (t === 'ask') {
-              list.push({ k: 'ask', id: ev.id, tool: ev.tool, summary: ev.summary,
-                          args: ev.args, preview: ev.preview, answered: false });
-            } else if (t === 'error') {
-              list.push({ k: 'err', id: 'e' + Date.now(), s: ev.msg || '' });
-              setBusy(false);
-            } else if (t === 'stopped') {
-              list.push({ k: 'note', id: 'n' + Date.now(), s: TX('Đã dừng theo yêu cầu của bạn.') });
-              setBusy(false);
-            } else if (t === 'done') {
-              setBusy(false);
-            }
-          });
-          return list;
-        });
+        for (let i = 0; i < batch.length; i++) inbox.current.push(batch[i]);
+        if (!rafId.current) rafId.current = requestAnimationFrame(drain);
       };
-      return function () { window.__nxAgentPush = null; };
-    }, []);
+      return function () {
+        window.__nxAgentPush = null;
+        if (rafId.current) { cancelAnimationFrame(rafId.current); rafId.current = 0; }
+      };
+    }, [drain]);
 
     /* --- xoa lich su khi bam "cuoc tro chuyen moi" --- */
     useEffect(function () {
-      function clear() { setItems([]); loadSes(); }
+      function clear() { setById({}); setCurSid(''); loadSes(); }
       window.addEventListener('nx-agent-cleared', clear);
       return function () { window.removeEventListener('nx-agent-cleared', clear); };
     }, [loadSes]);
@@ -860,33 +1023,54 @@
       const pics = imgs.slice();
       // Cho gui khi chi co anh ma chua go chu — anh cung la mot cau hoi.
       if ((!msg && !pics.length) || busy) return;
-      setItems(function (p) {
-        return p.concat([{ k: 'me', id: 'm' + Date.now(), s: msg,
-                           pics: pics.map(function (x) { return x.url; }) }]);
+      // Chua co phien nao dang mo -> tao phien moi truoc khi gui
+      let sid = curSid;
+      if (!sid) {
+        const nr = await callApi('ai_reset');
+        sid = (nr && nr.sid) || '';
+        if (sid) { setCurSid(sid); loadSes(); }
+      }
+      const mine = { k: 'me', id: 'm' + Date.now(), s: msg,
+                     pics: pics.map(function (x) { return x.url; }) };
+      setById(function (p) {
+        const n = Object.assign({}, p);
+        n[sid] = (p[sid] || []).concat([mine]);
+        return n;
       });
       setDraft('');
       setImgs([]);
       setBusy(true);
       stick.current = true;
       const r = await callApi('ai_send', msg || TX('Xem ảnh này giúp tôi.'),
-        pics.map(function (x) { return { media_type: x.media_type, data: x.data }; }));
+        pics.map(function (x) { return { media_type: x.media_type, data: x.data }; }), sid);
       if (!r || !r.success) {
         setBusy(false);
-        setItems(function (p) {
-          return p.concat([{ k: 'err', id: 'e' + Date.now(),
-                             s: (r && r.error) || TX('Không gửi được.') }]);
+        setById(function (p) {
+          const n = Object.assign({}, p);
+          n[sid] = (p[sid] || []).concat([{ k: 'err', id: 'e' + Date.now(),
+                        s: (r && r.error) || TX('Không gửi được.') }]);
+          return n;
         });
       }
-    }, [draft, busy, imgs]);
+    }, [draft, busy, imgs, curSid, loadSes]);
 
     const answer = useCallback(async function (pid, ok) {
-      setItems(function (p) {
-        return p.map(function (x) {
-          return (x.k === 'ask' && x.id === pid) ? Object.assign({}, x, { answered: true, ok: ok }) : x;
+      let owner = curSid;
+      setById(function (p) {
+        const n = Object.assign({}, p);
+        Object.keys(p).forEach(function (sid) {
+          let hit = false;
+          const l = p[sid].map(function (x) {
+            if (x.k === 'ask' && x.id === pid) { hit = true; owner = sid;
+              return Object.assign({}, x, { answered: true, ok: ok }); }
+            return x;
+          });
+          if (hit) n[sid] = l;
         });
+        return n;
       });
-      await callApi('ai_approve', pid, ok);
-    }, []);
+      await callApi('ai_approve', pid, ok, null, owner);
+    }, [curSid]);
 
     /* --- ban phim: Esc dong, Enter gui, chan phim tat cua app ben duoi ---
        app.views.jsx:649 bat Ctrl+F o tam window va KHONG kiem tra dang go trong
@@ -968,7 +1152,7 @@
 
         {/* ---- than: danh sach phien ben trai, cuoc tro chuyen ben phai ---- */}
         <div className="ag__mid">
-        <SessionList open={sideOpen} list={ses.list} cur={ses.current}
+        <SessionList open={sideOpen} list={ses.list} cur={curSid} running={running}
                      onOpen={openSes} onNew={newSes} onDelete={delSes} onRename={renSes} />
 
         {/* Cot phai gom CA vung cuon LAN o nhap. Neu de o nhap ra ngoai, no se
@@ -1003,57 +1187,10 @@
               </div>
             ) : null}
 
+            {/* Khong gan avatar vao tung tin: bong bong gradient ben phai da du
+                de biet dau la loi minh, phan con lai la loi agent. */}
             {items.map(function (it) {
-              if (it.k === 'me') {
-                return (
-                  <div key={it.id} className="ag__row ag__row--me">
-                    <div className="ag__mewrap">
-                      {it.pics && it.pics.length ? (
-                        <div className="ag__pics">
-                          {it.pics.map(function (u, i) {
-                            return <img key={i} className="ag__pic" src={u} alt="" />;
-                          })}
-                        </div>
-                      ) : null}
-                      {it.s ? <div className="ag__me">{it.s}</div> : null}
-                    </div>
-                  </div>
-                );
-              }
-              if (it.k === 'text') {
-                /* Khong gan avatar vao tung tin. Bong bong gradient ben phai da
-                   du de biet dau la loi minh, phan con lai la loi agent. Lap
-                   mot huy hieu sang o moi doan chi lam man hinh nhieu hon. */
-                return (
-                  <div key={it.id} className="ag__row">
-                    <div className="ag__ai"><Markdown text={it.s} /></div>
-                  </div>
-                );
-              }
-              if (it.k === 'think') {
-                return <div key={it.id} className="ag__row ag__row--sub"><ThinkBlock text={it.s} /></div>;
-              }
-              if (it.k === 'tool') {
-                return <div key={it.id} className="ag__row ag__row--sub"><ToolCard item={it} /></div>;
-              }
-              if (it.k === 'ask') {
-                return <div key={it.id} className="ag__row ag__row--sub"><AskCard item={it} onAnswer={answer} /></div>;
-              }
-              if (it.k === 'err') {
-                return (
-                  <div key={it.id} className="ag__row ag__row--sub">
-                    <div className="ag__err">
-                      <i className="ph-fill ph-warning-octagon"></i>
-                      <div>{it.s}</div>
-                    </div>
-                  </div>
-                );
-              }
-              return (
-                <div key={it.id} className="ag__row ag__row--sub">
-                  <div className="ag__note">{it.s}</div>
-                </div>
-              );
+              return <Row key={it.id} it={it} onAnswer={answer} />;
             })}
 
             {busy ? (
@@ -1103,7 +1240,8 @@
               onPaste={onPaste}
             />
             {busy ? (
-              <button className="ag__send ag__send--stop" onClick={function () { callApi('ai_stop'); }}
+              <button className="ag__send ag__send--stop"
+                      onClick={function () { callApi('ai_stop', curSid); }}
                       title={TX('Dừng')}>
                 <i className="ph-fill ph-stop"></i>
               </button>
