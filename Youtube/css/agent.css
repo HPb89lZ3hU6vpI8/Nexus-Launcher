@@ -1093,13 +1093,33 @@
   cursor: pointer;
 }
 
-.ag-eff__lb {
+/* Ten ky thuat cua muc dang chon (low/medium/high/xhigh/max) — de canh nhan
+   tieng Viet cho ai muon doi chieu voi tai lieu Claude. */
+.ag-eff__id {
+  float: right;
+  font-style: normal;
+  font-family: var(--f-num);
+  font-size: 10.5px;
+  color: var(--tx-faint);
+  background: rgba(255, 255, 255, .06);
+  padding: 1px 6px;
+  border-radius: var(--r-xs);
+}
+
+/* Thang chia 5 nac, ghi ten chuan duoi thanh truot */
+.ag-eff__sc {
   display: flex;
   justify-content: space-between;
-  color: var(--tx-faint);
-  font-size: 10.5px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
+.ag-eff__tick {
+  font-family: var(--f-num);
+  font-size: 9.5px;
+  color: var(--tx-faint);
+  letter-spacing: .2px;
+  transition: color var(--t-fast) var(--e-out);
+}
+.ag-eff__tick.is-on { color: var(--br-1); font-weight: 700; }
 
 .ag-eff__d {
   padding-top: 10px;

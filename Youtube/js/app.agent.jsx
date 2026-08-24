@@ -670,36 +670,50 @@
     useEscape(function () { setOpen(false); }, open);
 
     const val = (st && st.effort) || 5;
-    const name = (st && st.effort_name) || '';
+    /* Nhan hien theo dung ngon ngu dang chon: tieng Viet ra "Tối đa", tieng Anh
+       ra "Max". Python tra ve ca hai (effort_name / effort_en) nen o day chi
+       viec chon, khong phai dich. */
+    const vi = !window.NXI18N || window.NXI18N.get() === 'vi';
+    const name = (st && (vi ? st.effort_name : st.effort_en)) || '';
+    const lvl = (st && st.efforts) || [];
 
     return (
       <div className="ag-pk" ref={ref}>
         <button className={'ag-pk__b' + (open ? ' is-on' : '')}
                 onClick={function () { setOpen(!open); }}
-                title={TX('Mức suy nghĩ')}>
-          <span>{TX(name)}</span>
+                title={TX('Mức suy nghĩ') + ': ' + name}>
+          <span>{name}</span>
           <i className="ph-bold ph-caret-up"></i>
         </button>
         {open ? (
           <div className="ag-pk__menu ag-pk__menu--eff">
             <div className="ag-eff__t">
-              {TX('Mức suy nghĩ')} <b>{TX(name)}</b>
+              {TX('Mức suy nghĩ')}: <b>{name}</b>
+              <em className="ag-eff__id">{(st && st.effort_id) || ''}</em>
             </div>
             <input
               className="ag-eff__r"
-              type="range" min="1" max="5" step="1" value={val}
+              type="range" min="1" max={lvl.length || 5} step="1" value={val}
               onChange={function (e) { onPick({ effort: +e.target.value }); }}
             />
-            <div className="ag-eff__lb">
-              <span>{TX('Nhanh hơn')}</span>
-              <span>{TX('Kỹ hơn')}</span>
+            <div className="ag-eff__sc">
+              {lvl.map(function (x) {
+                return (
+                  <span key={x.n} className={'ag-eff__tick' + (x.n === val ? ' is-on' : '')}
+                        title={vi ? x.ten : x.en}>{x.id}</span>
+                );
+              })}
             </div>
             <div className="ag-eff__d">
               {val <= 1
-                ? TX('Trả lời ngay, gần như không suy nghĩ. Hợp với việc đơn giản.')
-                : val >= 5
-                  ? TX('Suy nghĩ lâu nhất. Chậm hơn nhưng làm việc khó tốt hơn hẳn.')
-                  : TX('Cân bằng giữa tốc độ và độ kỹ.')}
+                ? TX('Trả lời nhanh nhất, gần như không suy nghĩ. Hợp việc ngắn và đơn giản.')
+                : val === 2
+                  ? TX('Cân bằng, tiết kiệm. Hợp việc thường ngày.')
+                  : val === 3
+                    ? TX('Mức mặc định của Claude — cân bằng tốt nhất giữa chất lượng và tốc độ.')
+                    : val === 4
+                      ? TX('Suy nghĩ sâu hơn. Hợp việc code hoặc việc nhiều bước chạy lâu.')
+                      : TX('Sâu nhất, không giới hạn token. Rất kỹ nhưng đôi khi nghĩ lan man — chỉ dùng khi thật cần.')}
             </div>
           </div>
         ) : null}
