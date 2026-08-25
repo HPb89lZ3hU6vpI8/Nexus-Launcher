@@ -837,7 +837,10 @@ function cx(e) { return e.clientX / (window.NXZ ? window.NXZ() : 1); }
           {spinning ? <span className="nx-spin" /> : <i className={props.ico}></i>}
         </span>
         <span className="abtn__txt">
-          <span className="abtn__k">{props.eyebrow}</span>
+          <span className="abtn__k">
+            {props.eyebrow}
+            {props.badge ? <span className="abtn__badge">{props.badge}</span> : null}
+          </span>
           <span className="abtn__v">{props.label}</span>
         </span>
         {props.arrow !== false && !spinning && <i className="abtn__go ph-bold ph-arrow-right"></i>}
@@ -1545,6 +1548,7 @@ function cx(e) { return e.clientX / (window.NXZ ? window.NXZ() : 1); }
                           spinning={autoState === 'run'}
                           disabled={autoState === 'run'}
                           eyebrow={TX('TỰ TỐI ƯU ĐỒ HOẠ')}
+                          badge="BETA"
                           label={autoState === 'run'
                             ? (autoStage || TX('Đang xử lý...'))
                             : TX('Auto Setting In-Game')}

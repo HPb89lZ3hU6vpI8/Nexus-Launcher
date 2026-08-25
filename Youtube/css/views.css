@@ -2398,6 +2398,22 @@ video.gd__media.is-on { opacity: 1; }
    khong dung khoi mau chuoi qua chi. Hieu ung hover diu, khong giat.
    -------------------------------------------------------------------------- */
 
+/* Nhan BETA canh dong chu nho cua nut hanh dong. Bao nguoi dung biet tinh nang
+   con moi, co the con thieu hoac chua chuan o mot so game. */
+.abtn__badge {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 1px 5px;
+  border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--warn) 14%, transparent);
+  color: var(--warn);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  vertical-align: 1px;
+}
+
 /* Nut Hoan tac cua Auto Setting In-Game: nho hon nut hanh dong chinh, nam
    ngay duoi no, chi hien sau khi da chinh xong. */
 .auto-undo {
