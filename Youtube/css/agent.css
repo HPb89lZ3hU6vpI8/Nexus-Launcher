@@ -200,6 +200,7 @@
 }
 
 .ag__side {
+  position: relative;   /* de hop xac nhan bam theo dung cot nay */
   flex: 0 0 auto;
   width: 244px;
   display: flex;
@@ -1314,3 +1315,73 @@
   .ag__foot { padding: 10px 16px 12px; }
   .ag__row--sub { padding-left: 0; }
 }
+
+/* ---------------------------------------------- hop xac nhan xoa cuoc tro chuyen
+
+   Xoa la mat han ca noi dung lan anh, khong co thung rac. Nen phai hoi lai.
+   Phu len rieng cot ben trai chu khong phu ca man hinh: nguoi dung van thay
+   duoc khung chat, do bi cat mach. */
+
+.ag-xn {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  background: color-mix(in srgb, var(--bg-void) 74%, transparent);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.ag-xn__box {
+  width: 100%;
+  max-width: 250px;
+  padding: 16px 15px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg-surface);
+  box-shadow: var(--sh-3);
+  text-align: center;
+}
+
+.ag-xn__ico {
+  display: grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  margin: 0 auto 9px;
+  border-radius: var(--r-sm);
+  background: var(--bad-soft);
+  color: var(--bad);
+  font-size: 17px;
+}
+
+.ag-xn__t { font-size: 14px; font-weight: 650; color: var(--tx-hi); }
+
+.ag-xn__ten {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--br-2);
+  word-break: break-word;
+}
+
+.ag-xn__d {
+  margin-top: 8px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--tx-faint);
+}
+
+.ag-xn__act {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.ag-xn__act > * { flex: 1; justify-content: center; }
+
+.ag-xn__del {
+  background: var(--bad);
+  border-color: var(--bad);
+  color: #fff;
+}
+.ag-xn__del:hover { filter: brightness(1.08); }

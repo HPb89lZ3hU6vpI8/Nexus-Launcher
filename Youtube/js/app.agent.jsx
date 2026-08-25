@@ -639,6 +639,9 @@
 
   function SessionList({ open, list, cur, running, onOpen, onNew, onDelete, onRename }) {
     useLang();
+    /* Phien dang cho xac nhan xoa. Null = khong hoi gi. */
+    const [hoiXoa, setHoiXoa] = useState(null);
+    useEscape(function () { setHoiXoa(null); }, !!hoiXoa);
     if (!open) return null;
     return (
       <aside className="ag__side">
@@ -654,9 +657,36 @@
           ) : list.map(function (s) {
             return <SessionRow key={s.id} s={s} on={s.id === cur}
                                run={(running || []).indexOf(s.id) > -1}
-                               onOpen={onOpen} onDelete={onDelete} onRename={onRename} />;
+                               onOpen={onOpen}
+                               onDelete={function () { setHoiXoa(s); }}
+                               onRename={onRename} />;
           })}
         </div>
+
+        {hoiXoa && (
+          <div className="ag-xn" onMouseDown={function (e) {
+                 if (e.target === e.currentTarget) setHoiXoa(null);
+               }}>
+            <div className="ag-xn__box" role="dialog" aria-modal="true">
+              <div className="ag-xn__ico"><i className="ph-fill ph-trash"></i></div>
+              <div className="ag-xn__t">{TX('Xoá cuộc trò chuyện này?')}</div>
+              <div className="ag-xn__ten">{hoiXoa.title || TX('Cuộc trò chuyện mới')}</div>
+              <div className="ag-xn__d">
+                {TX('Toàn bộ nội dung và ảnh đã gửi trong cuộc này sẽ bị xoá khỏi máy. Không lấy lại được.')}
+              </div>
+              <div className="ag-xn__act">
+                <button className="nx-btn nx-btn--ghost"
+                        onClick={function () { setHoiXoa(null); }}>
+                  {TX('Huỷ')}
+                </button>
+                <button className="nx-btn ag-xn__del"
+                        onClick={function () { const id = hoiXoa.id; setHoiXoa(null); onDelete(id); }}>
+                  <i className="ph-bold ph-trash"></i> {TX('Xoá')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </aside>
     );
   }
