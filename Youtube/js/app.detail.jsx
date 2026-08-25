@@ -1142,7 +1142,7 @@ function cx(e) { return e.clientX / (window.NXZ ? window.NXZ() : 1); }
       }
       setAutoUndo(false);
       setAutoState('run');
-      setAutoStage(TX('Đang dò cấu hình...'));
+      setAutoStage(TX('Đang Kiểm Tra'));
       const r = await callApi('ai_auto_setting', appId, game.title);
       if (!r || !r.success) {
         setAutoState('idle');
