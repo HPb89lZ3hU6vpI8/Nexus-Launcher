@@ -1153,14 +1153,29 @@ function cx(e) { return e.clientX / (window.NXZ ? window.NXZ() : 1); }
                      desc: (r && r.error) || TX('Lỗi không rõ.') });
         return;
       }
-      // Poll tien do moi 1.2s; gioi han ~4 phut de khong poll mai neu treo.
+      /* Poll tien do moi 1.2s. Tran 15 phut chu khong phai 4 phut: lan dau voi
+         mot game la, agent phai tra nhieu nguon nen 5 phut la binh thuong — do
+         that mot lan 280 giay. Tran cu 240 giay lam giao dien bo cuoc va bao
+         "Qua lau" trong khi ben duoi van chay xong ngon lanh, nguoi dung tuong
+         la loi. */
       let guard = 0;
       for (;;) {
         await new Promise(function (rs) { setTimeout(rs, 1200); });
-        if (++guard > 200) {
+        if (++guard > 750) {
+          // Hoi lai mot lan cuoi truoc khi ket luan — co the vua xong xong.
+          let chot = null;
+          try { chot = await callApi('ai_auto_setting_status', appId); } catch (e) {}
           setAutoState('idle'); setAutoStage('');
-          toast.push({ tone: 'bad', title: TX('Quá lâu'),
-                       desc: TX('Auto Setting chạy quá lâu, đã dừng theo dõi.') });
+          if (chot && chot.done && chot.ok) {
+            const cnt = (chot.changed && chot.changed.length) || 0;
+            setAutoUndo(cnt > 0);
+            toast.push({ tone: cnt > 0 ? 'ok' : 'info',
+                         title: cnt > 0 ? TX('Đã tối ưu đồ hoạ') : TX('Không chỉnh được'),
+                         desc: chot.msg || game.title });
+          } else {
+            toast.push({ tone: 'info', title: TX('Vẫn đang chạy'),
+                         desc: TX('Game này cần tra cứu lâu hơn bình thường. Nó vẫn đang chạy ở dưới — lát nữa bấm lại nút này để xem kết quả.') });
+          }
           return;
         }
         let st;
