@@ -2398,6 +2398,16 @@ video.gd__media.is-on { opacity: 1; }
    khong dung khoi mau chuoi qua chi. Hieu ung hover diu, khong giat.
    -------------------------------------------------------------------------- */
 
+/* Nut Hoan tac cua Auto Setting In-Game: nho hon nut hanh dong chinh, nam
+   ngay duoi no, chi hien sau khi da chinh xong. */
+.auto-undo {
+  width: 100%;
+  justify-content: center;
+  gap: 8px;
+  margin-top: -2px;
+  font-size: 13px;
+}
+
 .abtn {
   --abtn-accent: var(--br-1);
   --abtn-accent-rgb: 58, 216, 255;
