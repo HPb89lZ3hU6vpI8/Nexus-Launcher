@@ -839,7 +839,6 @@ function cx(e) { return e.clientX / (window.NXZ ? window.NXZ() : 1); }
         <span className="abtn__txt">
           <span className="abtn__k">
             {props.eyebrow}
-            {props.badge ? <span className="abtn__badge">{props.badge}</span> : null}
           </span>
           <span className="abtn__v">{props.label}</span>
         </span>
@@ -914,10 +913,6 @@ function cx(e) { return e.clientX / (window.NXZ ? window.NXZ() : 1); }
     const [fixState, setFixState] = useState('idle');
     const [fixNote, setFixNote] = useState('');
 
-    /* ---- Auto Setting In-Game ---- */
-    const [autoState, setAutoState] = useState('idle');   // idle | run
-    const [autoStage, setAutoStage] = useState('');
-    const [autoUndo, setAutoUndo] = useState(false);
 
     /* ---- Palworld: doi ngon ngu ---- */
     const [palHasFix, setPalHasFix] = useState(false);
@@ -1131,85 +1126,6 @@ function cx(e) { return e.clientX / (window.NXZ ? window.NXZ() : 1); }
       }
       setFixNote(r.error || tagTone('bad', TX('Lỗi: không fix được game')));
     }, [game.fix, game.appId, game.title, isPalworld, toast]);
-
-    /* ------------------------------------------------------------------
-       LUONG: AUTO SETTING IN-GAME (session an o Python, poll tien do)
-       ------------------------------------------------------------------ */
-    const onAutoSetting = useCallback(async function () {
-      if (autoState === 'run') return;
-      const steam = await callApi('check_steam');
-      if (!steam || !steam.installed) {
-        toast.push({ tone: 'bad', title: TX('Chưa cài Steam'),
-                     desc: TX('Cài Steam trước khi dùng Auto Setting.') });
-        return;
-      }
-      setAutoUndo(false);
-      setAutoState('run');
-      setAutoStage(TX('Đang Kiểm Tra...'));
-      const r = await callApi('ai_auto_setting', appId, game.title);
-      if (!r || !r.success) {
-        setAutoState('idle');
-        toast.push({ tone: 'bad', title: TX('Không chạy được'),
-                     desc: (r && r.error) || TX('Lỗi không rõ.') });
-        return;
-      }
-      /* Poll tien do moi 1.2s. Tran 15 phut chu khong phai 4 phut: lan dau voi
-         mot game la, agent phai tra nhieu nguon nen 5 phut la binh thuong — do
-         that mot lan 280 giay. Tran cu 240 giay lam giao dien bo cuoc va bao
-         "Qua lau" trong khi ben duoi van chay xong ngon lanh, nguoi dung tuong
-         la loi. */
-      let guard = 0;
-      for (;;) {
-        await new Promise(function (rs) { setTimeout(rs, 1200); });
-        if (++guard > 750) {
-          // Hoi lai mot lan cuoi truoc khi ket luan — co the vua xong xong.
-          let chot = null;
-          try { chot = await callApi('ai_auto_setting_status', appId); } catch (e) {}
-          setAutoState('idle'); setAutoStage('');
-          if (chot && chot.done && chot.ok) {
-            const cnt = (chot.changed && chot.changed.length) || 0;
-            setAutoUndo(cnt > 0);
-            toast.push({ tone: cnt > 0 ? 'ok' : 'info',
-                         title: cnt > 0 ? TX('Đã tối ưu đồ hoạ') : TX('Không chỉnh được'),
-                         desc: chot.msg || game.title });
-          } else {
-            toast.push({ tone: 'info', title: TX('Vẫn đang chạy'),
-                         desc: TX('Game này cần tra cứu lâu hơn bình thường. Nó vẫn đang chạy ở dưới — lát nữa bấm lại nút này để xem kết quả.') });
-          }
-          return;
-        }
-        let st;
-        try { st = await callApi('ai_auto_setting_status', appId); }
-        catch (e) { setAutoState('idle'); setAutoStage(''); return; }
-        if (st && st.stage) setAutoStage(String(st.stage));
-        if (st && st.done) {
-          setAutoState('idle'); setAutoStage('');
-          if (st.ok) {
-            const cnt = (st.changed && st.changed.length) || 0;
-            setAutoUndo(cnt > 0);
-            toast.push({ tone: cnt > 0 ? 'ok' : 'info',
-                         title: cnt > 0 ? TX('Đã tối ưu đồ hoạ') : TX('Không chỉnh được'),
-                         desc: st.msg || game.title });
-          } else {
-            toast.push({ tone: 'bad', title: TX('Không tối ưu được'),
-                         desc: st.msg || TX('Thử lại sau.') });
-          }
-          return;
-        }
-      }
-    }, [autoState, appId, game.title, toast]);
-
-    const onAutoUndo = useCallback(async function () {
-      const r = await callApi('ai_auto_setting_undo', appId);
-      if (r && r.success) {
-        setAutoUndo(false);
-        toast.push({ tone: 'ok', title: TX('Đã hoàn tác'),
-                     desc: TX('Setting đã trả về như cũ.') });
-      } else {
-        toast.push({ tone: 'bad', title: TX('Không hoàn tác được'),
-                     desc: (r && r.error) || '' });
-      }
-    }, [appId, toast]);
 
     /* ------------------------------------------------------------------
        LUONG: DOI NGON NGU PALWORLD
@@ -1555,26 +1471,6 @@ function cx(e) { return e.clientX / (window.NXZ ? window.NXZ() : 1); }
                         />
                       ))}
                       {fixNote && <Note tone={noteTone(fixNote)}>{stripTone(fixNote)}</Note>}
-
-                      {appId && (
-                        <ActionButton
-                          tone="ghost"
-                          ico="ph-bold ph-gauge"
-                          spinning={autoState === 'run'}
-                          disabled={autoState === 'run'}
-                          eyebrow={TX('TỰ TỐI ƯU ĐỒ HOẠ')}
-                          badge="BETA"
-                          label={autoState === 'run'
-                            ? (autoStage || TX('Đang xử lý...'))
-                            : TX('Auto Setting In-Game')}
-                          onClick={onAutoSetting}
-                        />
-                      )}
-                      {autoUndo && autoState !== 'run' && (
-                        <button className="nx-btn nx-btn--ghost auto-undo" type="button" onClick={onAutoUndo}>
-                          <i className="ph-bold ph-arrow-counter-clockwise"></i> {TX('Hoàn tác Auto Setting')}
-                        </button>
-                      )}
 
                       {hasRedeem && (
                         <React.Fragment>
