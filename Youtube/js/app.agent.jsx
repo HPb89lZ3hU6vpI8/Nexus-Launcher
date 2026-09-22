@@ -908,16 +908,19 @@
               {TX('Mức suy nghĩ')}: <b>{name}</b>
               <em className="ag-eff__id">{cur}</em>
             </div>
-            <input
-              className="ag-eff__r"
-              type="range" min="1" max={lvl.length || 1} step="1" value={val}
-              onChange={function (e) { onPick({ effort: +e.target.value }); }}
-            />
-            <div className="ag-eff__sc">
+            {/* Segmented control co vien thuoc truot — thay cho thanh truot
+                range cung cu: bam chuyen muc thi vien thuoc loet xuong vi tri
+                moi, khong con nhay giat. */}
+            <div className="ag-eff__seg" style={{ '--n': lvl.length || 1 }}>
+              <span className="ag-eff__pill"
+                    style={{ transform: 'translateX(' + ((val - 1) * 100) + '%)' }} />
               {lvl.map(function (x) {
                 return (
-                  <span key={x.n} className={'ag-eff__tick' + (x.n === val ? ' is-on' : '')}
-                        title={vi ? x.ten : x.en}>{vi ? x.ten : x.en}</span>
+                  <button key={x.n}
+                          className={'ag-eff__seg__b' + (x.n === val ? ' is-on' : '')}
+                          onClick={function () { onPick({ effort: x.n }); }}>
+                    {vi ? x.ten : x.en}
+                  </button>
                 );
               })}
             </div>
