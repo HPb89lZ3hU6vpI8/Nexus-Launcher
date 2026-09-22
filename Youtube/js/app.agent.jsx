@@ -104,8 +104,10 @@
         const lines = chunk.split('\n');
         let buf = [];
         let listBuf = [];
+        let tblBuf = [];      // cac dong la bang: | a | b |
+        let qtBuf = [];       // cac dong trich dan: > ...
 
-        function flushList(tag) {
+        function flushList() {
           if (!listBuf.length) return;
           out.push(
             <ul key={'ul' + ci + '_' + out.length} className="ag-ul">
@@ -117,6 +119,58 @@
           listBuf = [];
         }
 
+        function flushQuote() {
+          if (!qtBuf.length) return;
+          out.push(
+            <blockquote key={'bq' + ci + '_' + out.length} className="ag-bq">
+              {qtBuf.map(function (t, i) {
+                return <p key={i}>{inlineMd(t, 'q' + ci + i)}</p>;
+              })}
+            </blockquote>
+          );
+          qtBuf = [];
+        }
+
+        /* Bang markdown: dong tach, dong --- la phan vien, cac dong con lai la
+           hang du lieu. Truoc day khong co phan nay nen AI bat bang len thi
+           launcher hien thang chu |---| ra man hinh. */
+        function flushTable() {
+          if (!tblBuf.length) return;
+          const hang = tblBuf.filter(function (r, i) {
+            if (i === 1) {  // dong separator ---|---
+              return !/^\s*\|?[\s:|-]*-{2,}[\s:|-]*\|?\s*$/.test(r);
+            }
+            return true;
+          });
+          const phan = hang.map(function (r) {
+            let c = r.replace(/^\s*\|/, '').replace(/\|\s*$/, '');
+            return c.split('|').map(function (x) { return x.trim(); });
+          });
+          if (phan.length) {
+            out.push(
+              <div key={'tb' + ci + '_' + out.length} className="ag-tb">
+                <table>
+                  <thead>
+                    <tr>{(phan[0] || []).map(function (h, i) {
+                      return <th key={i}>{inlineMd(h, 'th' + ci + i)}</th>;
+                    })}</tr>
+                  </thead>
+                  <tbody>
+                    {phan.slice(1).map(function (row, ri) {
+                      return (
+                        <tr key={ri}>{row.map(function (c, ci2) {
+                          return <td key={ci2}>{inlineMd(c, 'td' + ci + ri + '_' + ci2)}</td>;
+                        })}</tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            );
+          }
+          tblBuf = [];
+        }
+
         function flushPara() {
           if (!buf.length) return;
           const t = buf.join('\n');
@@ -126,27 +180,42 @@
           buf = [];
         }
 
+        // Dong nao cung phai flush het cac khoi truoc khi chuyen sang kieu moi
+        function flushAll() { flushPara(); flushList(); flushTable(); flushQuote(); }
+
         lines.forEach(function (ln) {
           const li = ln.match(/^\s*(?:[-*•]|\d+\.)\s+(.*)$/);
           const hd = ln.match(/^(#{1,4})\s+(.*)$/);
-          if (li) {
-            flushPara();
+          const qt = ln.match(/^\s*>\s?(.*)$/);
+          const tbl = /^\s*\|.*\|\s*$/.test(ln);
+          const hr = /^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(ln);
+          if (tbl) {
+            flushPara(); flushList(); flushQuote();
+            tblBuf.push(ln);
+          } else if (qt) {
+            flushPara(); flushList(); flushTable();
+            qtBuf.push(qt[1]);
+          } else if (hr) {
+            flushAll();
+            out.push(<hr key={'hr' + ci + '_' + out.length} className="ag-hr" />);
+          } else if (li) {
+            flushPara(); flushTable(); flushQuote();
             listBuf.push(li[1]);
           } else if (hd) {
-            flushPara(); flushList();
+            flushAll();
             out.push(
               <div key={'h' + ci + '_' + out.length} className={'ag-h ag-h--' + hd[1].length}>
                 {inlineMd(hd[2], 'h' + ci + out.length)}
               </div>
             );
           } else if (!ln.trim()) {
-            flushPara(); flushList();
+            flushAll();
           } else {
-            flushList();
+            flushList(); flushTable(); flushQuote();
             buf.push(ln);
           }
         });
-        flushPara(); flushList();
+        flushAll();
       });
       return out;
     }, [shown]);
@@ -774,13 +843,26 @@
     useClickOutside(ref, function () { setOpen(false); }, open);
     useEscape(function () { setOpen(false); }, open);
 
-    const val = (st && st.effort) || 5;
+    /* Moi model mot bac thang rieng (GLM 5.2 chi 2 nac, Muse Spark 5 nac...)
+       nen khong duoc dinh luon mac dinh 5 nua — lay bac cuoi cua model dang chon. */
+    const lvl = (st && st.efforts) || [];
+    const val = (st && st.effort) || (lvl.length || 1);
     /* Nhan hien theo dung ngon ngu dang chon: tieng Viet ra "Tối đa", tieng Anh
        ra "Max". Python tra ve ca hai (effort_name / effort_en) nen o day chi
        viec chon, khong phai dich. */
     const vi = !window.NXI18N || window.NXI18N.get() === 'vi';
     const name = (st && (vi ? st.effort_name : st.effort_en)) || '';
-    const lvl = (st && st.efforts) || [];
+    /* Mo ta theo TEN KY THUAT cua muc (id), khong theo so nac — vi cung mot
+       so 2 o GLM 5.2 la "max" con o Muse Spark la "low", doc theo so se lech. */
+    const desc = {
+      minimal: TX('Gần như không suy nghĩ. Hợp câu hỏi thật ngắn, trả lời thật nhanh.'),
+      low:     TX('Suy nghĩ rất ít, trả lời nhanh. Hợp việc đơn giản, quen tay.'),
+      medium:  TX('Cân bằng, tiết kiệm. Hợp việc thường ngày.'),
+      high:    TX('Suy nghĩ kỹ hơn. Cân bằng tốt giữa chất lượng và tốc độ.'),
+      xhigh:   TX('Suy nghĩ sâu. Hợp code hoặc việc nhiều bước chạy lâu.'),
+      max:     TX('Sâu nhất, không giới hạn token. Rất kỹ nhưng đôi khi nghĩ lan man — chỉ dùng khi thật cần.'),
+    };
+    const cur = (st && st.effort_id) || '';
 
     return (
       <div className="ag-pk" ref={ref}>
@@ -794,31 +876,23 @@
           <div className="ag-pk__menu ag-pk__menu--eff">
             <div className="ag-eff__t">
               {TX('Mức suy nghĩ')}: <b>{name}</b>
-              <em className="ag-eff__id">{(st && st.effort_id) || ''}</em>
+              <em className="ag-eff__id">{cur}</em>
             </div>
             <input
               className="ag-eff__r"
-              type="range" min="1" max={lvl.length || 5} step="1" value={val}
+              type="range" min="1" max={lvl.length || 1} step="1" value={val}
               onChange={function (e) { onPick({ effort: +e.target.value }); }}
             />
             <div className="ag-eff__sc">
               {lvl.map(function (x) {
                 return (
                   <span key={x.n} className={'ag-eff__tick' + (x.n === val ? ' is-on' : '')}
-                        title={vi ? x.ten : x.en}>{x.id}</span>
+                        title={vi ? x.ten : x.en}>{vi ? x.ten : x.en}</span>
                 );
               })}
             </div>
             <div className="ag-eff__d">
-              {val <= 1
-                ? TX('Trả lời nhanh nhất, gần như không suy nghĩ. Hợp việc ngắn và đơn giản.')
-                : val === 2
-                  ? TX('Cân bằng, tiết kiệm. Hợp việc thường ngày.')
-                  : val === 3
-                    ? TX('Mức mặc định của Claude — cân bằng tốt nhất giữa chất lượng và tốc độ.')
-                    : val === 4
-                      ? TX('Suy nghĩ sâu hơn. Hợp việc code hoặc việc nhiều bước chạy lâu.')
-                      : TX('Sâu nhất, không giới hạn token. Rất kỹ nhưng đôi khi nghĩ lan man — chỉ dùng khi thật cần.')}
+              {desc[cur] || desc.high}
             </div>
           </div>
         ) : null}

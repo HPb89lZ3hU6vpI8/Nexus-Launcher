@@ -461,16 +461,17 @@
    thuong — van phan biet duoc ngay dau la loi minh, ma khong choi mat. */
 .ag__me {
   max-width: 100%;
-  padding: 10px 15px;
-  border-radius: var(--r-lg) var(--r-lg) var(--r-xs) var(--r-lg);
+  padding: 11px 16px;
+  border-radius: var(--r-xl) var(--r-xl) 6px var(--r-xl);
   background: color-mix(in srgb, var(--br-2) 17%, var(--bg-surface));
   border: 1px solid color-mix(in srgb, var(--br-2) 26%, transparent);
   color: var(--tx-hi);
-  font-size: 14px;
-  line-height: 1.62;
+  font-size: 14.5px;
+  line-height: 1.68;
   font-weight: 450;
   white-space: pre-wrap;
   word-break: break-word;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .18);   /* bong day nhe cho noi len khoi nen */
 }
 
 /* ---- nut chep ---- */
@@ -512,8 +513,8 @@
 .ag__ai {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 14.5px;
-  line-height: 1.78;
+  font-size: 15px;
+  line-height: 1.8;
   color: var(--tx);
   font-weight: 400;
 }
@@ -882,29 +883,31 @@
    Ban cu dung vien + mau cyan sang, moi doan van co vai tu nhu vay la ca man
    hinh lap lanh — do chinh la thu lam giao dien trong "may lam". */
 .ag-code {
-  padding: 1.5px 5px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, .062);
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, .07);
   color: #b9d9f2;
   font-family: var(--f-num);
-  font-size: 12.5px;
+  font-size: 12.8px;
   word-break: break-word;
 }
 
 .ag-cb {
-  margin: 0 0 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
+  margin: 0 0 14px;
+  border: 1px solid var(--line-mid);
+  border-radius: var(--r-md);
   overflow: hidden;
-  background: var(--bg-void);
+  background: #070a10;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .25);
 }
 .ag-cb__bar {
   display: flex; align-items: center;
-  padding: 6px 11px;
+  padding: 7px 12px;
   border-bottom: 1px solid var(--line);
   background: var(--bg-sunken);
 }
-.ag-cb__lang { flex: 1; color: var(--tx-faint); font-size: 11px; font-weight: 650; }
+.ag-cb__lang { flex: 1; color: var(--br-1); font-size: 11px; font-weight: 700;
+               letter-spacing: .4px; text-transform: uppercase; }
 .ag-cb__copy {
   display: inline-flex; align-items: center; gap: 5px;
   border: 0; background: transparent;
@@ -923,6 +926,35 @@
   line-height: 1.65;
   color: var(--tx);
 }
+
+/* ------------------------------------------------- bang markdown + trich dan
+   AI hay bat bang san so sanh / so sanh muc do hoa. Truoc day khong co luat cho
+   bang nen chu "|" hien thang ra man hinh — do chinh la truong hop "tao khung
+   ma launcher khong hien". */
+.ag-tb { margin: 0 0 14px; overflow-x: auto; border: 1px solid var(--line-mid);
+         border-radius: var(--r-sm); background: var(--bg-sunken); }
+.ag-tb table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ag-tb th, .ag-tb td {
+  padding: 8px 12px; text-align: left; line-height: 1.55;
+  border-bottom: 1px solid var(--line);
+}
+.ag-tb th {
+  background: color-mix(in srgb, var(--br-1) 7%, var(--bg-raised));
+  color: var(--tx-hi); font-weight: 680; white-space: nowrap;
+}
+.ag-tb tr:last-child td { border-bottom: 0; }
+.ag-tb td { color: var(--tx); }
+
+.ag-bq {
+  margin: 0 0 14px; padding: 8px 14px;
+  border-left: 3px solid var(--br-1);
+  background: var(--br-1-soft);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+}
+.ag-bq p { margin: 0 0 6px; color: var(--tx-dim); font-size: 13.5px; }
+.ag-bq p:last-child { margin-bottom: 0; }
+
+.ag-hr { margin: 18px 0; border: 0; border-top: 1px solid var(--line-mid); }
 
 /* ----------------------------------------------------------------- o nhap */
 
