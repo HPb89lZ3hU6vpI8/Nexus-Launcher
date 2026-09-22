@@ -27,6 +27,27 @@
           prefersCalm } = window.NX;
 
   /* --------------------------------------------------------------------------
+     HIEU UNG VAO MAN HINH — dung TRANSITION, khong dung @keyframes.
+     Ly do: tokens.css lay animation-duration ve 0.001ms tren may giam chuyen
+     dong (va may nguoi dung DANG bat). @keyframes se CHET LANG LE khong bao
+     gio hien. Transition thi hoan toan mien nhiem.
+     Cach dung: gan class "ag-enter" cho the, dua is-in vao sau 2 khung hinh
+     thi no truot len tuoi len nhe.
+     ------------------------------------------------------------------------ */
+  function useEnter(dep) {
+    const [on, setOn] = useState(false);
+    useEffect(function () {
+      setOn(false);
+      let r2 = 0;
+      const r1 = requestAnimationFrame(function () {
+        r2 = requestAnimationFrame(function () { setOn(true); });
+      });
+      return function () { cancelAnimationFrame(r1); cancelAnimationFrame(r2); };
+    }, [dep]);
+    return on ? ' is-in' : '';
+  }
+
+  /* --------------------------------------------------------------------------
      1. MARKDOWN RUT GON
      Chi lam nhung thu model hay dung: khoi code, code trong dong, in dam,
      in nghieng, gach dau dong, tieu de. Khong keo ca thu vien markdown ve chi
@@ -350,9 +371,11 @@
   }
 
   const Row = React.memo(function Row({ it, onAnswer }) {
+    /* Tin moi xuat hien: truot len tuoi len mot lan (transition, khong bi tokens.css tat). */
+    const en = useEnter(it.id);
     if (it.k === 'me') {
       return (
-        <div className="ag__row ag__row--me">
+        <div className={'ag__row ag__row--me' + en}>
           <div className="ag__mewrap">
             {it.pics && it.pics.length ? (
               <div className="ag__pics">
@@ -373,7 +396,7 @@
     }
     if (it.k === 'text') {
       return (
-        <div className="ag__row">
+        <div className={'ag__row' + en}>
           <div className="ag__ai">
             <Markdown text={it.s} />
             <CopyBtn text={it.s} cls="ag__cp--ai" />
@@ -382,22 +405,22 @@
       );
     }
     if (it.k === 'think') {
-      return <div className="ag__row ag__row--sub"><ThinkBlock text={it.s} /></div>;
+      return <div className={'ag__row ag__row--sub' + en}><ThinkBlock text={it.s} /></div>;
     }
     if (it.k === 'tool') {
-      return <div className="ag__row ag__row--sub"><ToolCard item={it} /></div>;
+      return <div className={'ag__row ag__row--sub' + en}><ToolCard item={it} /></div>;
     }
     if (it.k === 'ask') {
-      return <div className="ag__row ag__row--sub"><AskCard item={it} onAnswer={onAnswer} /></div>;
+      return <div className={'ag__row ag__row--sub' + en}><AskCard item={it} onAnswer={onAnswer} /></div>;
     }
     if (it.k === 'err') {
       return (
-        <div className="ag__row ag__row--sub">
+        <div className={'ag__row ag__row--sub' + en}>
           <div className="ag__err"><i className="ph-fill ph-warning-octagon"></i><div>{it.s}</div></div>
         </div>
       );
     }
-    return <div className="ag__row ag__row--sub"><div className="ag__note">{it.s}</div></div>;
+    return <div className={'ag__row ag__row--sub' + en}><div className="ag__note">{it.s}</div></div>;
   }, function (a, b) {
     // Chi ve lai khi noi dung that su doi. So tung truong thay vi so ca object:
     // moi lan nhan su kien minh tao object moi nen so bang === se luon khac.
@@ -419,7 +442,7 @@
     const cls = 'ag-tool ag-tool--' + m.tone
       + (running ? ' is-run' : '') + (bad ? ' is-bad' : '') + (denied ? ' is-denied' : '');
     return (
-      <div className={cls}>
+      <div className={cls + (open ? ' is-open' : '')}>
         <button className="ag-tool__head" onClick={function () { setOpen(!open); }}>
           <span className="ag-tool__ico">
             {running ? <span className="nx-spin" /> : <i className={m.i}></i>}
@@ -432,7 +455,9 @@
             : <span className="ag-tool__tag ag-tool__tag--ok"><i className="ph-bold ph-check"></i></span>}
           {item.out ? <i className={'ag-tool__caret ph-bold ' + (open ? 'ph-caret-up' : 'ph-caret-down')}></i> : null}
         </button>
-        {open && item.out ? <pre className="ag-tool__out">{item.out}</pre> : null}
+        {/* Khong render co dieu kien nua: giu LUON trong DOM de transition mo/dong chay duoc.
+            An bang max-height:0 + overflow:hidden, mo len bang is-open. */}
+        {item.out ? <pre className="ag-tool__out">{item.out}</pre> : null}
       </div>
     );
   }
@@ -490,10 +515,13 @@
     return (
       <div className={'ag-think' + (open ? ' is-open' : '')}>
         <button className="ag-think__head" onClick={function () { setOpen(!open); }}>
-          <span>{TX('Đang suy nghĩ')}</span>
+          <span className="ag-think__lbl">
+            <span className="nx-spin" />{TX('Đang suy nghĩ')}
+          </span>
           <i className={'ph-bold ' + (open ? 'ph-caret-up' : 'ph-caret-down')}></i>
         </button>
-        {open ? <div className="ag-think__body">{text}</div> : null}
+        {/* Luon render trong DOM de transition mo/dong chay — an bang is-open. */}
+        <div className="ag-think__body">{text}</div>
       </div>
     );
   }
@@ -769,6 +797,7 @@
     const ref = useRef(null);
     useClickOutside(ref, function () { setOpen(false); }, open);
     useEscape(function () { setOpen(false); }, open);
+    const enMenu = useEnter(open ? 1 : 0);
 
     const list = (st && st.models) || [];
     const curId = (st && st.model) || '';
@@ -809,7 +838,7 @@
           {single ? null : <i className="ph-bold ph-caret-up"></i>}
         </button>
         {open && !single ? (
-          <div className="ag-pk__menu" role="listbox">
+          <div className={'ag-pk__menu' + enMenu} role="listbox">
             <div className="ag-pk__h">{TX('Mô hình')}</div>
             {list.map(function (m, i) {
               const on = m.id === curId && !!m.ctx1m === cur1m;
@@ -842,6 +871,7 @@
     const ref = useRef(null);
     useClickOutside(ref, function () { setOpen(false); }, open);
     useEscape(function () { setOpen(false); }, open);
+    const enMenu = useEnter(open ? 1 : 0);
 
     /* Moi model mot bac thang rieng (GLM 5.2 chi 2 nac, Muse Spark 5 nac...)
        nen khong duoc dinh luon mac dinh 5 nua — lay bac cuoi cua model dang chon. */
@@ -873,7 +903,7 @@
           <i className="ph-bold ph-caret-up"></i>
         </button>
         {open ? (
-          <div className="ag-pk__menu ag-pk__menu--eff">
+          <div className={'ag-pk__menu ag-pk__menu--eff' + enMenu}>
             <div className="ag-eff__t">
               {TX('Mức suy nghĩ')}: <b>{name}</b>
               <em className="ag-eff__id">{cur}</em>
@@ -920,6 +950,7 @@
     const [curSid, setCurSid] = useState('');
     const [running, setRunning] = useState([]);    // cac sid dang chay
     const items = byId[curSid] || [];
+    const enHi = useEnter(items.length ? 1 : 0);   // man chao truot len khi mo ra
     const busy = running.indexOf(curSid) > -1;
     const setBusy = useCallback(function (on) {
       setRunning(function (p) {
@@ -1357,7 +1388,7 @@
         <div className="ag__body" ref={bodyRef} onScroll={onScroll}>
           <div className={'ag__inner' + (items.length ? '' : ' ag__inner--empty')}>
             {!items.length ? (
-              <div className="ag__hi">
+              <div className={'ag__hi' + enHi}>
                 <div className="ag__hi__orb"><i className="ph-fill ph-graph"></i></div>
                 <h2 className="ag__hi__t">{TX('Tôi có thể giúp được gì cho bạn?')}</h2>
                 <p className="ag__hi__d">

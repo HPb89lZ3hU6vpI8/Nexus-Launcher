@@ -364,6 +364,16 @@
   padding-bottom: 26px;
 }
 
+/* Ag enter transition: tokens.css bop @keyframes khi may giam chuyen dong,
+   nhung TRANSITION thi khong ai bam vao — nen moi hieu ung o day deu dung
+   transition + class is-in (tu app.agent.jsx dua sau 2 khung hinh). */
+.ag__row {
+  transition: opacity 320ms var(--e-out), transform 320ms var(--e-out);
+}
+.ag__row:not(.is-in) { opacity: 0; transform: translateY(12px); }
+/* Thuc hien cau: giua chat dang cuon thi dong cu cung duoc tra phan hoi —
+   khi cuon len doc lai, cac dong cu da xong roi khong nhoang lai. */
+
 .ag__row { display: flex; gap: 12px; margin-bottom: 20px; }
 .ag__row--me { justify-content: flex-end; }
 .ag__row--sub { margin-bottom: 12px; }
@@ -466,12 +476,18 @@
   background: color-mix(in srgb, var(--br-2) 17%, var(--bg-surface));
   border: 1px solid color-mix(in srgb, var(--br-2) 26%, transparent);
   color: var(--tx-hi);
+  font-family: 'Inter', var(--f-ui);   /* Inter sach hon Be Vietnam cho chat */
   font-size: 14.5px;
   line-height: 1.68;
   font-weight: 450;
   white-space: pre-wrap;
   word-break: break-word;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .18);   /* bong day nhe cho noi len khoi nen */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .22);
+  transition: transform var(--t-fast) var(--e-out), box-shadow var(--t-fast) var(--e-out);
+}
+.ag__row--me:hover .ag__me {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, .3);
 }
 
 /* ---- nut chep ---- */
@@ -492,8 +508,9 @@
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
+  transform: scale(.85);
   transition: opacity var(--t-fast) var(--e-out), color var(--t-fast) var(--e-out),
-              border-color var(--t-fast) var(--e-out);
+              border-color var(--t-fast) var(--e-out), transform var(--t-fast) var(--e-spring);
 }
 /* Tin cua minh: nut nam ben TRAI bong bong. Cua agent: nam duoi, le trai. */
 /* Nut nam han o dong duoi, chiem cho that.
@@ -503,7 +520,7 @@
 .ag__cp--me { align-self: flex-end; margin-top: 5px; }
 .ag__cp--ai { margin-top: 6px; }
 
-.ag__row:hover .ag__cp { opacity: .7; pointer-events: auto; }
+.ag__row:hover .ag__cp { opacity: .7; pointer-events: auto; transform: scale(1); }
 .ag__cp:hover { opacity: 1 !important; color: var(--tx-hi); border-color: var(--line-strong); }
 .ag__cp.is-ok { opacity: 1 !important; color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
 
@@ -513,15 +530,27 @@
 .ag__ai {
   flex: 1 1 auto;
   min-width: 0;
+  font-family: 'Inter', var(--f-ui);
   font-size: 15px;
   line-height: 1.8;
-  color: var(--tx);
+  color: #dce4f5;
   font-weight: 400;
+  /* Bong bong cho LUON ca cau tra loi: nen surface + bo mot duong vien mong,
+     khong de chu thai ra tren nen chung — doc it loang nhoang hon. */
+  padding: 12px 18px;
+  background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 6px var(--r-xl) var(--r-xl) var(--r-xl);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .16);
+  transition: box-shadow var(--t-fast) var(--e-out);
 }
+.ag__row:hover .ag__ai { box-shadow: 0 5px 18px rgba(0, 0, 0, .24); }
 
 /* --------------------------------------------------------------- man chao */
 
-.ag__hi { text-align: center; padding: 58px 20px 30px; }
+.ag__hi { text-align: center; padding: 58px 20px 30px; opacity: 1; transform: none;
+           transition: opacity 400ms var(--e-out), transform 400ms var(--e-out); }
+.ag__inner--empty .ag__hi:not(.is-in) { opacity: 0; transform: translateY(14px); }
 /* Logo man chao: vien mong + nen mo thay cho khoi gradient co quang sang.
    Quang sang mau la thu lam giao dien trong "de doa" hon la chuyen nghiep. */
 .ag__hi__orb {
@@ -600,7 +629,13 @@
   font-size: 13px;
   text-align: left;
   cursor: pointer;
+  transition: background var(--t-fast) var(--e-out);
 }
+.ag-tool:hover { border-color: var(--line-strong); transition: border-color var(--t-fast) var(--e-out); }
+.ag-tool__head:hover { background: rgba(255, 255, 255, .028); }
+/* Mui ten mo/dong: xoay nhe cho biet dang mo hay dong */
+.ag-tool__caret { transition: transform 260ms var(--e-out); display: inline-block; }
+.ag-tool.is-open .ag-tool__caret { transform: rotate(180deg); }
 .ag-tool__ico {
   display: grid;
   place-items: center;
@@ -639,8 +674,11 @@
 
 .ag-tool__out {
   margin: 0;
-  padding: 11px 13px;
-  border-top: 1px solid var(--line);
+  /* Luon nam trong DOM, dong bang max-height:0 de transition mo/dong chay duoc
+     (truoc do render co dieu kien nen mo ra la "nhay" khong he co hieu ung). */
+  max-height: 0;
+  padding: 0 13px;
+  border-top: 0 solid var(--line);
   background: var(--bg-sunken);
   color: var(--tx-dim);
   font-family: var(--f-num);
@@ -648,7 +686,16 @@
   line-height: 1.62;
   white-space: pre-wrap;
   word-break: break-word;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 340ms var(--e-out), opacity 240ms var(--e-out),
+              padding 240ms var(--e-out), border-top-width 240ms var(--e-out);
+}
+.ag-tool.is-open .ag-tool__out {
   max-height: 340px;
+  padding: 11px 13px;
+  border-top-width: 1px;
+  opacity: 1;
   overflow: auto;
 }
 
@@ -780,28 +827,49 @@
 /* -------------------------------------------------------------- suy nghi */
 
 .ag-think {
-  border: 1px dashed var(--line-mid);
+  border: 1px dashed color-mix(in srgb, var(--br-2) 40%, var(--line-mid));
   border-radius: var(--r-sm);
-  background: rgba(255, 255, 255, .015);
+  background: color-mix(in srgb, var(--br-2) 5%, transparent);
+  overflow: hidden;
+  transition: border-color var(--t-fast) var(--e-out);
 }
+.ag-think.is-open { border-color: color-mix(in srgb, var(--br-2) 62%, transparent); }
+.ag-think__lbl {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.ag-think__lbl .nx-spin { width: 11px; height: 11px; color: var(--br-1); }
 .ag-think__head {
   display: flex; align-items: center; gap: 8px;
   width: 100%; padding: 7px 12px;
   border: 0; background: transparent;
-  color: var(--tx-faint);
+  color: var(--br-2);
   font-family: var(--f-ui);
   font-size: 12px;
+  font-weight: 620;
   cursor: pointer;
+  transition: color var(--t-fast) var(--e-out);
 }
-.ag-think__head > span { flex: 1; text-align: left; }
+.ag-think__head:hover { color: var(--br-1); }
 .ag-think__body {
-  padding: 4px 12px 11px;
+  /* Luon trong DOM -> mo/dong co transition thuc su. */
+  max-height: 0;
+  padding: 0 12px;
+  overflow: hidden;
+  opacity: 0;
   color: var(--tx-faint);
   font-size: 12px;
   line-height: 1.68;
   white-space: pre-wrap;
   word-break: break-word;
-  max-height: 300px;
+  transition: max-height 340ms var(--e-out), opacity 240ms var(--e-out),
+              padding 240ms var(--e-out);
+}
+.ag-think.is-open .ag-think__body {
+  max-height: 320px;
+  padding: 4px 12px 11px;
+  opacity: 1;
   overflow: auto;
 }
 
@@ -829,15 +897,20 @@
 }
 
 .ag__wait {
-  display: inline-flex; align-items: center; gap: 9px;
-  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 16px;
   border-radius: var(--r-pill);
-  background: var(--bg-surface);
-  border: 1px solid var(--line);
-  color: var(--tx-dim);
+  background: color-mix(in srgb, var(--br-1) 9%, var(--bg-surface));
+  border: 1px solid color-mix(in srgb, var(--br-1) 24%, var(--line));
+  color: var(--br-2);
   font-size: 12.5px;
+  font-weight: 620;
+  box-shadow: 0 2px 10px rgba(58, 216, 255, .08);
+  transition: box-shadow 500ms var(--e-inout);
 }
-.ag__wait .nx-spin { width: 13px; height: 13px; }
+.ag__wait .nx-spin { width: 13px; height: 13px; color: var(--br-1); }
 
 /* ------------------------------------------------------------------ markdown */
 
@@ -858,9 +931,10 @@
   content: '';
   position: absolute;
   left: 3px; top: .72em;
-  width: 4px; height: 4px;
+  width: 5px; height: 5px;
   border-radius: 50%;
-  background: var(--tx-faint);
+  background: var(--br-1);
+  opacity: .75;
 }
 
 /* Tieu de trong cau tra loi. Agent hay viet nhieu tieu de nho lien tiep, nen
@@ -868,16 +942,20 @@
    tren thi mat tu chia duoc khoi, khong can phong to hay to mau. */
 .ag-h {
   font-family: var(--f-ui);
-  font-weight: 650;
+  font-weight: 700;
   color: var(--tx-hi);
-  margin: 22px 0 8px;
-  letter-spacing: -.1px;
+  margin: 24px 0 9px;
+  letter-spacing: -.15px;
+  padding-left: 10px;
+  border-left: 3px solid var(--br-1);
 }
 .ag-h:first-child { margin-top: 0; }
-.ag-h--1 { font-size: 16px; }
-.ag-h--2 { font-size: 15px; }
+.ag-h--1 { font-size: 16.5px; }
+.ag-h--2 { font-size: 15.5px; }
 .ag-h--3 { font-size: 14.5px; }
 .ag-h--4 { font-size: 14px; }
+
+.ag-md strong { font-weight: 700; color: #f4f7fd; }
 
 /* Code trong dong: nen mo, KHONG vien, mau gan voi chu thuong.
    Ban cu dung vien + mau cyan sang, moi doan van co vai tu nhu vay la ca man
@@ -1020,11 +1098,13 @@
   color: #06161f;
   font-size: 16px;
   cursor: pointer;
-  transition: opacity var(--t-fast) var(--e-out), background var(--t-fast) var(--e-out);
+  transition: opacity var(--t-fast) var(--e-out), background var(--t-fast) var(--e-out),
+              transform 160ms var(--e-spring);
 }
-.ag__send:hover:not(:disabled) { background: var(--br-1); }
+.ag__send:hover:not(:disabled) { background: var(--br-1); transform: scale(1.06); }
 .ag__send:disabled { opacity: .32; cursor: not-allowed; }
 .ag__send--stop { background: var(--bad); color: #fff; }
+.ag__send--stop:hover { background: color-mix(in srgb, var(--bad) 84%, #fff); transform: scale(1.06); }
 
 /* ------------------------------------------- thanh duoi: quyen · model · effort */
 
@@ -1119,7 +1199,13 @@
   border-radius: var(--r-md);
   background: var(--bg-raised);
   box-shadow: var(--sh-4);
+  /* Hieu ung mo: tu duoi bay len + mo dan (app.agent.jsx dua is-in sau 2 frame) */
+  opacity: 0;
+  transform: translateY(7px) scale(.97);
+  transform-origin: bottom right;
+  transition: opacity 200ms var(--e-out), transform 220ms var(--e-spring);
 }
+.ag-pk__menu.is-in { opacity: 1; transform: none; }
 .ag-pk__h {
   padding: 5px 9px 7px;
   color: var(--tx-faint);
@@ -1142,9 +1228,9 @@
   font-size: 12.5px;
   text-align: left;
   cursor: pointer;
-  transition: background var(--t-fast) var(--e-out);
+  transition: background var(--t-fast) var(--e-out), transform 140ms var(--e-out);
 }
-.ag-pk__i:hover { background: rgba(255, 255, 255, .05); }
+.ag-pk__i:hover { background: rgba(255, 255, 255, .05); transform: translateX(2px); }
 .ag-pk__i.is-on { background: var(--br-1-soft); }
 .ag-pk__n {
   display: inline-flex;
@@ -1262,7 +1348,7 @@
 .ag-cfg__hint { font-size: 11.5px; color: var(--tx-faint); line-height: 1.55; margin-bottom: 9px; }
 .ag-cfg__pick { display: flex; gap: 7px; }
 
-.ag-in {
+.ag-in, .ag__in {
   flex: 1 1 auto;
   min-width: 0;
   height: 34px;
