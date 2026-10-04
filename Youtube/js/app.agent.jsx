@@ -1442,13 +1442,11 @@
             {!items.length ? (
               <div className={'ag__hi' + enHi}>
                 <div className="ag__hi__badge">
-                  <span className="ag__hi__badge-dot"></span>
-                  <i className="ph-fill ph-lightning"></i>
-                  <span>NEXUS AI ASSISTANT</span>
+                  <i className="ph-bold ph-sparkle"></i>
+                  <span>NEXUS AI</span>
                 </div>
                 <div className="ag__hi__orb">
-                  <div className="ag__hi__orb-ring"></div>
-                  <i className="ph-fill ph-sparkle"></i>
+                  <i className="ph-bold ph-sparkle"></i>
                 </div>
                 <h2 className="ag__hi__t">
                   <span className="ag__hi__t-grad">{TX('Tôi có thể giúp được gì cho bạn?')}</span>
@@ -1527,57 +1525,64 @@
             </div>
           ) : null}
 
-          <div className={'ag__in' + (busy ? ' is-busy' : '')}>
-            <button className="ag__clip" disabled={!ready} title={TX('Đính kèm ảnh')}
-                    onClick={function () { if (fileRef.current) fileRef.current.click(); }}>
-              <i className="ph-bold ph-plus"></i>
-            </button>
-            <input ref={fileRef} type="file" accept="image/*" multiple
-                   style={{ display: 'none' }}
-                   onChange={function (e) { addFiles(e.target.files); e.target.value = ''; }} />
+          <div className={'ag__dock' + (busy ? ' is-busy' : '')}>
+            <div className="ag__dock__body">
+              <textarea
+                ref={taRef}
+                className="ag__ta"
+                rows={1}
+                value={draft}
+                disabled={!ready}
+                placeholder={ready ? TX('Hỏi bất kỳ điều gì hoặc ra lệnh cho Nexus AI... (Shift+Enter để xuống dòng)')
+                                   : TX('Chưa cấu hình khoá API')}
+                onChange={function (e) { setDraft(e.target.value); }}
+                onKeyDown={onKeyDown}
+                onPaste={onPaste}
+              />
+            </div>
 
-            <textarea
-              ref={taRef}
-              className="ag__ta"
-              rows={1}
-              value={draft}
-              disabled={!ready}
-              placeholder={ready ? TX('Nhắn gì đó... (Enter để gửi, Shift+Enter xuống dòng, dán ảnh bằng Ctrl+V)')
-                                 : TX('Chưa cấu hình khoá API')}
-              onChange={function (e) { setDraft(e.target.value); }}
-              onKeyDown={onKeyDown}
-              onPaste={onPaste}
-            />
-            {busy ? (
-              <button className="ag__send ag__send--stop"
-                      onClick={function () { callApi('ai_stop', curSid); }}
-                      title={TX('Dừng')}>
-                <i className="ph-fill ph-stop"></i>
-              </button>
-            ) : (
-              <button className="ag__send" disabled={(!draft.trim() && !imgs.length) || !ready}
-                      onClick={function () { send(); }} title={TX('Gửi')}>
-                <i className="ph-fill ph-paper-plane-right"></i>
-              </button>
-            )}
+            <div className="ag__dock__bar">
+              <div className="ag__dock__left">
+                <button className="ag__clip" disabled={!ready} title={TX('Đính kèm ảnh')}
+                        onClick={function () { if (fileRef.current) fileRef.current.click(); }}>
+                  <i className="ph-bold ph-plus"></i>
+                </button>
+                <input ref={fileRef} type="file" accept="image/*" multiple
+                       style={{ display: 'none' }}
+                       onChange={function (e) { addFiles(e.target.files); e.target.value = ''; }} />
+
+                <button className={'ag__perm' + (mode === 'bypass' ? ' is-free' : '')}
+                        onClick={function () { setMode(mode === 'bypass' ? 'manual' : 'bypass'); }}
+                        title={mode === 'bypass'
+                          ? TX('Đang tự do. Bấm để chuyển sang cần duyệt.')
+                          : TX('Đang cần duyệt. Bấm để chuyển sang tự do.')}>
+                  <i className={mode === 'bypass' ? 'ph-bold ph-shield-slash' : 'ph-bold ph-shield-check'}></i>
+                  <span>{mode === 'bypass' ? TX('Tự do') : TX('Cần duyệt')}</span>
+                </button>
+              </div>
+
+              <div className="ag__dock__right">
+                <ModelPicker st={st} onPick={saveCfg} />
+                <EffortPicker st={st} onPick={saveCfg} />
+
+                {busy ? (
+                  <button className="ag__send ag__send--stop"
+                          onClick={function () { callApi('ai_stop', curSid); }}
+                          title={TX('Dừng')}>
+                    <i className="ph-bold ph-square"></i>
+                  </button>
+                ) : (
+                  <button className={'ag__send' + ((draft.trim() || imgs.length) && ready ? ' is-active' : '')}
+                          disabled={(!draft.trim() && !imgs.length) || !ready}
+                          onClick={function () { send(); }} title={TX('Gửi')}>
+                    <i className="ph-bold ph-arrow-up"></i>
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
-          {/* Thanh duoi: ben trai la che do quyen, ben phai la model + muc suy nghi.
-              Bo cuc nay hoc theo Claude App — moi thu dieu khien cuoc tro chuyen
-              deu nam ngay canh o nhap, khong phai lan len thanh tren tim. */}
-          <div className="ag__bot">
-            <button className={'ag__perm' + (mode === 'bypass' ? ' is-free' : '')}
-                    onClick={function () { setMode(mode === 'bypass' ? 'manual' : 'bypass'); }}
-                    title={mode === 'bypass'
-                      ? TX('Đang tự do. Bấm để chuyển sang cần duyệt.')
-                      : TX('Đang cần duyệt. Bấm để chuyển sang tự do.')}>
-              <i className={mode === 'bypass' ? 'ph-fill ph-shield-slash' : 'ph-fill ph-shield-check'}></i>
-              {mode === 'bypass' ? TX('Tự do') : TX('Cần duyệt')}
-            </button>
-
-            <span className="ag__bot__sp" />
-
-            <ModelPicker st={st} onPick={saveCfg} />
-            <EffortPicker st={st} onPick={saveCfg} />
+          <div className="ag__foot__sub">
+            <span>{TX('Nexus AI có thể mắc sai sót. Vui lòng kiểm tra lại thông tin quan trọng.')}</span>
           </div>
         </footer>
         </div>
