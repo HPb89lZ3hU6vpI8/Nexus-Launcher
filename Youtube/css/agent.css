@@ -1,25 +1,24 @@
 /* ============================================================================
-   NEXUS AGENT — khung chat AI toan man hinh
+   NEXUS AGENT — Giao diện Trợ lý AI toàn màn hình
+   Thiết kế cao cấp: Anti-slop, Obsidian Dark, Glassmorphism, Precision Micro-interactions
+   Phối hợp tiêu chuẩn từ evondevKit (ui-ux) + ui-ux-pro-max + taste-skill
 
-   Chi dung bien mau o tokens.css, khong hardcode (tru lop phu trang/den rat mo).
+   HAI ĐIỀU BẮT BUỘC KHÔNG ĐƯỢC QUÊN:
+   1. <html> bị đặt style.zoom bởi script trong index.html. Dùng 100vw/100vh sẽ
+      bị nhân đôi hệ số zoom -> panel tràn ra ngoài màn hình. Mọi chỗ cần chiều
+      dài theo khung nhìn đều phải dùng calc(100 * var(--vw)) / var(--vh).
 
-   HAI DIEU BAT BUOC PHAI NHO O FILE NAY:
+   2. tokens.css:239-244 quét MỌI phần tử, ép animation-duration về 0.001ms khi
+      máy bật giảm chuyển động — và máy người dùng ĐANG bật. Vì vậy:
+        - Mở/đóng panel dùng TRANSITION (transition hoàn toàn miễn nhiễm).
+        - Chờ quay dùng .nx-spin (class đã được miễn trừ sẵn trong tokens.css).
+        - KHÔNG viết @keyframes mới cho việc mở/đóng ở đây.
 
-   1. <html> bi dat style.zoom boi script trong index.html. Dung 100vw/100vh se
-      bi nhan doi he so zoom -> panel tran ra ngoai man hinh. Moi cho can chieu
-      dai theo khung nhin deu phai dung calc(100 * var(--vw)) / var(--vh).
-
-   2. tokens.css:239-244 quet MOI phan tu, ep animation-duration ve 0.001ms khi
-      may bat giam chuyen dong — va may nguoi dung DANG bat. Vi vay:
-        - Mo/dong panel dung TRANSITION (transition hoan toan mien nhiem).
-        - Cho quay dung .nx-spin (class da duoc mien tru san trong tokens.css).
-        - KHONG viet @keyframes moi o day, se chet lang le.
-
-   z-index: modal cua app la 200, toast la 300. Panel nay 250 — noi tren modal
-   nhung van de toast bao loi hien duoc len tren.
+   z-index: modal của app là 200, toast là 300. Panel này 250 — nổi trên modal
+   nhưng vẫn để toast báo lỗi hiện được lên trên.
    ========================================================================== */
 
-/* ---------------------------------------------------------------- lop boc */
+/* ---------------------------------------------------------------- LỚP BỌC */
 
 .ag-wrap {
   position: fixed;
@@ -27,12 +26,18 @@
   z-index: 250;
   display: flex;
   opacity: 0;
-  transform: scale(.985);
-  transition: opacity 260ms var(--e-out), transform 260ms var(--e-out);
+  transform: scale(.988);
+  transition: opacity 240ms var(--e-out), transform 240ms var(--e-out);
+  background: rgba(5, 8, 14, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
-.ag-wrap.is-in { opacity: 1; transform: none; }
+.ag-wrap.is-in {
+  opacity: 1;
+  transform: none;
+}
 
-/* ------------------------------------------------------------------ khung */
+/* ------------------------------------------------------------------ KHUNG CHÍNH */
 
 .ag {
   position: relative;
@@ -41,22 +46,15 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /* Dark theme phan tang: nen chinh thien chì sau (#0d1117), khong nua do
-     den xit xanh duc. Chi dot trong .ag (khu chat AI) — khong lan ra UI game. */
-  background: #0d1117;
+  /* Obsidian Dark kết hợp ánh sáng vòm cực nhẹ (subtle ambient highlight) */
+  background: #090d16;
+  background-image: radial-gradient(1000px 500px at 50% -80px, rgba(58, 216, 255, 0.05), transparent 70%);
   color: var(--tx);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
 }
 
-/* ------------------------------------------------- boi den chu de Ctrl+C
-
-   base.css khoa `user-select: none` tren <body> cho ca launcher, vi day la
-   app desktop chu khong phai trang web. Nhung trong khung chat thi nguoc lai:
-   nguoi dung phai to duoc mot doan bat ky roi Ctrl+C, giong Gemini hay Claude.
-   Nut chep ca khoi van con, hai cach bo tro nhau chu khong thay nhau.
-   Mo cho tung khoi chu mot, khong mo ca vung, de nhan nut va nhan cong cu
-   khong bi to nham khi keo chuot. */
+/* ------------------------------------------------- BÔI ĐEN CHỮ ĐỂ CTRL+C */
 
 .ag__me,
 .ag__ai,
@@ -70,7 +68,7 @@
   cursor: text;
 }
 
-/* Nut nam trong nhung khoi tren thi tra lai nhu cu, khong cho to. */
+/* Nút nằm trong các khối trên thì giữ nguyên không cho bôi đen */
 .ag__me button, .ag__ai button, .ag-md button,
 .ag-think__body button, .ag-tool__out button {
   -webkit-user-select: none;
@@ -78,10 +76,37 @@
   cursor: pointer;
 }
 
-/* Vet boi den: dung mau nhan cua launcher cho dong bo. */
-.ag ::selection { background: color-mix(in srgb, var(--br-2) 34%, transparent); color: var(--tx-hi); }
+/* Màu bôi đen chữ */
+.ag ::selection {
+  background: color-mix(in srgb, var(--br-1) 28%, transparent);
+  color: var(--tx-hi);
+}
 
-/* -------------------------------------------------------------- thanh tren */
+/* -------------------------------------------------------------- NÚT TRIGGER Ở TOPBAR LAUNCHER */
+
+.ag-btn {
+  position: relative;
+}
+.ag-btn .ag-btn__dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--br-1);
+  box-shadow: 0 0 8px var(--br-1);
+  opacity: 0.85;
+  pointer-events: none;
+}
+.ag-btn.is-on {
+  color: var(--br-1) !important;
+  background: var(--br-1-soft) !important;
+  border-color: color-mix(in srgb, var(--br-1) 40%, transparent) !important;
+  box-shadow: 0 0 16px rgba(58, 216, 255, 0.25) !important;
+}
+
+/* -------------------------------------------------------------- THANH TRÊN (HEADER BAR) */
 
 .ag__bar {
   position: relative;
@@ -89,110 +114,104 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 60px;
-  padding: 0 16px 0 18px;
+  height: 58px;
+  padding: 0 18px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  background: #161b26;          /* lop header phan tang ro voi nen chinh */
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(14, 19, 31, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   flex: 0 0 auto;
 }
 
-/* Logo thanh tren: cung ngon ngu voi logo man chao — vien mong, nen mo,
-   khong quang sang. */
+.ag__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
 .ag__logo {
   display: grid;
   place-items: center;
-  width: 32px; height: 32px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--r-sm);
-  background: color-mix(in srgb, var(--br-1) 13%, var(--bg-surface));
-  border: 1px solid color-mix(in srgb, var(--br-1) 26%, transparent);
+  background: linear-gradient(135deg, rgba(58, 216, 255, 0.16), rgba(139, 108, 255, 0.12));
+  border: 1px solid rgba(58, 216, 255, 0.28);
   color: var(--br-1);
-  font-size: 15px;
+  font-size: 16px;
   flex: 0 0 auto;
+  box-shadow: 0 0 12px rgba(58, 216, 255, 0.15);
 }
 
 .ag__id { min-width: 0; }
 .ag__name {
   font-family: var(--f-display);
-  font-weight: 750;
+  font-weight: 700;
   font-size: 15px;
   color: var(--tx-hi);
-  letter-spacing: .2px;
+  letter-spacing: -0.01em;
   line-height: 1.2;
 }
 .ag__sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 11.5px;
-  color: var(--tx-faint);
+  color: var(--tx-dim);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 320px;
 }
 
-.ag__spacer { flex: 1; }
-
-/* ---- gat che do quyen ---- */
-
-.ag__mode {
-  display: flex;
-  gap: 3px;
-  padding: 3px;
-  border-radius: var(--r-pill);
-  background: var(--bg-sunken);
-  border: 1px solid var(--line);
+.ag__status-dot {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  background: var(--tx-faint);
   flex: 0 0 auto;
+  transition: background var(--t-fast) var(--e-out), box-shadow var(--t-fast) var(--e-out);
 }
-.ag__mode__b {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 13px;
-  border: 0;
-  border-radius: var(--r-pill);
-  background: transparent;
-  color: var(--tx-dim);
-  font-family: var(--f-ui);
-  font-size: 12px;
-  font-weight: 650;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: color var(--t-fast) var(--e-out), background var(--t-fast) var(--e-out);
+.ag__status-dot.is-ready {
+  background: var(--ok);
+  box-shadow: 0 0 8px rgba(47, 224, 164, 0.65);
 }
-.ag__mode__b i { font-size: 13px; }
-.ag__mode__b:hover { color: var(--tx); }
-.ag__mode__b.is-on {
-  background: var(--br-1-soft);
-  color: var(--br-1);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--br-1) 30%, transparent);
-}
-.ag__mode__b--free.is-on {
-  background: color-mix(in srgb, var(--warn) 15%, transparent);
-  color: var(--warn);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warn) 34%, transparent);
-}
+
+.ag__spacer { flex: 1; }
 
 .ag__ib {
   display: grid;
   place-items: center;
-  width: 34px; height: 34px;
-  border: 1px solid var(--line);
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--r-sm);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.03);
   color: var(--tx-dim);
   font-size: 15px;
   cursor: pointer;
   flex: 0 0 auto;
   transition: color var(--t-fast) var(--e-out), border-color var(--t-fast) var(--e-out),
-              background var(--t-fast) var(--e-out);
+              background var(--t-fast) var(--e-out), transform 160ms var(--e-spring);
 }
-.ag__ib:hover { color: var(--tx-hi); border-color: var(--line-strong); background: rgba(255, 255, 255, .04); }
-.ag__ib--x:hover { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); }
+.ag__ib:hover {
+  color: var(--tx-hi);
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+}
+.ag__ib--side.is-on {
+  color: var(--tx-hi);
+  background: rgba(58, 216, 255, 0.08);
+  border-color: rgba(58, 216, 255, 0.28);
+}
+.ag__ib--x:hover {
+  color: var(--bad);
+  border-color: rgba(255, 79, 109, 0.35);
+  background: rgba(255, 79, 109, 0.1);
+}
 
-/* -------------------------------------------------------------------- than */
-
-/* ------------------------------------------ than: danh sach phien + hoi thoai */
+/* -------------------------------------------------------------------- THÂN CHÍNH */
 
 .ag__mid {
   position: relative;
@@ -202,15 +221,17 @@
   min-height: 0;
 }
 
+/* -------------------------------------------------------------------- SIDEBAR */
+
 .ag__side {
-  position: relative;   /* de hop xac nhan bam theo dung cot nay */
+  position: relative;
   flex: 0 0 auto;
-  width: 244px;
+  width: 248px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
-  background: #111620;           /* sidebar rieng mot lop, ro voi nen chinh */
-  padding: 12px 10px;
+  border-right: 1px solid rgba(255, 255, 255, 0.065);
+  background: rgba(10, 14, 23, 0.96);
+  padding: 14px 10px;
   min-height: 0;
 }
 
@@ -219,25 +240,29 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 9px 12px;
-  margin-bottom: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--r-sm);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--tx);
+  height: 36px;
+  padding: 0 12px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(58, 216, 255, 0.22);
+  border-radius: var(--r-md);
+  background: rgba(58, 216, 255, 0.06);
+  color: var(--tx-hi);
   font-family: inherit;
   font-size: 12.5px;
   font-weight: 620;
   letter-spacing: -0.01em;
   cursor: pointer;
   transition: border-color var(--t-fast) var(--e-out), color var(--t-fast) var(--e-out),
-              background var(--t-fast) var(--e-out);
+              background var(--t-fast) var(--e-out), transform 160ms var(--e-spring),
+              box-shadow var(--t-fast) var(--e-out);
 }
-.ag__new i { font-size: 13px; }
+.ag__new i { font-size: 14px; color: var(--br-1); }
 .ag__new:hover {
-  border-color: color-mix(in srgb, var(--br-1) 45%, transparent);
-  color: var(--tx-hi);
-  background: rgba(255, 255, 255, .05);
+  border-color: rgba(58, 216, 255, 0.45);
+  background: rgba(58, 216, 255, 0.12);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(58, 216, 255, 0.12);
 }
 
 .ag__side__h {
@@ -248,18 +273,38 @@
   letter-spacing: .8px;
   text-transform: uppercase;
 }
-.ag__side__l { flex: 1 1 auto; overflow-y: auto; min-height: 0; margin: 0 -4px; padding: 0 4px; }
-.ag__side__e { padding: 10px 6px; color: var(--tx-faint); font-size: 12px; }
+
+.ag__side__l {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+.ag__side__e {
+  padding: 14px 8px;
+  color: var(--tx-faint);
+  font-size: 12px;
+  text-align: center;
+}
 
 .ag__ses {
   position: relative;
   display: flex;
   align-items: center;
+  margin: 2px 0;
   border-radius: var(--r-sm);
-  transition: background var(--t-fast) var(--e-out);
+  border: 1px solid transparent;
+  transition: background var(--t-fast) var(--e-out), border-color var(--t-fast) var(--e-out);
 }
-.ag__ses:hover { background: rgba(255, 255, 255, .05); }
-.ag__ses.is-on { background: color-mix(in srgb, var(--br-1) 13%, transparent); }
+.ag__ses:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.ag__ses.is-on {
+  background: rgba(58, 216, 255, 0.08);
+  border-left: 2.5px solid var(--br-1);
+  border-color: rgba(58, 216, 255, 0.16);
+}
 
 .ag__ses__b {
   flex: 1 1 auto;
@@ -277,7 +322,10 @@
   text-align: left;
   cursor: pointer;
 }
-.ag__ses.is-on .ag__ses__b { color: var(--tx-hi); }
+.ag__ses.is-on .ag__ses__b {
+  color: var(--tx-hi);
+  font-weight: 600;
+}
 .ag__ses__t {
   flex: 1 1 auto;
   min-width: 0;
@@ -285,29 +333,38 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* Cho quay nho bao phien nay dang chay — nhieu phien chay cung luc nen phai
-   nhin thay ngay cai nao con dang lam. Dung .nx-spin vi class do da duoc mien
-   tru khoi bo quet giam-chuyen-dong o tokens.css. */
 .ag__ses__run {
-  width: 11px; height: 11px;
+  width: 11px;
+  height: 11px;
   flex: 0 0 auto;
   align-self: center;
+  color: var(--br-1);
 }
-.ag__ses .ag__ses__m { transition: color var(--t-fast) var(--e-out); }
-.ag__ses__m { flex: 0 0 auto; color: var(--tx-faint); font-family: var(--f-num); font-size: 10.5px; }
+.ag__ses__m {
+  flex: 0 0 auto;
+  color: var(--tx-faint);
+  font-family: var(--f-num);
+  font-size: 10.5px;
+  transition: color var(--t-fast) var(--e-out);
+}
+.ag__ses.is-on .ag__ses__m {
+  color: var(--tx-dim);
+}
 
 .ag__ses__x,
 .ag__ses__i {
   flex: 0 0 auto;
   display: none;
   place-items: center;
-  width: 24px; height: 24px;
-  border: 0; border-radius: var(--r-xs);
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: var(--r-xs);
   background: transparent;
   color: var(--tx-faint);
   font-size: 12px;
   cursor: pointer;
+  transition: color var(--t-fast) var(--e-out), background var(--t-fast) var(--e-out);
 }
 .ag__ses__x { margin-right: 5px; }
 .ag__ses:hover .ag__ses__x,
@@ -315,7 +372,6 @@
 .ag__ses__x:hover { color: var(--bad); background: var(--bad-soft); }
 .ag__ses__i:hover { color: var(--br-1); background: var(--br-1-soft); }
 
-/* O sua ten cuoc tro chuyen — chiem tron dong khi dang sua */
 .ag__ses.is-edit { background: var(--bg-sunken); }
 .ag__ses__in {
   width: 100%;
@@ -330,21 +386,17 @@
   outline: none;
 }
 
-.ag__ib--side.is-on { color: var(--tx-hi); border-color: var(--line-mid); }
+/* -------------------------------------------------------------------- CỘT CHAT PHẢI */
 
-/* Cot phai: vung cuon o tren, o nhap o duoi. Ca hai cung mot be ngang nen
-   truc giua cua chat va truc giua cua o nhap trung nhau. */
 .ag__col {
-  --ag-sbw: 0px;          /* JS do be rong thanh cuon roi ghi vao day */
+  --ag-sbw: 0px;
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
-/* KHONG dat scrollbar-gutter o day. Viec chua cho thanh cuon do JS lo: no do
-   be rong that roi ghi vao bien --ag-sbw, o nhap ben duoi bu dung tung do.
-   Dung ca hai thi bu hai lan -> lech nguoc lai 9px (da mac dung loi nay). */
 .ag__body {
   flex: 1 1 auto;
   overflow-y: auto;
@@ -355,12 +407,9 @@
   width: 100%;
   max-width: 860px;
   margin: 0 auto;
-  padding: 26px 26px 8px;
+  padding: 26px 24px 12px;
 }
 
-/* Khi chua co tin nhan nao, man chao phai nam giua man hinh. Neu khong no dinh
-   len sat thanh tren va de lai mot mang trong menh mong ben duoi — trong rat
-   lech. Chi ap khi rong, luc co tin nhan thi noi dung van chay tu tren xuong. */
 .ag__inner--empty {
   display: flex;
   align-items: center;
@@ -369,28 +418,29 @@
   padding-bottom: 26px;
 }
 
-/* Ag enter transition: tokens.css bop @keyframes khi may giam chuyen dong,
-   nhung TRANSITION thi khong ai bam vao — nen moi hieu ung o day deu dung
-   transition + class is-in (tu app.agent.jsx dua sau 2 khung hinh). */
-.ag__row {
-  transition: opacity 320ms var(--e-out), transform 320ms var(--e-out);
-}
-.ag__row:not(.is-in) { opacity: 0; transform: translateY(12px); }
-/* Thuc hien cau: giua chat dang cuon thi dong cu cung duoc tra phan hoi —
-   khi cuon len doc lai, cac dong cu da xong roi khong nhoang lai. */
+/* -------------------------------------------------------------------- HIỆU ỨNG VÀO (TRANSITION) */
 
-.ag__row { display: flex; gap: 12px; margin-bottom: 20px; }
+.ag__row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  transition: opacity 280ms var(--e-out), transform 280ms var(--e-out);
+}
+.ag__row:not(.is-in) {
+  opacity: 0;
+  transform: translateY(12px);
+}
 .ag__row--me { justify-content: flex-end; }
 .ag__row--sub { margin-bottom: 12px; }
 
-/* ---- anh dinh kem ---- */
+/* -------------------------------------------------------------------- TIN NGƯỜI DÙNG */
 
 .ag__mewrap {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 7px;
-  max-width: 74%;
+  max-width: 76%;
   min-width: 0;
 }
 .ag__pics { display: flex; flex-wrap: wrap; gap: 7px; justify-content: flex-end; }
@@ -403,218 +453,248 @@
   display: block;
 }
 
-/* Hang anh cho gui, nam ngay tren o nhap */
-.ag__att {
+.ag__mebox {
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  max-width: 860px;
-  margin: 0 auto 9px;
-}
-.ag__att__i { position: relative; }
-.ag__att__i img {
-  width: 68px; height: 68px;
-  object-fit: cover;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--line-mid);
-  display: block;
-}
-.ag__att__i button {
-  position: absolute;
-  top: -6px; right: -6px;
-  width: 20px; height: 20px;
-  display: grid; place-items: center;
-  border: 1px solid var(--line-strong);
-  border-radius: 50%;
-  background: var(--bg-raised);
-  color: var(--tx-dim);
-  font-size: 10px;
-  cursor: pointer;
-  transition: color var(--t-fast) var(--e-out), background var(--t-fast) var(--e-out);
-}
-.ag__att__i button:hover { color: #fff; background: var(--bad); }
-
-/* Nút đính kem: cung truc doc voi nut gui (ca hai da center trong .ag__in) */
-.ag__clip {
-  display: grid; place-items: center;
-  width: 32px; height: 32px;
-  flex: 0 0 auto;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--r-sm);
-  background: transparent;
-  color: var(--tx-dim);
-  font-size: 14px;
-  cursor: pointer;
-  transition: color var(--t-fast) var(--e-out), border-color var(--t-fast) var(--e-out),
-              background var(--t-fast) var(--e-out), transform 160ms var(--e-spring);
-}
-.ag__clip:hover:not(:disabled) {
-  color: var(--br-1);
-  border-color: color-mix(in srgb, var(--br-1) 45%, transparent);
-  background: var(--br-1-soft);
-  transform: scale(1.05);
-}
-.ag__clip:disabled { opacity: .35; cursor: not-allowed; }
-
-/* Keo tha anh vao bat cu dau trong panel */
-.ag.is-drag::after {
-  content: '';
-  position: absolute;
-  inset: 10px;
-  z-index: 60;
-  pointer-events: none;
-  border: 2px dashed color-mix(in srgb, var(--br-1) 55%, transparent);
-  border-radius: var(--r-xl);
-  background: color-mix(in srgb, var(--br-1) 7%, transparent);
+  flex-direction: column;
+  align-items: flex-end;
 }
 
-/* Bong bong tin cua minh: nen DAC, mau diu, khong con gradient.
-
-   Ban cu dung gradient cyan->tim sang ruc voi chu den. Nhin thi bat mat nhung
-   no la dau hieu ro nhat cua "giao dien do may lam": mot mang mau bao hoa dat
-   giua man hinh toi. Doi sang mot lop nen mo cua chinh mau nhan, chu sang binh
-   thuong — van phan biet duoc ngay dau la loi minh, ma khong choi mat. */
 .ag__me {
   max-width: 100%;
-  padding: 11px 16px;
-  border-radius: var(--r-xl) var(--r-xl) 6px var(--r-xl);
-  background: color-mix(in srgb, var(--br-2) 17%, var(--bg-surface));
-  border: 1px solid color-mix(in srgb, var(--br-2) 26%, transparent);
-  color: var(--tx-hi);
-  font-family: 'Inter', var(--f-ui);   /* Inter sach hon Be Vietnam cho chat */
+  padding: 12px 18px;
+  border-radius: 18px 18px 4px 18px;
+  background: #152238;
+  border: 1px solid rgba(90, 168, 255, 0.24);
+  color: #f2f5fb;
+  font-family: 'Inter', var(--f-ui);
   font-size: 14.5px;
   line-height: 1.68;
   font-weight: 450;
   white-space: pre-wrap;
   word-break: break-word;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, .22);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   transition: transform var(--t-fast) var(--e-out), box-shadow var(--t-fast) var(--e-out);
 }
 .ag__row--me:hover .ag__me {
   transform: translateY(-1px);
-  box-shadow: 0 5px 16px rgba(0, 0, 0, .3);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
 }
 
-/* ---- nut chep ---- */
+/* -------------------------------------------------------------------- TIN TRỢ LÝ */
 
-.ag__mebox { position: relative; display: flex; flex-direction: column; align-items: flex-end; }
-.ag__ai { position: relative; }
+.ag__ai {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: 'Inter', var(--f-ui);
+  font-size: 14.5px;
+  line-height: 1.78;
+  color: #dce4f5;
+  font-weight: 400;
+  padding: 16px 22px;
+  background: rgba(17, 23, 37, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 4px 20px 20px 20px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+  transition: box-shadow var(--t-fast) var(--e-out);
+}
+.ag__row:hover .ag__ai {
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28);
+}
 
 .ag__cp {
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  width: 26px; height: 26px;
-  border: 1px solid var(--line);
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--r-sm);
-  background: var(--bg-raised);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--tx-faint);
   font-size: 12px;
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  transform: scale(.85);
+  transform: scale(.88);
   transition: opacity var(--t-fast) var(--e-out), color var(--t-fast) var(--e-out),
-              border-color var(--t-fast) var(--e-out), transform var(--t-fast) var(--e-spring);
+              border-color var(--t-fast) var(--e-out), transform var(--t-fast) var(--e-spring),
+              background var(--t-fast) var(--e-out);
 }
-/* Tin cua minh: nut nam ben TRAI bong bong. Cua agent: nam duoi, le trai. */
-/* Nut nam han o dong duoi, chiem cho that.
-   Ban cu dat absolute chong len khoi chu: dong cuoi cua cau tra loi bi nut
-   de mat may chu dau. Khong bo tri chong len chu nua — no cho ra cam giac
-   lam au. Vi nut luon giu cho san nen luc an hay hien bo cuc cung khong nhay. */
 .ag__cp--me { align-self: flex-end; margin-top: 5px; }
-.ag__cp--ai { margin-top: 6px; }
+.ag__cp--ai { margin-top: 8px; }
 
-.ag__row:hover .ag__cp { opacity: .7; pointer-events: auto; transform: scale(1); }
-.ag__cp:hover { opacity: 1 !important; color: var(--tx-hi); border-color: var(--line-strong); }
-.ag__cp.is-ok { opacity: 1 !important; color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.ag__row:hover .ag__cp { opacity: .75; pointer-events: auto; transform: scale(1); }
+.ag__cp:hover { opacity: 1 !important; color: var(--tx-hi); border-color: var(--line-strong); background: rgba(255, 255, 255, 0.08); }
+.ag__cp.is-ok { opacity: 1 !important; color: var(--ok); border-color: rgba(47, 224, 164, 0.4); background: var(--ok-soft); }
 
-/* Chu cua agent: mau diu, do dam binh thuong, dong thoang.
-   Truoc day chu qua sang va qua dam nen doc len rat "may moc" — nhin la biet
-   ngay may viet. Chu thuong, khoang cach rong mot chut thi de doc hon nhieu. */
-.ag__ai {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-family: 'Inter', var(--f-ui);
-  font-size: 15px;
-  line-height: 1.8;
-  color: #dce4f5;
-  font-weight: 400;
-  /* Bong bong cho LUON ca cau tra loi: nen surface + bo mot duong vien mong,
-     khong de chu thai ra tren nen chung — doc it loang nhoang hon. */
-  padding: 12px 18px;
-  background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
-  border: 1px solid var(--line);
-  border-radius: 6px var(--r-xl) var(--r-xl) var(--r-xl);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, .16);
-  transition: box-shadow var(--t-fast) var(--e-out);
+/* -------------------------------------------------------------------- MÀN CHÀO (WELCOME HERO) */
+
+.ag__hi {
+  text-align: center;
+  max-width: 620px;
+  padding: 30px 16px 20px;
+  opacity: 1;
+  transform: none;
+  transition: opacity 360ms var(--e-out), transform 360ms var(--e-out);
 }
-.ag__row:hover .ag__ai { box-shadow: 0 5px 18px rgba(0, 0, 0, .24); }
+.ag__inner--empty .ag__hi:not(.is-in) {
+  opacity: 0;
+  transform: translateY(14px);
+}
 
-/* --------------------------------------------------------------- man chao */
-
-.ag__hi { text-align: center; padding: 58px 20px 30px; opacity: 1; transform: none;
-           transition: opacity 400ms var(--e-out), transform 400ms var(--e-out); }
-.ag__inner--empty .ag__hi:not(.is-in) { opacity: 0; transform: translateY(14px); }
-/* Logo man chao: vien mong + nen mo thay cho khoi gradient co quang sang.
-   Quang sang mau la thu lam giao dien trong "de doa" hon la chuyen nghiep. */
 .ag__hi__orb {
   display: grid;
   place-items: center;
-  width: 54px; height: 54px;
-  margin: 0 auto 22px;
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--br-1) 13%, var(--bg-surface));
-  border: 1px solid color-mix(in srgb, var(--br-1) 26%, transparent);
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(58, 216, 255, 0.14), rgba(139, 108, 255, 0.12));
+  border: 1px solid rgba(58, 216, 255, 0.28);
   color: var(--br-1);
-  font-size: 24px;
+  font-size: 26px;
+  box-shadow: 0 0 24px rgba(58, 216, 255, 0.15);
 }
 
-/* Typography hien dai cho man chao: Inter stack (da thay o .ag), phan cap ro.
-   Tieu de dam hon, gian chu hoi am de doc nhe; phu mau xam nhe mat. */
 .ag__hi__t {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  /* base.css ép h2 (day la h2) dung --f-display (Outfit) — trong khung chat AI
-     chuyen sang Inter cho thong nhat voi ca man hinh chat. */
-  font-weight: 650;
-  font-size: 23px;
+  font-weight: 700;
+  font-size: 22px;
   letter-spacing: -0.02em;
   line-height: 1.35;
   color: var(--tx-hi);
 }
-/* Cau gioi thieu — rong hon mot chut vi khong con o goi y ben duoi, va day la
-   thu duy nhat nguoi dung doc truoc khi bat dau go. */
 .ag__hi__d {
-  margin: 0 auto;
-  max-width: 520px;
-  color: #8b949e;                /* xam diu mat, khong trang nhat nhu truoc */
+  margin: 0 auto 22px;
+  max-width: 500px;
+  color: var(--tx-dim);
   font-size: 13.5px;
-  line-height: 1.6;
+  line-height: 1.62;
 }
+
 .ag__hi__warn {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  max-width: 540px;
-  margin: 22px auto 0;
-  padding: 14px 16px;
+  max-width: 500px;
+  margin: 18px auto 0;
+  padding: 12px 16px;
   border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent);
   border-radius: var(--r-md);
   background: var(--warn-soft);
   color: var(--tx);
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.55;
   text-align: left;
 }
 .ag__hi__warn i { color: var(--warn); font-size: 17px; flex: 0 0 auto; margin-top: 1px; }
 
-/* --------------------------------------------------------------- the tool */
+/* -------------------------------------------------------------------- GỢI Ý MỞ ĐẦU (STARTER CARDS) */
+
+.ag__starters {
+  margin-top: 24px;
+}
+.ag__starters__title {
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--tx-faint);
+  margin-bottom: 12px;
+}
+.ag__starters__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  text-align: left;
+}
+.ag__starter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--t-fast) var(--e-out), border-color var(--t-fast) var(--e-out),
+              transform 160ms var(--e-spring), box-shadow var(--t-fast) var(--e-out);
+}
+.ag__starter:hover {
+  background: rgba(58, 216, 255, 0.06);
+  border-color: rgba(58, 216, 255, 0.32);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+.ag__starter__ico {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-sm);
+  background: rgba(58, 216, 255, 0.08);
+  border: 1px solid rgba(58, 216, 255, 0.18);
+  color: var(--br-1);
+  font-size: 16px;
+  flex: 0 0 auto;
+}
+.ag__starter__cnt { min-width: 0; flex: 1 1 auto; }
+.ag__starter__t {
+  font-weight: 650;
+  font-size: 13px;
+  color: var(--tx-hi);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ag__starter__d {
+  font-size: 11.5px;
+  color: var(--tx-faint);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* -------------------------------------------------------------------- NÚT CUỘN XUỐNG CUỐI */
+
+.ag-scroll-btn {
+  position: sticky;
+  bottom: 14px;
+  align-self: center;
+  margin-top: -46px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #161e30;
+  border: 1px solid rgba(58, 216, 255, 0.35);
+  color: var(--br-1);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 160ms var(--e-spring), background var(--t-fast) var(--e-out),
+              box-shadow var(--t-fast) var(--e-out);
+}
+.ag-scroll-btn:hover {
+  transform: scale(1.1);
+  background: #1c263c;
+  box-shadow: 0 6px 22px rgba(58, 216, 255, 0.25);
+}
+
+/* -------------------------------------------------------------------- THẺ TOOL (TOOL CARD) */
 
 .ag-tool {
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  background: var(--bg-surface);
+  background: rgba(17, 23, 37, 0.55);
   overflow: hidden;
   transition: border-color var(--t-fast) var(--e-out);
 }
@@ -637,15 +717,16 @@
   cursor: pointer;
   transition: background var(--t-fast) var(--e-out);
 }
-.ag-tool:hover { border-color: var(--line-strong); transition: border-color var(--t-fast) var(--e-out); }
-.ag-tool__head:hover { background: rgba(255, 255, 255, .028); }
-/* Mui ten mo/dong: xoay nhe cho biet dang mo hay dong */
+.ag-tool:hover { border-color: var(--line-strong); }
+.ag-tool__head:hover { background: rgba(255, 255, 255, .03); }
 .ag-tool__caret { transition: transform 260ms var(--e-out); display: inline-block; }
 .ag-tool.is-open .ag-tool__caret { transform: rotate(180deg); }
+
 .ag-tool__ico {
   display: grid;
   place-items: center;
-  width: 22px; height: 22px;
+  width: 22px;
+  height: 22px;
   flex: 0 0 auto;
   border-radius: var(--r-xs);
   font-size: 13px;
@@ -680,12 +761,10 @@
 
 .ag-tool__out {
   margin: 0;
-  /* Luon nam trong DOM, dong bang max-height:0 de transition mo/dong chay duoc
-     (truoc do render co dieu kien nen mo ra la "nhay" khong he co hieu ung). */
   max-height: 0;
   padding: 0 13px;
   border-top: 0 solid var(--line);
-  background: var(--bg-sunken);
+  background: #060911;
   color: var(--tx-dim);
   font-family: var(--f-num);
   font-size: 11.5px;
@@ -705,7 +784,7 @@
   overflow: auto;
 }
 
-/* ---------------------------------------------------------- the xin phep */
+/* ---------------------------------------------------------- THẺ XIN PHÉP (ASK CARD) */
 
 .ag-ask {
   border: 1px solid color-mix(in srgb, var(--br-1) 34%, transparent);
@@ -718,8 +797,11 @@
 
 .ag-ask__head { display: flex; align-items: center; gap: 11px; margin-bottom: 11px; }
 .ag-ask__ico {
-  display: grid; place-items: center;
-  width: 32px; height: 32px; flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
   border-radius: var(--r-sm);
   background: var(--br-1-soft);
   color: var(--br-1);
@@ -739,7 +821,7 @@
   margin: 0 0 11px;
   padding: 11px 13px;
   border-radius: var(--r-sm);
-  background: var(--bg-void);
+  background: #060911;
   border: 1px solid var(--line);
   color: var(--br-1);
   font-family: var(--f-num);
@@ -748,8 +830,11 @@
   word-break: break-all;
 }
 .ag-ask__warn {
-  display: flex; align-items: center; gap: 8px;
-  margin-bottom: 11px; padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 11px;
+  padding: 9px 12px;
   border-radius: var(--r-sm);
   background: var(--bad-soft);
   color: var(--bad);
@@ -758,22 +843,17 @@
 }
 .ag-ask__act { display: flex; gap: 8px; margin-top: 12px; }
 .ag-ask__act .nx-btn { flex: 0 0 auto; }
-
-/* Nut Dong y dung .nx-btn--primary cua launcher, von la gradient cau vong.
-   Trong khung chat thi ghi de sang mot mau dac cho dong bo voi phan con lai —
-   ca panel gio khong con mot vet gradient nao. */
 .ag-ask__act .nx-btn--primary {
   background: var(--br-2);
   color: #06161f;
 }
 .ag-ask__act .nx-btn--primary:hover { background: var(--br-1); }
 .ag-ask--danger .ag-ask__act .nx-btn--primary { background: var(--bad); color: #fff; }
-.ag-ask--danger .ag-ask__act .nx-btn--primary:hover {
-  background: color-mix(in srgb, var(--bad) 84%, #fff);
-}
 
 .ag-ask.is-done {
-  display: flex; align-items: center; gap: 9px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
   padding: 9px 13px;
   border-radius: var(--r-sm);
   background: var(--bg-surface);
@@ -786,37 +866,41 @@
 .ag-ask.is-yes i { color: var(--ok); }
 .ag-ask.is-no i  { color: var(--tx-faint); }
 
-/* ------------------------------------------------------------------- diff */
+/* ------------------------------------------------------------------- DIFF VIEW */
 
 .ag-diff {
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
   overflow: hidden;
-  background: var(--bg-void);
+  background: #060911;
 }
 .ag-diff__bar {
-  display: flex; align-items: center; gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 7px 11px;
   border-bottom: 1px solid var(--line);
   background: var(--bg-sunken);
   font-size: 11.5px;
 }
 .ag-diff__bar > i { color: var(--tx-faint); }
-/* Khong dung direction: rtl de cat dau duong dan. Voi duong dan Windows, rtl
-   lam dau ':' va '\' nhay vi tri lung tung (D:\a\b co the hien thanh \b\a:D).
-   Cat duoi bang ellipsis thuong thi luon dung thu tu. */
 .ag-diff__path {
-  flex: 1 1 auto; min-width: 0;
+  flex: 1 1 auto;
+  min-width: 0;
   font-family: var(--f-num);
   color: var(--tx-dim);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .ag-diff__add { color: var(--ok); font-weight: 700; font-family: var(--f-num); }
 .ag-diff__rm  { color: var(--bad); font-weight: 700; font-family: var(--f-num); }
 
 .ag-diff__body {
-  margin: 0; padding: 8px 0;
-  max-height: 260px; overflow: auto;
+  margin: 0;
+  padding: 8px 0;
+  max-height: 260px;
+  overflow: auto;
   font-family: var(--f-num);
   font-size: 11.5px;
   line-height: 1.6;
@@ -830,16 +914,16 @@
 .ag-diff__l--a { background: color-mix(in srgb, var(--ok) 11%, transparent); color: var(--ok); }
 .ag-diff__l--r { background: color-mix(in srgb, var(--bad) 10%, transparent); color: var(--bad); }
 
-/* -------------------------------------------------------------- suy nghi */
+/* -------------------------------------------------------------- KHỐI SUY NGHĨ (THINKING) */
 
 .ag-think {
-  border: 1px dashed color-mix(in srgb, var(--br-2) 40%, var(--line-mid));
+  border: 1px dashed rgba(90, 168, 255, 0.35);
   border-radius: var(--r-sm);
-  background: color-mix(in srgb, var(--br-2) 5%, transparent);
+  background: rgba(90, 168, 255, 0.04);
   overflow: hidden;
   transition: border-color var(--t-fast) var(--e-out);
 }
-.ag-think.is-open { border-color: color-mix(in srgb, var(--br-2) 62%, transparent); }
+.ag-think.is-open { border-color: rgba(90, 168, 255, 0.65); }
 .ag-think__lbl {
   display: inline-flex;
   align-items: center;
@@ -847,9 +931,13 @@
 }
 .ag-think__lbl .nx-spin { width: 11px; height: 11px; color: var(--br-1); }
 .ag-think__head {
-  display: flex; align-items: center; gap: 8px;
-  width: 100%; padding: 7px 12px;
-  border: 0; background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 12px;
+  border: 0;
+  background: transparent;
   color: var(--br-2);
   font-family: var(--f-ui);
   font-size: 12px;
@@ -859,12 +947,11 @@
 }
 .ag-think__head:hover { color: var(--br-1); }
 .ag-think__body {
-  /* Luon trong DOM -> mo/dong co transition thuc su. */
   max-height: 0;
   padding: 0 12px;
   overflow: hidden;
   opacity: 0;
-  color: var(--tx-faint);
+  color: var(--tx-dim);
   font-size: 12px;
   line-height: 1.68;
   white-space: pre-wrap;
@@ -879,10 +966,11 @@
   overflow: auto;
 }
 
-/* ------------------------------------------------------------ loi va ghi chu */
+/* ------------------------------------------------------------ LỖI VÀ GHI CHÚ */
 
 .ag__err {
-  display: flex; gap: 10px;
+  display: flex;
+  gap: 10px;
   padding: 12px 14px;
   border: 1px solid color-mix(in srgb, var(--bad) 36%, transparent);
   border-radius: var(--r-md);
@@ -914,19 +1002,16 @@
   font-size: 12.5px;
   font-weight: 620;
   box-shadow: 0 2px 10px rgba(58, 216, 255, .08);
-  transition: box-shadow 500ms var(--e-inout);
 }
 .ag__wait .nx-spin { width: 13px; height: 13px; color: var(--br-1); }
 
-/* ------------------------------------------------------------------ markdown */
+/* ------------------------------------------------------------------ MARKDOWN CHUẨN */
 
 .ag-md > *:first-child { margin-top: 0; }
 .ag-md > *:last-child { margin-bottom: 0; }
 .ag-p { margin: 0 0 12px; white-space: pre-wrap; word-break: break-word; }
-.ag-md strong { font-weight: 620; color: var(--tx-hi); }
+.ag-md strong { font-weight: 650; color: #f4f7fd; }
 
-/* Gach dau dong tu ve bang dau cham nho, khong dung bullet mac dinh cua trinh
-   duyet — bullet do to va dam, dung nhieu se thanh mot rung cham den. */
 .ag-ul { margin: 0 0 12px; padding-left: 4px; list-style: none; }
 .ag-ul li {
   position: relative;
@@ -936,21 +1021,20 @@
 .ag-ul li::before {
   content: '';
   position: absolute;
-  left: 3px; top: .72em;
-  width: 5px; height: 5px;
+  left: 3px;
+  top: .72em;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--br-1);
   opacity: .75;
 }
 
-/* Tieu de trong cau tra loi. Agent hay viet nhieu tieu de nho lien tiep, nen
-   cai quyet dinh do doc la KHOANG CACH TREN chu khong phai co chu: cach xa phia
-   tren thi mat tu chia duoc khoi, khong can phong to hay to mau. */
 .ag-h {
   font-family: var(--f-ui);
   font-weight: 700;
   color: var(--tx-hi);
-  margin: 24px 0 9px;
+  margin: 22px 0 9px;
   letter-spacing: -.15px;
   padding-left: 10px;
   border-left: 3px solid var(--br-1);
@@ -961,16 +1045,12 @@
 .ag-h--3 { font-size: 14.5px; }
 .ag-h--4 { font-size: 14px; }
 
-.ag-md strong { font-weight: 700; color: #f4f7fd; }
-
-/* Code trong dong: nen mo, KHONG vien, mau gan voi chu thuong.
-   Ban cu dung vien + mau cyan sang, moi doan van co vai tu nhu vay la ca man
-   hinh lap lanh — do chinh la thu lam giao dien trong "may lam". */
 .ag-code {
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 5px;
-  background: rgba(255, 255, 255, .07);
-  color: #b9d9f2;
+  background: rgba(58, 216, 255, 0.08);
+  border: 1px solid rgba(58, 216, 255, 0.16);
+  color: var(--br-1);
   font-family: var(--f-num);
   font-size: 12.8px;
   word-break: break-word;
@@ -978,23 +1058,33 @@
 
 .ag-cb {
   margin: 0 0 14px;
-  border: 1px solid var(--line-mid);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--r-md);
   overflow: hidden;
-  background: #070a10;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, .25);
+  background: #060911;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .3);
 }
 .ag-cb__bar {
-  display: flex; align-items: center;
-  padding: 7px 12px;
-  border-bottom: 1px solid var(--line);
-  background: var(--bg-sunken);
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
 }
-.ag-cb__lang { flex: 1; color: var(--br-1); font-size: 11px; font-weight: 700;
-               letter-spacing: .4px; text-transform: uppercase; }
+.ag-cb__lang {
+  flex: 1;
+  color: var(--br-1);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
 .ag-cb__copy {
-  display: inline-flex; align-items: center; gap: 5px;
-  border: 0; background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
   color: var(--tx-faint);
   font-family: var(--f-ui);
   font-size: 11px;
@@ -1003,36 +1093,43 @@
 }
 .ag-cb__copy:hover { color: var(--br-1); }
 .ag-cb__pre {
-  margin: 0; padding: 12px 13px;
+  margin: 0;
+  padding: 13px 14px;
   overflow-x: auto;
   font-family: var(--f-num);
   font-size: 12.5px;
   line-height: 1.65;
-  color: var(--tx);
+  color: #e2e8f0;
 }
 
-/* ------------------------------------------------- bang markdown + trich dan
-   AI hay bat bang san so sanh / so sanh muc do hoa. Truoc day khong co luat cho
-   bang nen chu "|" hien thang ra man hinh — do chinh la truong hop "tao khung
-   ma launcher khong hien". */
-.ag-tb { margin: 0 0 14px; overflow-x: auto; border: 1px solid var(--line-mid);
-         border-radius: var(--r-sm); background: var(--bg-sunken); }
+.ag-tb {
+  margin: 0 0 14px;
+  overflow-x: auto;
+  border: 1px solid var(--line-mid);
+  border-radius: var(--r-sm);
+  background: #080c14;
+}
 .ag-tb table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .ag-tb th, .ag-tb td {
-  padding: 8px 12px; text-align: left; line-height: 1.55;
+  padding: 8px 12px;
+  text-align: left;
+  line-height: 1.55;
   border-bottom: 1px solid var(--line);
 }
 .ag-tb th {
-  background: color-mix(in srgb, var(--br-1) 7%, var(--bg-raised));
-  color: var(--tx-hi); font-weight: 680; white-space: nowrap;
+  background: rgba(58, 216, 255, 0.06);
+  color: var(--tx-hi);
+  font-weight: 680;
+  white-space: nowrap;
 }
 .ag-tb tr:last-child td { border-bottom: 0; }
 .ag-tb td { color: var(--tx); }
 
 .ag-bq {
-  margin: 0 0 14px; padding: 8px 14px;
-  border-left: 3px solid var(--br-1);
-  background: var(--br-1-soft);
+  margin: 0 0 14px;
+  padding: 8px 14px;
+  border-left: 3px solid var(--br-2);
+  background: rgba(90, 168, 255, 0.07);
   border-radius: 0 var(--r-sm) var(--r-sm) 0;
 }
 .ag-bq p { margin: 0 0 6px; color: var(--tx-dim); font-size: 13.5px; }
@@ -1040,50 +1137,103 @@
 
 .ag-hr { margin: 18px 0; border: 0; border-top: 1px solid var(--line-mid); }
 
-/* ----------------------------------------------------------------- o nhap */
+/* ----------------------------------------------------------------- Ô NHẬP (CHAT INPUT BAR) */
 
-/* padding-right cong them be rong thanh cuon: vung cuon o tren bi thanh cuon
-   an mat tung do pixel ben phai, khong bu thi hai khoi lech truc nhau.
-   padding-top tang len 16px: khung input tuong khoang voi duong phan cach
-   khung chat ben tren, khong con ep sat nhu truoc. */
 .ag__foot {
   position: relative;
   z-index: 2;
   flex: 0 0 auto;
-  padding: 16px calc(26px + var(--ag-sbw, 0px)) 16px 26px;
+  padding: 14px calc(24px + var(--ag-sbw, 0px)) 16px 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
-  background: #111620;           /* lop footer cung phan tang voi sidebar */
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(12, 16, 27, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
+.ag__att {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 860px;
+  margin: 0 auto 9px;
+}
+.ag__att__i { position: relative; }
+.ag__att__i img {
+  width: 68px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-mid);
+  display: block;
+}
+.ag__att__i button {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--bg-raised);
+  color: var(--tx-dim);
+  font-size: 10px;
+  cursor: pointer;
+  transition: color var(--t-fast) var(--e-out), background var(--t-fast) var(--e-out);
+}
+.ag__att__i button:hover { color: #fff; background: var(--bad); }
+
+/* Khung vỏ ngoài của ô nhập — Nested border-radius 22px chuẩn evondevKit & taste-skill */
 .ag__in {
   display: flex;
-  align-items: center;           /* giua thang dung: chu, nut +, nut gui mot truc */
+  align-items: center;
   gap: 10px;
   width: 100%;
   max-width: 860px;
   margin: 0 auto;
   box-sizing: border-box;
-  padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--r-lg);
-  background: #161b24;           /* khung input noi len nhe khoi footer */
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 22px;
+  background: #131826;
   transition: border-color var(--t-fast) var(--e-out), box-shadow var(--t-fast) var(--e-out);
 }
-/* Vien focus: sang thanh lich, khong quang sang choang mat */
 .ag__in:focus-within {
-  border-color: rgba(99, 102, 241, 0.45);
-  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2);
-  background: #171c2a;
+  border-color: rgba(58, 216, 255, 0.45);
+  box-shadow: 0 0 0 3px rgba(58, 216, 255, 0.12);
+  background: #151b2a;
 }
+
+.ag__clip {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--tx-dim);
+  font-size: 14px;
+  cursor: pointer;
+  transition: color var(--t-fast) var(--e-out), border-color var(--t-fast) var(--e-out),
+              background var(--t-fast) var(--e-out), transform 160ms var(--e-spring);
+}
+.ag__clip:hover:not(:disabled) {
+  color: var(--br-1);
+  border-color: rgba(58, 216, 255, 0.4);
+  background: var(--br-1-soft);
+  transform: scale(1.05);
+}
+.ag__clip:disabled { opacity: .35; cursor: not-allowed; }
 
 .ag__ta {
   flex: 1 1 auto;
   min-width: 0;
   max-height: 160px;
   box-sizing: border-box;
-  padding: 6px 6px;              /* padding can: chu luon giua khung, khong bat len men */
+  padding: 6px 6px;
   border: 0;
   background: transparent;
   color: var(--tx-hi);
@@ -1092,32 +1242,43 @@
   line-height: 1.55;
   resize: none;
   outline: none;
-  overflow-y: auto;              /* go nhieu dong qua max-height thi cuon noi bo */
+  overflow-y: auto;
 }
 .ag__ta::placeholder { color: var(--tx-faint); }
 .ag__ta:disabled { cursor: not-allowed; }
 
-/* Nut gui: mot mau dac, khong gradient. Day la nut duy nhat trong khung nen
-   khong can gradient de noi bat — mau nhan dac da du. */
 .ag__send {
-  display: grid; place-items: center;
-  width: 36px; height: 36px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
   flex: 0 0 auto;
   border: 0;
   border-radius: var(--r-sm);
-  background: var(--br-1);        /* accent tuoi, tuong cao voi nen #161b24 */
+  background: var(--br-1);
   color: #06161f;
   font-size: 16px;
   cursor: pointer;
   transition: opacity var(--t-fast) var(--e-out), background var(--t-fast) var(--e-out),
-              transform 160ms var(--e-spring);
+              transform 160ms var(--e-spring), box-shadow var(--t-fast) var(--e-out);
 }
-.ag__send:hover:not(:disabled) { background: #6ae4ff; transform: scale(1.06); }
+.ag__send:hover:not(:disabled) {
+  background: #5fe4ff;
+  transform: scale(1.06);
+  box-shadow: 0 0 16px rgba(58, 216, 255, 0.35);
+}
 .ag__send:disabled { opacity: .32; cursor: not-allowed; }
-.ag__send--stop { background: var(--bad); color: #fff; }
-.ag__send--stop:hover { background: color-mix(in srgb, var(--bad) 84%, #fff); transform: scale(1.06); }
+.ag__send--stop {
+  background: var(--bad);
+  color: #fff;
+}
+.ag__send--stop:hover {
+  background: color-mix(in srgb, var(--bad) 84%, #fff);
+  transform: scale(1.06);
+  box-shadow: 0 0 16px rgba(255, 79, 109, 0.35);
+}
 
-/* ------------------------------------------- thanh duoi: quyen · model · effort */
+/* ------------------------------------------- THANH ĐIỀU KHIỂN DƯỚI: QUYỀN · MODEL · EFFORT */
 
 .ag__bot {
   display: flex;
@@ -1132,9 +1293,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 27px;
-  padding: 0 11px;
-  border: 1px solid rgba(255, 255, 255, 0.12);   /* vien ro hon, khong chim vao nen */
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--r-pill);
   background: rgba(255, 255, 255, 0.04);
   color: var(--tx-dim);
@@ -1147,14 +1308,14 @@
               background var(--t-fast) var(--e-out);
 }
 .ag__perm i { font-size: 13px; }
-.ag__perm:hover { color: var(--tx-hi); border-color: var(--line-strong); }
+.ag__perm:hover { color: var(--tx-hi); border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.07); }
 .ag__perm.is-free {
   color: var(--warn);
-  border-color: color-mix(in srgb, var(--warn) 38%, transparent);
-  background: color-mix(in srgb, var(--warn) 11%, transparent);
+  border-color: rgba(255, 181, 69, 0.38);
+  background: rgba(255, 181, 69, 0.1);
 }
 
-/* ---- chip mo len tren (model / effort) ---- */
+/* ---- SELECTOR CHIP (MODEL / EFFORT) ---- */
 
 .ag-pk { position: relative; flex: 0 0 auto; }
 
@@ -1162,9 +1323,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 27px;
-  padding: 0 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);   /* chip selector vien ro hon */
+  height: 28px;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--r-pill);
   background: rgba(255, 255, 255, 0.04);
   color: var(--tx-dim);
@@ -1177,17 +1338,19 @@
               border-color var(--t-fast) var(--e-out);
 }
 .ag-pk__b > i { font-size: 11px; opacity: .6; }
-.ag-pk__b:hover { color: var(--tx-hi); background: rgba(255, 255, 255, .07); border-color: rgba(255, 255, 255, 0.16); }
+.ag-pk__b:hover {
+  color: var(--tx-hi);
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.18);
+}
 .ag-pk__b.is-on {
   color: var(--tx-hi);
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.2);
 }
-/* Chi co mot model -> chip la nhan, khong phai nut */
 .ag-pk__b.is-lone { cursor: default; opacity: 1; }
 .ag-pk__b.is-lone:hover { background: transparent; color: var(--tx-dim); }
 
-/* Nhan 1M — dung mau nhan de doc duoc ngay la dang o cua so lon. */
 .ag-pk__1m {
   padding: 1px 5px;
   border-radius: var(--r-xs);
@@ -1204,13 +1367,12 @@
   right: 0;
   bottom: calc(100% + 8px);
   z-index: 20;
-  min-width: 268px;
+  min-width: 270px;
   padding: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--r-md);
-  background: #1a2030;           /* menu noi len ro khoi nen footer */
+  background: #161c2c;
   box-shadow: var(--sh-4);
-  /* Hieu ung mo: tu duoi bay len + mo dan (app.agent.jsx dua is-in sau 2 frame) */
   opacity: 0;
   transform: translateY(7px) scale(.97);
   transform-origin: bottom right;
@@ -1263,10 +1425,8 @@
   flex: 0 0 auto;
 }
 
-/* ---- SEGMENTED CONTROL + vien thuoc truot cho muc suy nghi ---- */
+/* ---- SEGMENTED CONTROL CHO EFFORT ---- */
 
-/* Ten ky thuat cua muc dang chon (low/medium/high/xhigh/max) — de canh nhan
-   tieng Viet cho ai muon doi chieu voi tai lieu. */
 .ag-eff__id {
   float: right;
   font-style: normal;
@@ -1279,7 +1439,6 @@
 }
 
 .ag-pk__menu--eff { min-width: 300px; padding: 14px; }
-
 .ag-eff__t {
   color: var(--tx-dim);
   font-size: 12.5px;
@@ -1287,7 +1446,6 @@
 }
 .ag-eff__t b { color: var(--tx-hi); font-weight: 700; }
 
-/* Vi khung segmented — moi nut phan mot khoang, vien thuoc absolute truot di chuyen */
 .ag-eff__seg {
   position: relative;
   display: flex;
@@ -1299,8 +1457,6 @@
   user-select: none;
 }
 
-/* Vien thuoc (pill): vi tri tinh theo --n, truot bang translateX voi cubic-bezier
-   nay — cam giac loet xuong, nay nhe o cuoi, khong con nhay giat nhu cu. */
 .ag-eff__pill {
   position: absolute;
   top: 3px;
@@ -1310,7 +1466,7 @@
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--br-1) 20%, transparent);
   border: 1px solid color-mix(in srgb, var(--br-1) 55%, transparent);
-  box-shadow: 0 0 12px rgba(58, 216, 255, 0.18);   /* subtle pill glow */
+  box-shadow: 0 0 12px rgba(58, 216, 255, 0.18);
   transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow var(--t-fast) var(--e-out);
   pointer-events: none;
@@ -1348,11 +1504,13 @@
   margin-top: 12px;
 }
 
-/* -------------------------------------------------------------- cai dat */
+/* -------------------------------------------------------------- CÀI ĐẶT (SETTINGS DRAWER) */
 
 .ag-cfg {
   position: absolute;
-  top: 60px; right: 0; bottom: 0;
+  top: 58px;
+  right: 0;
+  bottom: 0;
   width: 400px;
   max-width: calc(100 * var(--vw) - 40px);
   z-index: 5;
@@ -1363,7 +1521,9 @@
   box-shadow: var(--sh-4);
 }
 .ag-cfg__head {
-  display: flex; align-items: center; gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 15px 16px;
   border-bottom: 1px solid var(--line);
   font-family: var(--f-display);
@@ -1374,9 +1534,12 @@
 .ag-cfg__head > i:first-child { color: var(--br-1); font-size: 17px; }
 .ag-cfg__head > span { flex: 1; }
 .ag-x {
-  display: grid; place-items: center;
-  width: 28px; height: 28px;
-  border: 0; border-radius: var(--r-xs);
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--r-xs);
   background: transparent;
   color: var(--tx-faint);
   cursor: pointer;
@@ -1390,7 +1553,8 @@
 .ag-cfg__hint { font-size: 11.5px; color: var(--tx-faint); line-height: 1.55; margin-bottom: 9px; }
 .ag-cfg__pick { display: flex; gap: 7px; }
 
-.ag-in, .ag__in {
+/* Ô input cài đặt: .ag-in (CHỈ .ag-in, TUYỆT ĐỐI KHÔNG GHÉP .ag__in Ở ĐÂY) */
+.ag-in {
   flex: 1 1 auto;
   min-width: 0;
   height: 34px;
@@ -1405,9 +1569,6 @@
   transition: border-color var(--t-fast) var(--e-out), box-shadow var(--t-fast) var(--e-out);
 }
 .ag-in:focus { border-color: var(--focus); box-shadow: var(--focus-ring); }
-
-/* O nhap chiem tron be ngang (cho phan Ket noi), khac voi o chon thu muc
-   von phai chia cho cho nut Chon. */
 .ag-in--w { width: 100%; }
 
 .ag-cfg__sep {
@@ -1466,21 +1627,7 @@
   text-align: right;
 }
 
-/* --------------------------------------------------- khung nhin hep hon */
-
-@media (max-width: 900px) {
-  .ag__sub { max-width: 150px; }
-  .ag__inner, .ag__in, .ag__tip { max-width: 100%; }
-  .ag__inner { padding: 20px 16px 8px; }
-  .ag__foot { padding: 10px 16px 12px; }
-  .ag__row--sub { padding-left: 0; }
-}
-
-/* ---------------------------------------------- hop xac nhan xoa cuoc tro chuyen
-
-   Xoa la mat han ca noi dung lan anh, khong co thung rac. Nen phai hoi lai.
-   Phu len rieng cot ben trai chu khong phu ca man hinh: nguoi dung van thay
-   duoc khung chat, do bi cat mach. */
+/* ---------------------------------------------- HỘP XÁC NHẬN XOÁ PHIÊN */
 
 .ag-xn {
   position: absolute;
@@ -1490,8 +1637,8 @@
   place-items: center;
   padding: 14px;
   background: color-mix(in srgb, var(--bg-void) 74%, transparent);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .ag-xn__box {
@@ -1504,44 +1651,62 @@
   box-shadow: var(--sh-3);
   text-align: center;
 }
-
 .ag-xn__ico {
   display: grid;
   place-items: center;
-  width: 34px; height: 34px;
+  width: 34px;
+  height: 34px;
   margin: 0 auto 9px;
   border-radius: var(--r-sm);
   background: var(--bad-soft);
   color: var(--bad);
   font-size: 17px;
 }
-
 .ag-xn__t { font-size: 14px; font-weight: 650; color: var(--tx-hi); }
-
 .ag-xn__ten {
   margin-top: 4px;
   font-size: 12px;
   color: var(--br-2);
   word-break: break-word;
 }
-
 .ag-xn__d {
   margin-top: 8px;
   font-size: 11.5px;
   line-height: 1.55;
   color: var(--tx-faint);
 }
-
 .ag-xn__act {
   display: flex;
   gap: 8px;
   margin-top: 14px;
 }
 .ag-xn__act > * { flex: 1; justify-content: center; }
-
 .ag-xn__del {
   background: var(--bad);
   border-color: var(--bad);
   color: #fff;
 }
 .ag-xn__del:hover { filter: brightness(1.08); }
+
+/* Kéo thả ảnh vào panel */
+.ag.is-drag::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  z-index: 60;
+  pointer-events: none;
+  border: 2px dashed color-mix(in srgb, var(--br-1) 55%, transparent);
+  border-radius: var(--r-xl);
+  background: color-mix(in srgb, var(--br-1) 7%, transparent);
+}
+
+/* --------------------------------------------------- RESPONSIVE TRÊN KHUNG NHÌN HẸP */
+
+@media (max-width: 900px) {
+  .ag__sub { max-width: 150px; }
+  .ag__inner, .ag__in { max-width: 100%; }
+  .ag__inner { padding: 20px 16px 8px; }
+  .ag__foot { padding: 12px 16px 14px; }
+  .ag__row--sub { padding-left: 0; }
+  .ag__starters__grid { grid-template-columns: 1fr; }
+}

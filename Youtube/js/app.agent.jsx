@@ -1212,6 +1212,45 @@
       if (!busy) loadSes();
     }, [busy, loadSes]);
 
+    const [showScrollBottom, setShowScrollBottom] = useState(false);
+
+    const STARTERS = useMemo(function () {
+      return [
+        {
+          ico: 'ph-folder-open',
+          t: TX('Kiểm tra thư mục cài đặt'),
+          d: TX('Xem cấu trúc file & tài nguyên hiện có'),
+          p: 'Kiểm tra thư mục hiện tại xem có những file và cấu hình nào?'
+        },
+        {
+          ico: 'ph-terminal-window',
+          t: TX('Thông số & Hệ thống'),
+          d: TX('Kiểm tra môi trường chạy & phần cứng máy tính'),
+          p: 'Kiểm tra thông số cấu hình và môi trường hệ thống hiện tại.'
+        },
+        {
+          ico: 'ph-bug-beetle',
+          t: TX('Khắc phục sự cố'),
+          d: TX('Tìm nguyên nhân và cách xử lý lỗi phần mềm'),
+          p: 'Hãy hướng dẫn tôi cách khắc phục sự cố game hoặc ứng dụng bị lỗi crash.'
+        },
+        {
+          ico: 'ph-code-simple',
+          t: TX('Viết script & Tự động hoá'),
+          d: TX('Tạo script PowerShell / Python tự động'),
+          p: 'Hãy giúp tôi viết một script tự động kiểm tra và tối ưu hoá tệp tin.'
+        }
+      ];
+    }, []);
+
+    function onPickStarter(promptText) {
+      setDraft(promptText);
+      if (taRef.current) {
+        taRef.current.focus();
+        taRef.current.style.height = 'auto';
+      }
+    }
+
     /* --- tu cuon xuong, nhung ton trong khi nguoi dung dang doc o tren --- */
     useEffect(function () {
       const el = bodyRef.current;
@@ -1221,7 +1260,9 @@
     function onScroll() {
       const el = bodyRef.current;
       if (!el) return;
-      stick.current = (el.scrollHeight - el.scrollTop - el.clientHeight) < 90;
+      const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
+      stick.current = dist < 90;
+      setShowScrollBottom(dist > 160 && items.length > 0);
     }
 
     /* Do be rong thanh cuon roi bao cho o nhap biet ma bu vao.
@@ -1357,14 +1398,17 @@
         <header className="ag__bar">
           <button className={'ag__ib ag__ib--side' + (sideOpen ? ' is-on' : '')}
                   onClick={function () { setSideOpen(!sideOpen); }}
-                  title={TX('Danh sách cuộc trò chuyện')}>
+                  title={sideOpen ? TX('Thu gọn danh sách') : TX('Mở danh sách cuộc trò chuyện')}>
             <i className="ph-bold ph-sidebar-simple"></i>
           </button>
-          <span className="ag__logo"><i className="ph-fill ph-graph"></i></span>
-          <div className="ag__id">
-            <div className="ag__name">Nexus Agent</div>
-            <div className="ag__sub">
-              {ready ? ((st && st.model) || '') : TX('Chưa cấu hình khoá API')}
+          <div className="ag__brand">
+            <span className="ag__logo"><i className="ph-fill ph-sparkle"></i></span>
+            <div className="ag__id">
+              <div className="ag__name">Nexus Agent</div>
+              <div className="ag__sub">
+                <span className={'ag__status-dot' + (ready ? ' is-ready' : '')}></span>
+                {ready ? ((st && st.model) || TX('Sẵn sàng')) : TX('Chưa cấu hình khoá API')}
+              </div>
             </div>
           </div>
 
@@ -1374,7 +1418,7 @@
                   title={TX('Cài đặt')}>
             <i className="ph-fill ph-gear-six"></i>
           </button>
-          <button className="ag__ib ag__ib--x" onClick={onClose} title={TX('Đóng')}>
+          <button className="ag__ib ag__ib--x" onClick={onClose} title={TX('Đóng (Esc)')}>
             <i className="ph-bold ph-x"></i>
           </button>
         </header>
@@ -1392,17 +1436,34 @@
           <div className={'ag__inner' + (items.length ? '' : ' ag__inner--empty')}>
             {!items.length ? (
               <div className={'ag__hi' + enHi}>
-                <div className="ag__hi__orb"><i className="ph-fill ph-graph"></i></div>
+                <div className="ag__hi__orb"><i className="ph-fill ph-sparkle"></i></div>
                 <h2 className="ag__hi__t">{TX('Tôi có thể giúp được gì cho bạn?')}</h2>
                 <p className="ag__hi__d">
-                  {TX('Tôi là trợ lý AI được tích hợp vào Nexus Launcher, luôn sẵn sàng giải đáp thắc mắc và giúp bạn làm việc nhanh hơn ngay trên màn hình chính.')}
+                  {TX('Tôi là trợ lý AI được tích hợp vào Nexus Launcher, luôn sẵn sàng giải đáp thắc mắc, phân tích thư mục và hỗ trợ công việc của bạn.')}
                 </p>
                 {!ready ? (
                   <div className="ag__hi__warn">
                     <i className="ph-fill ph-warning-circle"></i>
                     <span>{TX('Chưa có khoá API nên chưa dùng được. Khoá được đọc từ máy bạn, không nằm trên mạng.')}</span>
                   </div>
-                ) : null}
+                ) : (
+                  <div className="ag__starters">
+                    <div className="ag__starters__title">{TX('Gợi ý bắt đầu nhanh')}</div>
+                    <div className="ag__starters__grid">
+                      {STARTERS.map(function (s, idx) {
+                        return (
+                          <button key={idx} className="ag__starter" onClick={function () { onPickStarter(s.p); }}>
+                            <div className="ag__starter__ico"><i className={'ph-bold ' + s.ico}></i></div>
+                            <div className="ag__starter__cnt">
+                              <div className="ag__starter__t">{s.t}</div>
+                              <div className="ag__starter__d">{s.d}</div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : null}
 
@@ -1419,6 +1480,19 @@
             ) : null}
           </div>
         </div>
+
+        {showScrollBottom && (
+          <button className="ag-scroll-btn" title={TX('Cuộn xuống cuối')}
+                  onClick={function () {
+                    if (bodyRef.current) {
+                      bodyRef.current.scrollTo({ top: bodyRef.current.scrollHeight, behavior: 'smooth' });
+                      stick.current = true;
+                      setShowScrollBottom(false);
+                    }
+                  }}>
+            <i className="ph-bold ph-caret-down"></i>
+          </button>
+        )}
 
         {/* ---- o nhap ---- */}
         <footer className="ag__foot">
@@ -1563,8 +1637,9 @@
     if (!window.pywebview) return null;
     return (
       <button className={'nx-icobtn ag-btn' + (open ? ' is-on' : '')}
-              onClick={onToggle} title="Nexus Agent">
-        <i className="ph-fill ph-graph"></i>
+              onClick={onToggle} title={TX('Nexus Agent (Trợ lý AI)')}>
+        <i className="ph-fill ph-sparkle"></i>
+        <span className="ag-btn__dot"></span>
       </button>
     );
   }
