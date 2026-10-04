@@ -398,8 +398,13 @@
       return (
         <div className={'ag__row' + en}>
           <div className="ag__ai">
+            <div className="ag__ai__header">
+              <span className="ag__ai__badge"><i className="ph-fill ph-sparkle"></i> Nexus AI</span>
+            </div>
             <Markdown text={it.s} />
-            <CopyBtn text={it.s} cls="ag__cp--ai" />
+            <div className="ag__ai__actions">
+              <CopyBtn text={it.s} cls="ag__cp--ai" />
+            </div>
           </div>
         </div>
       );
@@ -1436,10 +1441,20 @@
           <div className={'ag__inner' + (items.length ? '' : ' ag__inner--empty')}>
             {!items.length ? (
               <div className={'ag__hi' + enHi}>
-                <div className="ag__hi__orb"><i className="ph-fill ph-sparkle"></i></div>
-                <h2 className="ag__hi__t">{TX('Tôi có thể giúp được gì cho bạn?')}</h2>
+                <div className="ag__hi__badge">
+                  <span className="ag__hi__badge-dot"></span>
+                  <i className="ph-fill ph-lightning"></i>
+                  <span>NEXUS AI ASSISTANT</span>
+                </div>
+                <div className="ag__hi__orb">
+                  <div className="ag__hi__orb-ring"></div>
+                  <i className="ph-fill ph-sparkle"></i>
+                </div>
+                <h2 className="ag__hi__t">
+                  <span className="ag__hi__t-grad">{TX('Tôi có thể giúp được gì cho bạn?')}</span>
+                </h2>
                 <p className="ag__hi__d">
-                  {TX('Tôi là trợ lý AI được tích hợp vào Nexus Launcher, luôn sẵn sàng giải đáp thắc mắc, phân tích thư mục và hỗ trợ công việc của bạn.')}
+                  {TX('Trợ lý AI thế hệ mới được tích hợp vào Nexus Launcher, sẵn sàng giải đáp thắc mắc, phân tích thư mục và tối ưu hoá tác vụ.')}
                 </p>
                 {!ready ? (
                   <div className="ag__hi__warn">
@@ -1458,6 +1473,7 @@
                               <div className="ag__starter__t">{s.t}</div>
                               <div className="ag__starter__d">{s.d}</div>
                             </div>
+                            <i className="ph-bold ph-arrow-up-right ag__starter__arrow"></i>
                           </button>
                         );
                       })}
@@ -1638,6 +1654,7 @@
     return (
       <button className={'nx-icobtn ag-btn' + (open ? ' is-on' : '')}
               onClick={onToggle} title={TX('Nexus Agent (Trợ lý AI)')}>
+        <span className="ag-btn__ring"></span>
         <i className="ph-fill ph-sparkle"></i>
         <span className="ag-btn__dot"></span>
       </button>
