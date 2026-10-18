@@ -33,7 +33,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #090d15;
+  background: #0c1017;
   color: #e2e8f0;
   font-family: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
@@ -102,10 +102,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 52px;
+  height: 54px;
   padding: 0 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  background: #0d121c;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #090d14;
   flex: 0 0 auto;
 }
 
@@ -122,31 +122,41 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: rgba(56, 189, 248, 0.1);
-  border: 1px solid rgba(56, 189, 248, 0.22);
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.28);
   color: #38bdf8;
   font-size: 14px;
   flex: 0 0 auto;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
 }
 
-.ag__id { min-width: 0; }
-.ag__name {
-  font-weight: 600;
-  font-size: 13.5px;
-  color: #f1f5f9;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-.ag__sub {
+.ag__id {
   display: flex;
   align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.ag__name {
+  font-family: 'Outfit', 'Be Vietnam Pro', sans-serif;
+  font-weight: 650;
+  font-size: 14px;
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.ag__sub {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
-  color: #64748b;
+  font-weight: 500;
+  color: #94a3b8;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 300px;
 }
 
 .ag__status-dot {
@@ -208,46 +218,50 @@
 .ag__side {
   position: relative;
   flex: 0 0 auto;
-  width: 250px;
+  width: 256px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
-  background: #0a0e17;
-  padding: 12px 10px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: #080b11;
+  padding: 14px 10px;
   min-height: 0;
 }
 
 .ag__new {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   width: 100%;
-  height: 36px;
-  padding: 0 12px;
+  height: 38px;
+  padding: 0 14px;
   margin-bottom: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.035);
-  color: #f1f5f9;
-  font-family: inherit;
-  font-size: 12.5px;
-  font-weight: 550;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 10px;
+  background: rgba(56, 189, 248, 0.08);
+  color: #38bdf8;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 180ms ease !important;
+  transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 .ag__new i { font-size: 14px; color: #38bdf8; }
 .ag__new:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(56, 189, 248, 0.16);
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .ag__side__h {
-  padding: 4px 6px 8px;
-  color: #475569;
+  padding: 6px 8px 8px;
+  color: #64748b;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
 }
 
 .ag__side__l {
@@ -259,7 +273,7 @@
 }
 .ag__side__e {
   padding: 24px 8px;
-  color: #475569;
+  color: #64748b;
   font-size: 12px;
   text-align: center;
 }
@@ -271,41 +285,34 @@
   margin: 2px 0;
   border-radius: 8px;
   border: 1px solid transparent;
-  transition: all 160ms ease !important;
+  transition: background 150ms ease, border-color 150ms ease !important;
+  overflow: hidden;
 }
 .ag__ses:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
 }
 .ag__ses.is-on {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.22);
 }
 
 .ag__ses__b {
-  flex: 1 1 auto;
-  min-width: 0;
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 8px 52px 8px 10px;
   border: 0;
   background: transparent;
   color: #94a3b8;
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: 13px;
   text-align: left;
   cursor: pointer;
 }
 .ag__ses.is-on .ag__ses__b {
   color: #f8fafc;
   font-weight: 550;
-}
-.ag__ses__t {
-  flex: 1 1 auto;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .ag__ses__ico {
   font-size: 14px;
@@ -314,7 +321,7 @@
   transition: color 150ms ease;
 }
 .ag__ses:hover .ag__ses__ico {
-  color: #94a3b8;
+  color: #cbd5e1;
 }
 .ag__ses.is-on .ag__ses__ico {
   color: #38bdf8;
@@ -325,35 +332,59 @@
   flex: 0 0 auto;
   color: #38bdf8;
 }
+.ag__ses__t {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .ag__ses__m {
   flex: 0 0 auto;
   color: #475569;
   font-size: 11px;
+  font-family: 'Inter', sans-serif;
+  margin-left: auto;
 }
 .ag__ses.is-on .ag__ses__m {
   color: #64748b;
 }
 
+/* Cụm thao tác nổi tuyệt đối - KHÔNG BAO GIỜ GÂY GIẬT CHỮ KHI HOVER */
+.ag__ses__act {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-left: 10px;
+  background: linear-gradient(90deg, transparent 0%, #080b11 30%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease;
+}
+.ag__ses:hover .ag__ses__act {
+  opacity: 1;
+  pointer-events: auto;
+}
 .ag__ses__x,
 .ag__ses__i {
-  flex: 0 0 auto;
-  display: none;
+  display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border: 0;
-  border-radius: 5px;
-  background: transparent;
-  color: #64748b;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
   font-size: 12px;
   cursor: pointer;
-  transition: all 140ms ease !important;
+  transition: all 120ms ease !important;
 }
-.ag__ses__x { margin-right: 4px; }
-.ag__ses:hover .ag__ses__x,
-.ag__ses:hover .ag__ses__i { display: grid; }
-.ag__ses__x:hover { color: #f87171; background: rgba(239, 68, 68, 0.1); }
-.ag__ses__i:hover { color: #38bdf8; background: rgba(56, 189, 248, 0.1); }
+.ag__ses__x:hover { color: #f87171; background: rgba(239, 68, 68, 0.2); }
+.ag__ses__i:hover { color: #38bdf8; background: rgba(56, 189, 248, 0.2); }
 
 .ag__ses.is-edit { background: #0f1422; border-color: rgba(56, 189, 248, 0.3); }
 .ag__ses__in {
@@ -448,16 +479,16 @@
   max-width: 100%;
   padding: 12px 18px;
   border-radius: 18px 18px 4px 18px;
-  background: #182030;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #1f2637;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #f8fafc;
-  font-family: inherit;
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 14.5px;
-  line-height: 1.6;
+  line-height: 1.62;
   font-weight: 450;
   white-space: pre-wrap;
   word-break: break-word;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 /* -------------------------------------------------------------------- TIN TRỢ LÝ (AI / CLAUDE STYLE) */
@@ -466,9 +497,9 @@
   position: relative;
   flex: 1 1 auto;
   min-width: 0;
-  font-family: inherit;
-  font-size: 14.5px;
-  line-height: 1.7;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 15px;
+  line-height: 1.72;
   color: #e2e8f0;
   font-weight: 400;
   padding: 2px 0;
@@ -610,20 +641,22 @@
 }
 
 .ag__hi__t {
-  margin: 0 0 8px;
-  font-weight: 650;
-  font-size: 24px;
-  letter-spacing: -0.025em;
+  margin: 0 0 10px;
+  font-family: 'Outfit', 'Be Vietnam Pro', sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: -0.02em;
   line-height: 1.3;
   color: #f8fafc;
 }
 .ag__hi__t-grad { color: #f8fafc; }
 .ag__hi__d {
   margin: 0 auto 24px;
-  max-width: 460px;
-  color: #64748b;
-  font-size: 13.5px;
-  line-height: 1.6;
+  max-width: 480px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  color: #94a3b8;
+  font-size: 14.5px;
+  line-height: 1.65;
 }
 
 .ag__hi__warn {
@@ -649,11 +682,12 @@
   margin-top: 16px;
 }
 .ag__starters__title {
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.6px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #475569;
+  color: #64748b;
   margin-bottom: 12px;
 }
 .ag__starters__grid {
@@ -667,17 +701,17 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: #10141f;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #131822;
   cursor: pointer;
   text-align: left;
   transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 .ag__starter:hover {
-  background: #141a29;
-  border-color: rgba(255, 255, 255, 0.15);
+  background: #181f2c;
+  border-color: rgba(56, 189, 248, 0.3);
   transform: translateY(-1.5px);
 }
 .ag__starter__ico {
@@ -1014,46 +1048,55 @@
 }
 
 .ag-cb {
-  margin: 10px 0 16px;
+  margin: 12px 0 18px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 9px;
+  border-radius: 10px;
   overflow: hidden;
-  background: #070a10;
+  background: #090d13;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 .ag-cb__bar {
   display: flex;
   align-items: center;
-  padding: 6px 12px;
+  justify-content: space-between;
+  padding: 8px 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.025);
+  background: #141a24;
 }
 .ag-cb__lang {
-  flex: 1;
-  color: #64748b;
-  font-size: 11px;
+  color: #94a3b8;
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 .ag-cb__copy {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  border: 0;
-  background: transparent;
-  color: #64748b;
-  font-family: inherit;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
+  font-weight: 500;
   cursor: pointer;
-  transition: color 140ms ease;
+  transition: all 140ms ease;
 }
-.ag-cb__copy:hover { color: #f1f5f9; }
+.ag-cb__copy:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+}
 .ag-cb__pre {
   margin: 0;
-  padding: 12px 14px;
+  padding: 14px 16px;
   overflow-x: auto;
-  font-family: 'JetBrains Mono', Consolas, monospace;
-  font-size: 12.5px;
+  font-family: 'JetBrains Mono', Consolas, ui-monospace, monospace;
+  font-size: 13px;
   line-height: 1.6;
   color: #f1f5f9;
 }
@@ -1138,31 +1181,31 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 780px;
+  max-width: 820px;
   margin: 0 auto;
-  border-radius: 16px;
-  background: #131824;
+  border-radius: 20px;
+  background: #151b24;
   border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
   transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease !important;
 }
 .ag__dock:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 .ag__dock:focus-within {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: #161c2a;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+  border-color: rgba(56, 189, 248, 0.45);
+  background: #161d28;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(56, 189, 248, 0.2);
 }
 
 .ag__dock__body {
-  padding: 12px 16px 6px 16px;
+  padding: 14px 18px 6px 18px;
   display: flex;
   align-items: center;
 }
 .ag__ta {
   width: 100%;
-  min-height: 28px;
+  min-height: 36px;
   box-sizing: border-box;
   max-height: 180px;
   padding: 0;
@@ -1170,51 +1213,53 @@
   border: 0;
   background: transparent;
   color: #f8fafc;
-  font-family: inherit;
-  font-size: 14.5px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 15px;
   line-height: 1.55;
   resize: none;
   outline: none;
   overflow-y: auto;
 }
 .ag__ta::placeholder {
-  color: #475569;
+  color: #64748b;
+  font-size: 14.5px;
 }
 .ag__ta:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-/* Thanh công cụ dưới ô nhập */
+/* Thanh công cụ dưới ô nhập — ĐỒNG BỘ 32PX CHO TẤT CẢ CÁC NÚT */
 .ag__dock__bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 4px 10px 8px 12px;
+  padding: 4px 12px 10px 14px;
 }
 .ag__dock__left {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 .ag__dock__right {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
-/* Nút đính kèm ảnh */
+/* Nút đính kèm ảnh (32px tròn) */
 .ag__clip {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.04);
   color: #94a3b8;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 160ms ease !important;
 }
@@ -1227,41 +1272,44 @@
   cursor: not-allowed;
 }
 
-/* Nút chế độ duyệt */
+/* Nút chế độ duyệt (32px pill) */
 .ag__perm {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  height: 26px;
-  padding: 0 9px;
-  border-radius: 7px;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
   color: #94a3b8;
-  font-family: inherit;
-  font-size: 11.5px;
-  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 550;
   cursor: pointer;
   transition: all 160ms ease !important;
 }
-.ag__perm i { font-size: 13px; color: #10b981; }
+.ag__perm i { font-size: 14px; color: #10b981; }
 .ag__perm:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.14);
 }
 .ag__perm.is-free {
-  background: rgba(245, 158, 11, 0.08);
-  border-color: rgba(245, 158, 11, 0.22);
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.28);
   color: #fbbf24;
 }
 .ag__perm.is-free i { color: #fbbf24; }
 
-/* Nút gửi (Send Button) */
+/* Nút gửi (32px tròn) */
 .ag__send {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 0;
   background: rgba(255, 255, 255, 0.06);
@@ -1271,15 +1319,17 @@
   transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 .ag__send.is-active {
-  background: #ffffff;
+  background: #38bdf8;
   color: #090d16;
   cursor: pointer;
+  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.35);
 }
 .ag__send.is-active:hover {
-  transform: scale(1.06);
+  background: #7dd3fc;
+  transform: scale(1.05);
 }
 .ag__send.is-active:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 .ag__send--stop {
   background: rgba(239, 68, 68, 0.2) !important;
@@ -1294,24 +1344,27 @@
 /* Dòng chữ lưu ý nhỏ */
 .ag__foot__sub {
   text-align: center;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   color: #475569;
   margin-top: 8px;
+  letter-spacing: 0.01em;
 }
 
-/* Selector chip (Model / Effort) */
+/* Selector chip (Model / Effort) (32px pill) */
 .ag-pk { position: relative; flex: 0 0 auto; }
 .ag-pk__b {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  height: 28px;
-  padding: 0 10px;
+  height: 32px;
+  padding: 0 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   color: #cbd5e1;
-  font-family: inherit;
+  font-family: 'Inter', sans-serif;
   font-size: 12px;
   font-weight: 550;
   cursor: pointer;

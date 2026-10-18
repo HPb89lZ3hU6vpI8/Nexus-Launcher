@@ -733,14 +733,16 @@
           <span className="ag__ses__t">{s.title}</span>
           <span className="ag__ses__m">{run ? TX('đang chạy') : whenText(s.updated)}</span>
         </button>
-        <button className="ag__ses__i" title={TX('Đổi tên')}
-                onClick={function (e) { e.stopPropagation(); setVal(s.title); setEdit(true); }}>
-          <i className="ph-bold ph-pencil-simple"></i>
-        </button>
-        <button className="ag__ses__x" title={TX('Xoá')}
-                onClick={function (e) { e.stopPropagation(); onDelete(s.id); }}>
-          <i className="ph-bold ph-trash"></i>
-        </button>
+        <div className="ag__ses__act">
+          <button className="ag__ses__i" title={TX('Đổi tên')}
+                  onClick={function (e) { e.stopPropagation(); setVal(s.title); setEdit(true); }}>
+            <i className="ph-bold ph-pencil-simple"></i>
+          </button>
+          <button className="ag__ses__x" title={TX('Xoá')}
+                  onClick={function (e) { e.stopPropagation(); onDelete(s.id); }}>
+            <i className="ph-bold ph-trash"></i>
+          </button>
+        </div>
       </div>
     );
   }
