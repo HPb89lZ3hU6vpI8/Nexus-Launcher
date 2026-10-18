@@ -6791,4 +6791,29 @@ window.GAME_DATA = [
       audio: 'DirectX compatible sound card — Bắt buộc phải có Microphone để chơi'
     }
   },
+  {
+    id: 394,
+    title: 'Enshrouded',
+    appId: '1203620',
+    percent: '86.00%',
+    reviewText: 'RẤT TÍCH CỰC',
+    reviewCount: '108.000 đánh giá',
+    tags: ['SINH TỒN', 'NHẬP VAI', 'HÀNH ĐỘNG', 'THẾ GIỚI MỞ', 'CHẾ TẠO', 'HỢP TÁC TRỰC TUYẾN'],
+    viethoa: true,
+    viethoaLink: 'https://meviethoa.com/1834/enshrouded-viet-hoa/',
+    cloudSave: true,
+    baseName: 'Enshrouded',
+    addedAt: '2026-10-18',
+    steamAccount: '',
+    sysreq: {
+      arch64: true,
+      os: 'Windows 10 (64-bit)',
+      cpu: 'Intel Core i5-6400 (2.7 GHz 4 Core) or AMD Ryzen 5 1500X',
+      ram: '16 GB RAM',
+      gpu: 'NVIDIA GeForce GTX 1060 (6GB) or AMD Radeon RX 580 (6GB)',
+      dx: 'Version 11',
+      storage: '60 GB available space',
+      audio: 'DirectX compatible sound card'
+    }
+  },
 ];
