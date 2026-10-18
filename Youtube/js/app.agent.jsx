@@ -399,9 +399,14 @@
         <div className={'ag__row' + en}>
           <div className="ag__ai">
             <div className="ag__ai__header">
-              <span className="ag__ai__badge"><i className="ph-fill ph-sparkle"></i> Nexus AI</span>
+              <div className="ag__ai__avatar">
+                <i className="ph-fill ph-sparkle"></i>
+              </div>
+              <span className="ag__ai__name">Nexus AI</span>
             </div>
-            <Markdown text={it.s} />
+            <div className="ag__ai__body">
+              <Markdown text={it.s} />
+            </div>
             <div className="ag__ai__actions">
               <CopyBtn text={it.s} cls="ag__cp--ai" />
             </div>
@@ -723,6 +728,7 @@
         <button className="ag__ses__b" onClick={function () { onOpen(s.id); }}
                 onDoubleClick={function () { setVal(s.title); setEdit(true); }}
                 title={s.title + ' — ' + TX('bấm đúp để đổi tên')}>
+          <i className="ph-bold ph-chat-teardrop-text ag__ses__ico"></i>
           {run ? <span className="nx-spin ag__ses__run" /> : null}
           <span className="ag__ses__t">{s.title}</span>
           <span className="ag__ses__m">{run ? TX('đang chạy') : whenText(s.updated)}</span>
@@ -910,15 +916,12 @@
         {open ? (
           <div className={'ag-pk__menu ag-pk__menu--eff' + enMenu}>
             <div className="ag-eff__t">
-              {TX('Mức suy nghĩ')}: <b>{name}</b>
-              <em className="ag-eff__id">{cur}</em>
+              <span className="ag-eff__lbl">{TX('Mức suy nghĩ')}:</span>
+              <b className="ag-eff__val">{name}</b>
+              {cur ? <span className="ag-eff__code">{cur}</span> : null}
             </div>
-            {/* Segmented control co vien thuoc truot — thay cho thanh truot
-                range cung cu: bam chuyen muc thi vien thuoc loet xuong vi tri
-                moi, khong con nhay giat. */}
-            <div className="ag-eff__seg" style={{ '--n': lvl.length || 1 }}>
-              <span className="ag-eff__pill"
-                    style={{ transform: 'translateX(' + ((val - 1) * 100) + '%)' }} />
+            {/* Segmented control buttons */}
+            <div className="ag-eff__seg">
               {lvl.map(function (x) {
                 return (
                   <button key={x.n}
@@ -1533,7 +1536,7 @@
                 rows={1}
                 value={draft}
                 disabled={!ready}
-                placeholder={ready ? TX('Hỏi bất kỳ điều gì hoặc ra lệnh cho Nexus AI... (Shift+Enter để xuống dòng)')
+                placeholder={ready ? TX('Nhắn tin cho Nexus AI...')
                                    : TX('Chưa cấu hình khoá API')}
                 onChange={function (e) { setDraft(e.target.value); }}
                 onKeyDown={onKeyDown}
