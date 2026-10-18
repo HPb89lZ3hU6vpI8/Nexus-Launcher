@@ -463,11 +463,14 @@
             : bad ? <span className="ag-tool__tag ag-tool__tag--bad">{TX('lỗi')}</span>
             : running ? null
             : <span className="ag-tool__tag ag-tool__tag--ok"><i className="ph-bold ph-check"></i></span>}
-          {item.out ? <i className={'ag-tool__caret ph-bold ' + (open ? 'ph-caret-up' : 'ph-caret-down')}></i> : null}
+          {item.out ? <i className="ag-tool__caret ph-bold ph-caret-down"></i> : null}
         </button>
-        {/* Khong render co dieu kien nua: giu LUON trong DOM de transition mo/dong chay duoc.
-            An bang max-height:0 + overflow:hidden, mo len bang is-open. */}
-        {item.out ? <pre className="ag-tool__out">{item.out}</pre> : null}
+        {/* CSS Grid fluid accordion — bung mo khong bi giat nhu max-height */}
+        {item.out ? (
+          <div className="ag-tool__wrapper">
+            <pre className="ag-tool__out">{item.out}</pre>
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -526,12 +529,17 @@
       <div className={'ag-think' + (open ? ' is-open' : '')}>
         <button className="ag-think__head" onClick={function () { setOpen(!open); }}>
           <span className="ag-think__lbl">
-            <span className="nx-spin" />{TX('Đang suy nghĩ')}
+            <span className="ag-think__sparkle">
+              <i className="ph-fill ph-sparkle"></i>
+            </span>
+            <span className="ag-think__txt">{TX('Suy nghĩ')}</span>
           </span>
-          <i className={'ph-bold ' + (open ? 'ph-caret-up' : 'ph-caret-down')}></i>
+          <i className="ag-think__caret ph-bold ph-caret-down"></i>
         </button>
-        {/* Luon render trong DOM de transition mo/dong chay — an bang is-open. */}
-        <div className="ag-think__body">{text}</div>
+        {/* CSS Grid fluid accordion — bung mo dung 100% chieu cao that */}
+        <div className="ag-think__wrapper">
+          <div className="ag-think__body">{text}</div>
+        </div>
       </div>
     );
   }
@@ -752,25 +760,26 @@
     /* Phien dang cho xac nhan xoa. Null = khong hoi gi. */
     const [hoiXoa, setHoiXoa] = useState(null);
     useEscape(function () { setHoiXoa(null); }, !!hoiXoa);
-    if (!open) return null;
     return (
-      <aside className="ag__side">
-        <button className="ag__new" onClick={onNew}>
-          <i className="ph-bold ph-plus"></i>{TX('Cuộc trò chuyện mới')}
-        </button>
+      <aside className={'ag__side' + (open ? ' is-open' : ' is-collapsed')} aria-hidden={!open}>
+        <div className="ag__side__inner">
+          <button className="ag__new" onClick={onNew}>
+            <i className="ph-bold ph-plus"></i>{TX('Cuộc trò chuyện mới')}
+          </button>
 
-        <div className="ag__side__h">{TX('Gần đây')}</div>
+          <div className="ag__side__h">{TX('Gần đây')}</div>
 
-        <div className="ag__side__l">
-          {!list.length ? (
-            <div className="ag__side__e">{TX('Chưa có cuộc nào')}</div>
-          ) : list.map(function (s) {
-            return <SessionRow key={s.id} s={s} on={s.id === cur}
-                               run={(running || []).indexOf(s.id) > -1}
-                               onOpen={onOpen}
-                               onDelete={function () { setHoiXoa(s); }}
-                               onRename={onRename} />;
-          })}
+          <div className="ag__side__l">
+            {!list.length ? (
+              <div className="ag__side__e">{TX('Chưa có cuộc nào')}</div>
+            ) : list.map(function (s) {
+              return <SessionRow key={s.id} s={s} on={s.id === cur}
+                                 run={(running || []).indexOf(s.id) > -1}
+                                 onOpen={onOpen}
+                                 onDelete={function () { setHoiXoa(s); }}
+                                 onRename={onRename} />;
+            })}
+          </div>
         </div>
 
         {hoiXoa && (
@@ -1493,8 +1502,20 @@
             })}
 
             {busy ? (
-              <div className="ag__row ag__row--sub">
-                <div className="ag__wait"><span className="nx-spin" />{TX('Đang làm...')}</div>
+              <div className="ag__row ag__row--sub ag__row--typing is-in">
+                <div className="ag__ai">
+                  <div className="ag__ai__header">
+                    <div className="ag__ai__avatar ag__ai__avatar--pulse">
+                      <i className="ph-fill ph-sparkle"></i>
+                    </div>
+                    <span className="ag__ai__name">Nexus AI</span>
+                    <div className="ag-wave" title={TX('Đang xử lý...')}>
+                      <span className="ag-wave__dot" style={{ animationDelay: '0ms' }}></span>
+                      <span className="ag-wave__dot" style={{ animationDelay: '160ms' }}></span>
+                      <span className="ag-wave__dot" style={{ animationDelay: '320ms' }}></span>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : null}
           </div>
