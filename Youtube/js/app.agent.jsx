@@ -548,66 +548,65 @@
      4. BANG CAI DAT
      ------------------------------------------------------------------------ */
 
-  function Settings({ st, onClose, onSave }) {
+  function Settings({ open, st, onClose, onSave }) {
     const [cwd, setCwd] = useState((st && st.cwd) || '');
     const [askRead, setAskRead] = useState(!!(st && st.ask_read));
     const toast = useToast();
+    useEscape(onClose, open);
 
     return (
-      <div className="ag-cfg">
-        <div className="ag-cfg__head">
-          <i className="ph-fill ph-gear-six"></i>
-          <span>{TX('Cài đặt')}</span>
-          <button className="ag-x" onClick={onClose}><i className="ph-bold ph-x"></i></button>
-        </div>
+      <div className={'ag-cfg-wrap' + (open ? ' is-open' : '')} aria-hidden={!open}>
+        <div className="ag-cfg__scrim" onClick={onClose} />
+        <div className="ag-cfg" role="dialog" aria-modal="true" aria-label={TX('Cài đặt')}>
+          <div className="ag-cfg__head">
+            <i className="ph-fill ph-gear-six"></i>
+            <span>{TX('Cài đặt')}</span>
+            <button className="ag-x" onClick={onClose} title={TX('Đóng')}>
+              <i className="ph-bold ph-x"></i>
+            </button>
+          </div>
 
-        <div className="ag-cfg__body">
-          <div className="ag-cfg__row">
-            <div className="ag-cfg__lb">{TX('Thư mục làm việc')}</div>
-            <div className="ag-cfg__hint">{TX('Nơi agent chạy lệnh khi bạn không nói rõ đường dẫn.')}</div>
-            <div className="ag-cfg__pick">
-              <input className="ag-in" value={cwd} placeholder={TX('Chưa chọn')}
-                     onChange={function (e) { setCwd(e.target.value); }} />
-              <button className="nx-btn nx-btn--ghost nx-btn--sm" onClick={async function () {
-                const r = await callApi('ai_pick_folder');
-                if (r && r.success && r.path) { setCwd(r.path); onSave({ cwd: r.path }); }
-              }}>
-                <i className="ph-bold ph-folder-open"></i>{TX('Chọn')}
-              </button>
+          <div className="ag-cfg__body">
+            <div className="ag-cfg__row">
+              <div className="ag-cfg__lb">{TX('Thư mục làm việc')}</div>
+              <div className="ag-cfg__hint">{TX('Nơi agent chạy lệnh khi bạn không nói rõ đường dẫn.')}</div>
+              <div className="ag-cfg__pick">
+                <input className="ag-in" value={cwd} placeholder={TX('Chưa chọn')}
+                       onChange={function (e) { setCwd(e.target.value); }} />
+                <button className="nx-btn nx-btn--ghost nx-btn--sm" onClick={async function () {
+                  const r = await callApi('ai_pick_folder');
+                  if (r && r.success && r.path) { setCwd(r.path); onSave({ cwd: r.path }); }
+                }}>
+                  <i className="ph-bold ph-folder-open"></i>{TX('Chọn')}
+                </button>
+              </div>
             </div>
+
+            <label className="ag-cfg__sw">
+              <input type="checkbox" checked={askRead} onChange={function (e) {
+                setAskRead(e.target.checked); onSave({ ask_read: e.target.checked });
+              }} />
+              <span>
+                <b>{TX('Hỏi cả khi agent chỉ đọc file')}</b>
+                <i>{TX('Mặc định chỉ hỏi khi ghi hoặc chạy lệnh. Bật cái này sẽ hỏi rất nhiều.')}</i>
+              </span>
+            </label>
+
+            <div className="ag-cfg__info">
+              <div><span>{TX('Máy chủ')}</span><b>{(st && st.base_url) || '—'}</b></div>
+              <div><span>{TX('Tìm web')}</span><b>{st && st.has_exa ? TX('có') : TX('chưa bật')}</b></div>
+              <div><span>{TX('Số công cụ')}</span><b>{(st && st.tools && st.tools.length) || 0}</b></div>
+            </div>
+
+            <button className="nx-btn nx-btn--ghost nx-btn--sm nx-btn--full" onClick={async function () {
+              await callApi('ai_reset');
+              toast.push({ tone: 'ok', title: TX('Đã xoá cuộc trò chuyện') });
+              onClose();
+              window.dispatchEvent(new CustomEvent('nx-agent-cleared'));
+            }}>
+              <i className="ph-bold ph-broom"></i>{TX('Bắt đầu cuộc trò chuyện mới')}
+            </button>
           </div>
-
-          {/* Muc suy nghi da chuyen thanh chip Effort o thanh duoi, khong de o day
-              nua — de hai cho cung chinh mot thu thi kieu gi cung co luc lech. */}
-
-          <label className="ag-cfg__sw">
-            <input type="checkbox" checked={askRead} onChange={function (e) {
-              setAskRead(e.target.checked); onSave({ ask_read: e.target.checked });
-            }} />
-            <span>
-              <b>{TX('Hỏi cả khi agent chỉ đọc file')}</b>
-              <i>{TX('Mặc định chỉ hỏi khi ghi hoặc chạy lệnh. Bật cái này sẽ hỏi rất nhiều.')}</i>
-            </span>
-          </label>
-
-          {/* Khong con phan Ket noi o day. Dia chi may chu, khoa API va mo hinh
-              deu lay tu hang so trong nexus_agent.py — do la nguon duy nhat.
-              De thanh o sua duoc trong giao dien chi tao ra kha nang hai noi
-              lech nhau roi kho lan ra dang chay bang cai nao. */}
-          <div className="ag-cfg__info">
-            <div><span>{TX('Máy chủ')}</span><b>{(st && st.base_url) || '—'}</b></div>
-            <div><span>{TX('Tìm web')}</span><b>{st && st.has_exa ? TX('có') : TX('chưa bật')}</b></div>
-            <div><span>{TX('Số công cụ')}</span><b>{(st && st.tools && st.tools.length) || 0}</b></div>
-          </div>
-
-          <button className="nx-btn nx-btn--ghost nx-btn--sm nx-btn--full" onClick={async function () {
-            await callApi('ai_reset');
-            toast.push({ tone: 'ok', title: TX('Đã xoá cuộc trò chuyện') });
-            onClose();
-            window.dispatchEvent(new CustomEvent('nx-agent-cleared'));
-          }}>
-            <i className="ph-bold ph-broom"></i>{TX('Bắt đầu cuộc trò chuyện mới')}
-          </button>
         </div>
       </div>
     );
@@ -1614,7 +1613,7 @@
         </div>
         </div>
 
-        {cfgOpen ? <Settings st={st} onClose={function () { setCfgOpen(false); }} onSave={saveCfg} /> : null}
+        <Settings open={cfgOpen} st={st} onClose={function () { setCfgOpen(false); }} onSave={saveCfg} />
       </div>
     );
   }
