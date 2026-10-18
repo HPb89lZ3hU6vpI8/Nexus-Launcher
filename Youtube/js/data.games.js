@@ -6768,4 +6768,27 @@ window.GAME_DATA = [
       storage: '5 GB available space'
     }
   },
+  {
+    id: 393,
+    title: 'Mimic Party',
+    appId: '5053820',
+    percent: '56.00%',
+    reviewText: 'ĐA DẠNG',
+    reviewCount: '960 đánh giá',
+    tags: ['CHƠI NHIỀU NGƯỜI', 'PVP TRỰC TUYẾN', 'HÀI HƯỚC', 'CASUAL'],
+    viethoa: false,
+    cloudSave: true,
+    baseName: 'MimicParty',
+    addedAt: '2026-10-18',
+    steamAccount: '',
+    sysreq: {
+      arch64: true,
+      os: 'Windows 10 / 11',
+      cpu: 'Intel Core i3 / AMD Ryzen',
+      ram: '4 GB RAM',
+      dx: 'Version 11',
+      storage: '2 GB available space',
+      audio: 'DirectX compatible sound card — Bắt buộc phải có Microphone để chơi'
+    }
+  },
 ];

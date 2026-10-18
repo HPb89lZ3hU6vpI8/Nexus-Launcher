@@ -7866,5 +7866,20 @@ window.STEAM_MEDIA = {
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2591310/5ca5cab4c1579fa8844f2230501e5d065254ebf4/ss_5ca5cab4c1579fa8844f2230501e5d065254ebf4.1920x1080.jpg?t=1778241954"
     ],
     "header_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2591310/4e85d52fc3cb6acaac03c264c88f757fef01a226/header.jpg?t=1778241954"
+  },
+  "5053820": {
+    "movies": [
+      {
+        "src": "https://video.akamai.steamstatic.com/store_trailers/5053820/352844902/5a74ecb159f2211e0dda7483b4a6c11303282b30/1787559917/hls_264_master.m3u8",
+        "thumb": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/257391874/3c7668047d75d81b43ebafc7d21318427eaa6725/movie_600x337.jpg"
+      }
+    ],
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5053820/05f346d353c2c713fe9ce335d5bbdb2dfd499836/page_bg_v6.jpg",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5053820/b4377159ba73da6ed927c8b5503bec61ff5ab3ac/capsule_616x353.jpg",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5053820/d9c74a93f275373eddfa13e5cb5ef84e6044c256/library_hero.jpg",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5053820/252c2f31357ce6aa2d7afcfd793e55776211e765/library_capsule.jpg"
+    ],
+    "header_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/5053820/cb42d784567e89c1c409e49856ece32c9cf8ab36/header.jpg"
   }
 };
