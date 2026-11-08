@@ -1,6 +1,6 @@
 /* ============================================================================
    NEXUS LAUNCHER — DICH VU TICH HOP
-   Ban the keo ngang, 5 muc: Cloud Save · Cánh Cụt Team · Game Thuần Việt · Easy-Install · Fluenty UI
+   Ban the keo ngang, 4 muc: Cloud Save · Cánh Cụt Team · Game Thuần Việt · Fluenty UI
    Ca bo nam gon trong mot man hinh: keo trai/phai de doi the, khong cuon doc.
    Phu thuoc: window.NX (app.core.jsx)
    ========================================================================== */
@@ -81,29 +81,6 @@
         ['Cài đặt', 'Tự động 1-click nhanh chóng']
       ],
       note: 'Trải nghiệm Việt hóa chuẩn nhất bởi Game Thuần Việt.'
-    },
-    {
-      id: 'vip',
-      title: 'EASY-INSTALL GAMES',
-      badge: 'CHIA SẺ GAME',
-      ico: 'ph-fill ph-rocket-launch',
-      a: '#9f1239', b: '#f43f5e', glow: 'rgba(244,63,94,0.13)',
-      features: [
-        'Tự động thêm và mở khóa game qua Steam',
-        'Chơi ngay lập tức chỉ với một AppID',
-        'Tự động tải và cập nhật file manifest Lua',
-        'Kho AppID mở rộng liên tục theo yêu cầu',
-        'Không cần thao tác thủ công với Steam'
-      ],
-      infoHead: 'CÁCH SỬ DỤNG',
-      info: [
-        ['Bước 1', 'Tra AppID của game trên SteamDB'],
-        ['Bước 2', 'Dán AppID vào ô bên dưới'],
-        ['Bước 3', 'Bấm Kích hoạt rồi mở lại Steam']
-      ],
-      unsupHead: 'CÁC TRÒ CHƠI KHÔNG HỖ TRỢ',
-      unsup: ['Denuvo Anti-Tamper', 'Game Online', 'Launcher bên thứ 3 (Uplay/EA)', 'Anti-Cheat (EAC)'],
-      note: 'Trò chơi có thể phát sinh trục trặc — hãy tham gia Discord để được hỗ trợ và yêu cầu thêm game.'
     },
     {
       id: 'fluenty',
@@ -382,83 +359,7 @@
     );
   }
 
-  /* --------------------------------------------------------------------------
-     4. EASY-INSTALL GAMES
-     ------------------------------------------------------------------------ */
-
-  function EasyCard({ card }) {
-    const toast = useToast();
-    const [appid, setAppid] = useState('');
-    const [st, setSt] = useState('idle');
-    const [note, setNote] = useState('');
-
-    useEffect(function () {
-      if (!note) return undefined;
-      const t = setTimeout(function () { setNote(''); setSt('idle'); }, 10000);
-      return function () { clearTimeout(t); };
-    }, [note]);
-
-    const click = useCallback(async function () {
-      if (st === 'activating') return;
-      const clean = String(appid || '').trim();
-      if (!clean) { setSt('error'); setNote(TX('Vui lòng nhập AppID game.')); return; }
-
-      setSt('activating');
-      setNote('');
-
-      const r = await callApi('activate_easy_install_game', clean);
-
-      if (r && r.success) {
-        if (r.already_exists) { setSt('already'); setNote(TX('Bạn đã có trò chơi này rồi')); return; }
-        setSt('success');
-        setNote(r.message || TX('Đã kích hoạt thành công trò chơi có AppID {id}', { id: clean }));
-        toast.push({ tone: 'ok', title: TX('Đã kích hoạt AppID {id}', { id: clean }), desc: TX('Mở lại Steam để thấy game.') });
-        return;
-      }
-
-      setSt('error');
-      const err = (r && r.error) ? String(r.error) : '';
-      if (!err || /404|Không tìm thấy|file Lua|Server/i.test(err)) {
-        setNote(TX('Máy chủ hiện chưa có trò chơi nào mang AppID {id}', { id: clean }));
-      } else {
-        setNote(err);
-      }
-    }, [appid, st, toast]);
-
-    const tone = st === 'success' ? 'ok' : st === 'already' ? 'warn' : 'bad';
-
-    return (
-      <ServiceCard
-        card={card}
-        note={note ? <Note tone={tone}>{stripTone(note)}</Note> : null}
-      >
-        {/* O nhap AppID dung CHUNG mot hang voi nut kich hoat. Truoc kia no
-            chiem rieng mot dong trong than the, lam the nay cao hon bon the
-            kia 61px -- ma ca nam the phai cao bang nhau nen bon the con lai
-            bi keo theo, ho ra mot mang trong. Bo luon nut kinh lup ben canh
-            o nhap: no chi mo trang tim kiem Steam, ma viec do thanh ben trai
-            da co san muc "Tra cuu AppID", con dong Buoc 1 trong bang cung da
-            chi cho tra o SteamDB. */}
-        <div className="sc__appid">
-          <input
-            type="text"
-            inputMode="numeric"
-            value={appid}
-            onChange={function (e) { setAppid(e.target.value.replace(/[^0-9]/g, '').slice(0, 10)); }}
-            onKeyDown={function (e) { if (e.key === 'Enter') click(); }}
-            placeholder={TX('Nhập AppID, ví dụ 1245620')}
-            spellCheck="false"
-            disabled={st === 'activating'}
-          />
-          <button className="nx-btn nx-btn--accent nx-btn--lg" onClick={click} disabled={st === 'activating'}>
-            {st === 'activating'
-              ? <Busy label={TX('Đang kích hoạt...')} />
-              : <React.Fragment><i className="ph-fill ph-lightning"></i>{TX('KÍCH HOẠT NGAY')}</React.Fragment>}
-          </button>
-        </div>
-      </ServiceCard>
-    );
-  }
+  
 
   /* --------------------------------------------------------------------------
      5. FLUENTY UI
@@ -751,7 +652,7 @@
         <header className="ig__hero">
           <h1 className="ig__title">{TX('Hệ thống dịch vụ tích hợp')}</h1>
           <p className="ig__sub">
-            {TX('Năm tiện ích chạy trực tiếp trên máy bạn: đồng bộ save, cài bản Việt hóa, mở khóa game bằng AppID và thay giao diện Steam — tất cả chỉ một lần bấm.')}
+            {TX('Bốn tiện ích chạy trực tiếp trên máy bạn: đồng bộ save, cài bản Việt hóa và thay giao diện Steam — tất cả chỉ một lần bấm.')}
           </p>
         </header>
 
@@ -759,7 +660,6 @@
           <CloudCard card={byId.cloud} />
           <ToolCard card={byId.canhcut} />
           <ToolCard card={byId.thuanviet} />
-          <EasyCard card={byId.vip} />
           <FluentyCard card={byId.fluenty} />
         </Deck>
 
