@@ -1,0 +1,1017 @@
+/* ============================================================================
+   NEXUS LAUNCHER — THE GAME, KE NGANG, LUOI THU VIEN, THE SAP RA MAT
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   THE GAME (dung chung cho luoi thu vien va ke ngang)
+   Ti le anh header Steam = 460x215 (~2.14:1). Giu dung ti le, khong bao gio meo.
+   -------------------------------------------------------------------------- */
+
+.gc {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  /* NGUYEN NHAN ANH DEN (da sua): truoc day moi the bi ep giu rieng mot lop
+     tren card man hinh (translateZ). Thu vien co gan 300 the, moi lan doi qua
+     lai la card man hinh phai cap lai tung ay lop kem anh 460x215 — het cho
+     thi trinh duyet bo trong nhung o chua ve kip, tuc la the den si.
+     Nay khong ep lop nua; the nao chua troi toi tam nhin thi bo han khong ve,
+     nen cuon bao nhieu, doi tab bao nhieu lan cung khong con den anh. */
+  content-visibility: auto;
+  contain-intrinsic-size: 202px;
+  contain-intrinsic-size: auto 202px;
+  transition:
+    transform var(--t-base) var(--e-out),
+    box-shadow var(--t-base) var(--e-out),
+    border-color var(--t-base) var(--e-out),
+    background var(--t-base) var(--e-out);
+}
+/* Hover: khong con vien xanh dam vien quanh the — mau bao hoa vien kin bon canh
+   nhin re va lam roi mat khi ca luoi cung sang. Nay chi con mot duong vien trang
+   rat nhat, bong do sau hon de the noi len, va mot vet sang lanh RAT mo hat ra
+   tu duoi. Diem nhan mau doi ve mot vach mong o canh tren. */
+.gc:hover {
+  transform: translateY(-5px);
+  background: var(--bg-raised);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 24px 46px -20px rgba(0, 0, 0, 0.88),
+    0 4px 14px -8px rgba(0, 0, 0, 0.6),
+    0 14px 40px -26px rgba(90, 168, 255, 0.4);
+  z-index: 2;
+}
+.gc:active { transform: translateY(-2px); }
+
+/* Vach sang mong chay doc canh tren khi hover */
+.gc::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 1.5px;
+  background: var(--grad-brand);
+  opacity: 0.85;
+  transform: scaleX(0);
+  transform-origin: 50% 50%;
+  transition: transform 460ms var(--e-out);
+  pointer-events: none;
+  z-index: 4;
+}
+.gc:hover::before { transform: scaleX(1); }
+
+.gc__shot {
+  position: relative;
+  aspect-ratio: 460 / 215;
+  overflow: hidden;
+  background: var(--bg-sunken);
+  flex: none;
+}
+.gc__img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Anh khong tu mo dan nua: o cho .nx-well phu ben tren tan di de lo anh ra.
+     Hai lop cung mo dan thi thanh nhoe. Giu lai transition cho luc ro chuot. */
+  transition: transform 620ms var(--e-out), filter var(--t-base) var(--e-out);
+}
+.gc:hover .gc__img { transform: scale(1.03); filter: brightness(1.06) saturate(1.05); }
+
+/* Lop phu chuyen sang khi hover */
+.gc__shot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(5, 7, 11, 0.9) 0%, rgba(5, 7, 11, 0.12) 46%, transparent 72%);
+  opacity: 0.72;
+  transition: opacity var(--t-base) var(--e-out);
+  pointer-events: none;
+}
+.gc:hover .gc__shot::after { opacity: 0.95; }
+
+
+/* Dai huy hieu.
+
+   TRUOC: neo goc TREN-TRAI va xep doc. Anh bia Steam luon dat ten/logo game o
+   nua tren, nen hai huy hieu chong len nhau che mat phan dep nhat cua anh.
+
+   NAY: neo goc DUOI-TRAI va xep ngang. Nua tren cua anh sach hoan toan; day
+   anh von da co lop toi chuyen sac san (.gc__shot::after) nen chu van doc ro.
+   Neo bang "bottom" nen neu co nhieu huy hieu, hang moi se day len TREN chu
+   khong tran xuong duoi. Diem danh gia da roi khoi anh nen dai nay duoc dung
+   het chieu ngang. */
+.gc__flags {
+  position: absolute;
+  left: 10px;
+  bottom: 11px;
+  right: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 4px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Huy hieu nen tang goc tren-phai */
+.gc__plat {
+  position: absolute;
+  right: 9px; top: 9px;
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  border-radius: 8px;
+  /* Truoc day co lam mo nen phia sau. Moi the mot cai, gan 300 the la gan 300
+     lan chup lai nen — rat ton. Nen dam hon mot chut cho ket qua nhin y het. */
+  background: rgba(5, 7, 11, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  font-size: 13px;
+  color: var(--tx-hi);
+  z-index: 2;
+}
+
+/* Con so diem, dung chung cho the game va hang danh sach.
+   Mot o mau nho dat ngay truoc nhan sac thai: liec qua la biet tot hay xau
+   ma khong can doc chu.
+
+   Truoc day o nay to mau DAC ruc kem mot vet hat sang mo ra xung quanh, ma
+   dong chu ben canh LAI cung mau do nua -- hai thu cung mau dinh lien nhau
+   lam ca goc the thanh mot vung xanh bet, con vet hat sang thi nhoe ra tren
+   nen the von rat phang, nhin nhu bi loi. Nay chi con nen mau rat nhat va mot
+   duong vien mong cung mau -- dung mot kieu voi nhan the loai o hang tren --
+   con dong chu ben canh tra ve mau chu thuong. Ca hang chi con MOT cho co mau
+   nen con so noi len duoc, va no khong con lan at ten tro choi nua. */
+.gc__rev__n {
+  flex: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5px;
+  padding: 2.5px 3.5px;
+  border-radius: 5px;
+  font-family: var(--f-num);
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tone) 38%, transparent);
+  transition: background var(--t-base), border-color var(--t-base);
+}
+/* Dau phan tram di lien con so nhung nho hon han: mat doc ra "93" truoc roi
+   moi thay don vi, khong bi tuong nham la mot chu so thu ba. */
+.gc__rev__n i {
+  font-style: normal;
+  font-size: 0.68em;
+  font-weight: 700;
+  letter-spacing: 0;
+  opacity: 0.72;
+}
+/* Ro them mot chut khi ro chuot len the, dung nhip voi nhan the loai va so
+   luot danh gia -- ca ba cung sang len chu khong chi rieng mot cai. */
+.gc:hover .gc__rev__n,
+.glr:hover .gc__rev__n {
+  background: color-mix(in srgb, var(--tone) 22%, transparent);
+  border-color: color-mix(in srgb, var(--tone) 55%, transparent);
+}
+
+.gc__body {
+  padding: 12px 8px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+/* Hang tieu de: ten tro choi ben trai, nhan the loai ben phai.
+   Ten ngan thi ca nua hang ben phai bo trong, bo cuc nhin hong. Nhan the loai
+   vua lap cho trong vua them mot thong tin doc duoc ngay tren the. */
+.gc__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.gc__title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--f-display);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--tx-hi);
+  letter-spacing: -0.01em;
+  min-height: 2.6em;
+  transition: color var(--t-fast);
+}
+.gc:hover .gc__title { color: #fff; }
+.gc__gen {
+  flex: none;
+  max-width: 44%;
+  margin-top: 1px;
+  padding: 3px 7px;
+  border-radius: var(--r-xs);
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--line);
+  font-family: var(--f-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: var(--tx-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--t-base), border-color var(--t-base), background var(--t-base);
+}
+.gc:hover .gc__gen {
+  color: var(--tx-dim);
+  border-color: var(--line-mid);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Hang duoi cung: sac thai danh gia ben TRAI, so luot danh gia day sang mep
+   PHAI cho thang hang voi nhan the loai o hang tren -- hai cot deu nhau thay
+   vi don het ve mot ben roi bo trong nua hang. */
+/* Hang nay bat buoc chi duoc mot dong. Neu cho phep xuong dong thi so luot
+   danh gia tut xuong duoi, nhin ngang qua mot hang the la thay lech ngay.
+   min-height bang dung hai dong chu: the nao cung cao bang nhau, nen du mot
+   nhan hiem hoi co phai xuong hai dong thi so luot danh gia cua no van nam
+   dung cao do voi cac the ben canh. */
+.gc__meta {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: nowrap;
+  min-height: 28px;
+  margin-top: auto;
+}
+/* Nhan sac thai dai rat khac nhau: ban tieng Viet dai nhat 16 ky tu, ban
+   tieng Anh len toi 23 (OVERWHELMINGLY POSITIVE), tieng Tay Ban Nha 25.
+   Chia bon nac co chu theo do dai -- nhan cang dai cang ha mot nac -- de moi
+   nhan deu nam gon mot dong o cot luoi hep nhat. */
+.gc__meta .gc__rev--long .gc__rev__t { font-size: 10px; letter-spacing: -0.016em; }
+.gc__meta .gc__rev--xlong .gc__rev__t { font-size: 9px; letter-spacing: -0.03em; }
+.gc__meta .gc__rev--xxl .gc__rev__t { font-size: 8.5px; letter-spacing: -0.035em; }
+/* Cot the trong luoi chi rong khoang 225px o cua so that. Ca hang phai vua
+   trong chung do, nen ban tren the nho hon ban trong che do danh sach mot
+   chut, va so luot danh gia bo khung vien -- no la thong tin phu, de tran
+   nhu vay vua nhe mat vua tiet kiem duoc gan 15px. */
+.gc__meta .gc__rev { font-size: 11px; gap: 3px; letter-spacing: 0; }
+.gc__meta .gc__revn {
+  margin-left: auto;
+  align-items: baseline;
+  gap: 2px;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: 11px;
+}
+.gc__meta .gc__revn em { font-size: 9.5px; }
+/* Chot chan cuoi. Chi mot so muc rong cua so hiem hoi -- dung ngay diem luoi
+   them mot cot -- nhan tieng Anh dai nhat moi thieu vai px. Luc do cho chu
+   xuong hai dong chu khong cat bang ba cham: cat se mat han chu POSITIVE la
+   phan mang nghia. Ca hang can giua nen so luot danh gia van nam chinh giua
+   ben phai, nhin ra la co y chu khong phai vo bo cuc. */
+.gc__rev__t {
+  min-width: 0;
+  line-height: 1.25;
+  /* Dong chu sac thai KHONG con to mau nua. Mau da nam o o diem ngay ben
+     trai roi; to them lan hai chi lam hai thu tranh nhau. De mau chu thuong
+     thi con so mau moi bat len, va hang nay van deu voi ten tro choi. */
+  color: var(--tx);
+}
+.gc__rev {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-family: var(--f-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.005em;
+  line-height: 1;
+}
+.gc__rev--dot::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent);
+  flex: none;
+}
+.gc__rev { --tone: var(--tx-dim); }
+.gc__rev--pos { color: var(--ok);   --tone: var(--ok); }
+.gc__rev--mix { color: var(--warn); --tone: var(--warn); }
+.gc__rev--neg { color: var(--bad);  --tone: var(--bad); }
+
+/* So luot danh gia: vien nho, chu so canh deu */
+.gc__revn {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: var(--r-xs);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+  font-family: var(--f-num);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--tx-dim);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transition: border-color var(--t-base), color var(--t-base);
+}
+.gc__revn em {
+  font-family: var(--f-ui);
+  font-style: normal;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--tx-faint);
+}
+.gc:hover .gc__revn { border-color: var(--line-strong); color: var(--tx); }
+
+/* ----------------------------------------------------------------------------
+   LUOI THU VIEN
+   -------------------------------------------------------------------------- */
+
+.nx-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  gap: 20px;
+  padding: 0 var(--pad-page) 48px;
+}
+.nx-grid > * { animation: nx-rise 460ms var(--e-out) backwards; }
+/* Do tre theo vi tri — tao hieu ung do vao man hinh */
+.nx-grid > *:nth-child(1)  { animation-delay: 0ms; }
+.nx-grid > *:nth-child(2)  { animation-delay: 26ms; }
+.nx-grid > *:nth-child(3)  { animation-delay: 52ms; }
+.nx-grid > *:nth-child(4)  { animation-delay: 78ms; }
+.nx-grid > *:nth-child(5)  { animation-delay: 104ms; }
+.nx-grid > *:nth-child(6)  { animation-delay: 130ms; }
+.nx-grid > *:nth-child(7)  { animation-delay: 156ms; }
+.nx-grid > *:nth-child(8)  { animation-delay: 182ms; }
+.nx-grid > *:nth-child(9)  { animation-delay: 208ms; }
+.nx-grid > *:nth-child(10) { animation-delay: 234ms; }
+.nx-grid > *:nth-child(11) { animation-delay: 260ms; }
+.nx-grid > *:nth-child(12) { animation-delay: 286ms; }
+.nx-grid > *:nth-child(n+13) { animation-delay: 300ms; }
+
+/* Che do danh sach */
+.nx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 0 var(--pad-page) 48px;
+}
+.nx-list > * { animation: nx-rise 380ms var(--e-out) backwards; }
+
+.glr {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 9px 15px 9px 9px;
+  border-radius: var(--r-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background var(--t-base) var(--e-out), border-color var(--t-base), transform var(--t-fast) var(--e-out);
+}
+.glr:hover { background: var(--bg-raised); border-color: var(--line-strong); transform: translateX(4px); }
+.glr__shot {
+  width: 132px;
+  flex: none;
+  aspect-ratio: 460 / 215;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--bg-sunken);
+  position: relative;
+}
+.glr__shot img { width: 100%; height: 100%; object-fit: cover; }
+.glr__main { flex: 1; min-width: 0; }
+.glr__title {
+  font-family: var(--f-display);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--tx-hi);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.glr__sub { display: flex; align-items: center; gap: 9px; margin-top: 4px; flex-wrap: wrap; }
+.glr__side { flex: none; display: flex; align-items: center; gap: 9px; }
+.glr__go { color: var(--tx-faint); font-size: 17px; transition: color var(--t-fast), transform var(--t-fast) var(--e-out); }
+.glr:hover .glr__go { color: var(--br-1); transform: translateX(3px); }
+
+/* ----------------------------------------------------------------------------
+   KE NGANG CO CUON (SHELF)
+   -------------------------------------------------------------------------- */
+
+.shelf { position: relative; }
+
+.shelf__track {
+  display: grid;
+  grid-auto-flow: column;
+  /* Chieu rong the tu tinh theo khung: luon thay dung N the + nua the ke tiep
+     -> nguoi dung biet ngay con noi dung, khong bao gio bi cat le vai pixel. */
+  /* So the hien cung mot luc do doan script o dau index.html tinh san roi ghi
+     vao --shelf-cols. No biet ca be ngang cua so lan muc phong to nen tinh ra
+     duoc be rong that su cua mot the, viec ma cau lenh @media khong lam duoc
+     (media chi doc duoc be ngang, mu tit ve phong to). So 4 phia sau chi la
+     muc du phong neu script chua kip chay. */
+  --cols: var(--shelf-cols, 4);
+  grid-auto-columns: calc((100% - var(--cols) * 18px) / (var(--cols) + 0.5));
+  gap: 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* KHONG dung scroll-snap o day. Nam cham hut dinh se giat lai tung khung
+     hinh trong luc cu truot theo da dang chay, nen buong tay ra la khuc mot
+     cai roi dinh cung vao mep the. Viec canh thang hang nay do nut mui ten
+     tu tinh (nhay dung mot so nguyen the), con keo tay thi de tu do. */
+  overscroll-behavior-x: contain;
+  scroll-padding-left: var(--pad-page);
+  padding: 4px var(--pad-page) 18px;
+  scrollbar-width: none;
+}
+.shelf__track::-webkit-scrollbar { height: 0; }
+
+/* Nam keo bang chuot trai: doi con tro, va chan keo-tha anh cua trinh duyet */
+.shelf__track { cursor: grab; }
+.shelf__track img { -webkit-user-drag: none; user-drag: none; }
+.shelf__track.is-grab {
+  cursor: grabbing;
+  scroll-behavior: auto;
+  -webkit-user-select: none; user-select: none;
+}
+/* Dang keo thi khoa moi hieu ung hover ben trong cho khoi giat */
+.shelf__track.is-grab * { pointer-events: none; }
+
+/* Mo dan hai canh de bao con noi dung */
+.shelf::before,
+.shelf::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 18px;
+  width: 56px;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity var(--t-base);
+}
+.shelf::before { left: 0;  background: linear-gradient(90deg, var(--bg-app), transparent); }
+.shelf::after  { right: 0; background: linear-gradient(270deg, var(--bg-app), transparent); }
+.shelf.at-start::before { opacity: 0; }
+.shelf.at-end::after    { opacity: 0; }
+
+.shelf__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: rgba(11, 15, 23, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--line-mid);
+  color: var(--tx-hi);
+  font-size: 15px;
+  z-index: 4;
+  opacity: 0;
+  box-shadow: var(--sh-2);
+  transition: opacity var(--t-base) var(--e-out), transform var(--t-base) var(--e-out), background var(--t-fast);
+}
+.shelf:hover .shelf__nav { opacity: 1; }
+.shelf__nav:hover { background: var(--bg-raised); transform: translateY(-50%) scale(1.09); }
+.shelf__nav:disabled { opacity: 0 !important; pointer-events: none; }
+.shelf__nav--l { left: calc(var(--pad-page) - 19px); }
+.shelf__nav--r { right: calc(var(--pad-page) - 19px); }
+
+/* ----------------------------------------------------------------------------
+   THE SAP RA MAT + DEM NGUOC
+   -------------------------------------------------------------------------- */
+
+.uc {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 42%),
+    var(--bg-surface);
+  border: 1px solid var(--line);
+  cursor: default;
+  isolation: isolate;
+  transition: transform var(--t-base) var(--e-out), box-shadow var(--t-base),
+              border-color var(--t-base);
+}
+.uc:hover {
+  transform: translateY(-5px);
+  border-color: var(--line-strong);
+  box-shadow: var(--sh-3);
+}
+
+/* Vien sang chay quanh the khi con duoi 7 ngay */
+.uc.is-soon { border-color: color-mix(in srgb, var(--warn) 30%, transparent); }
+.uc.is-soon::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(115deg,
+    transparent 30%,
+    color-mix(in srgb, var(--warn) 62%, transparent) 50%,
+    transparent 70%);
+  background-size: 260% 100%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: nx-uc-sweep 3.6s linear infinite;
+  pointer-events: none;
+}
+.uc.is-done { border-color: color-mix(in srgb, var(--ok) 26%, transparent); }
+
+.uc__shot {
+  position: relative;
+  aspect-ratio: 460 / 215;
+  overflow: hidden;
+  background: var(--bg-sunken);
+}
+.uc__shot img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: saturate(0.7) brightness(0.6);
+  transform: scale(1.015);
+  transition: filter var(--t-slow) var(--e-out), transform 760ms var(--e-out);
+}
+.uc:hover .uc__shot img { filter: saturate(1.02) brightness(0.9); transform: scale(1.07); }
+.uc__shot::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(5, 7, 11, 0.96), rgba(5, 7, 11, 0.22) 58%, transparent);
+}
+
+/* Quang sang mo dan tu day anh — cho khoi anh khong bi "chet" */
+.uc__glow {
+  position: absolute;
+  left: 50%; bottom: -46%;
+  width: 150%; height: 92%;
+  transform: translateX(-50%);
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+  background: radial-gradient(ellipse at center,
+    color-mix(in srgb, var(--br-1) 26%, transparent), transparent 68%);
+  transition: opacity var(--t-slow) var(--e-out);
+}
+.uc:hover .uc__glow { opacity: 0.85; }
+.uc.is-soon .uc__glow {
+  background: radial-gradient(ellipse at center,
+    color-mix(in srgb, var(--warn) 28%, transparent), transparent 68%);
+}
+.uc.is-done .uc__glow {
+  background: radial-gradient(ellipse at center,
+    color-mix(in srgb, var(--ok) 26%, transparent), transparent 68%);
+}
+
+.uc__tag { position: absolute; left: 10px; top: 10px; z-index: 3; }
+
+/* Nhan bao Steam da doi lich */
+.uc__moved {
+  position: absolute;
+  right: 10px; top: 10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 21px;
+  padding: 0 8px;
+  border-radius: var(--r-pill);
+  font-family: var(--f-ui);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  color: var(--info);
+  background: rgba(5, 7, 11, 0.76);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--info) 34%, transparent);
+  cursor: help;
+}
+.uc__moved i { font-size: 11px; }
+
+.uc__body {
+  position: relative;
+  z-index: 2;
+  padding: 13px 14px 15px;
+  display: flex;
+  flex-direction: column;
+}
+.uc__title {
+  font-family: var(--f-display);
+  font-size: 14.5px;
+  font-weight: 750;
+  letter-spacing: -0.012em;
+  color: var(--tx-hi);
+  line-height: 1.28;
+  min-height: 2.56em;
+}
+
+.uc__when {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+}
+.uc__date {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-family: var(--f-num);
+  font-size: 11.5px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.008em;
+  color: var(--tx-dim);
+  white-space: nowrap;
+}
+.uc__date i {
+  flex: none;
+  font-size: 12px;
+  color: var(--tx-faint);
+  font-variant-numeric: normal;
+}
+/* Nhan mui gio — noi ro moc gio dang hien theo gio Viet Nam */
+.uc__tz {
+  flex: none;
+  margin-left: auto;
+  padding: 2px 6px;
+  border-radius: var(--r-xs);
+  font-family: var(--f-num);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--tx-faint);
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--line);
+  cursor: help;
+}
+.uc__wd {
+  margin-top: 3px;
+  font-family: var(--f-ui);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.006em;
+  color: var(--tx-faint);
+}
+
+/* Dong ho dem nguoc */
+.cd { display: flex; gap: 7px; margin-top: 12px; }
+.cd__cell {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  padding: 8px 3px 7px;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+  animation: nx-rise 460ms var(--e-out) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+  transition: border-color var(--t-base), background var(--t-base),
+              box-shadow var(--t-base);
+}
+/* Vach sang mong tren dinh moi o */
+.cd__cell::before {
+  content: '';
+  position: absolute;
+  left: 22%; right: 22%; top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent,
+    color-mix(in srgb, var(--br-1) 55%, transparent), transparent);
+  opacity: 0.5;
+  transition: opacity var(--t-base);
+}
+.uc:hover .cd__cell {
+  border-color: color-mix(in srgb, var(--br-1) 24%, transparent);
+  background: color-mix(in srgb, var(--br-1) 6%, var(--bg-sunken));
+  box-shadow: inset 0 0 16px color-mix(in srgb, var(--br-1) 7%, transparent);
+}
+.uc:hover .cd__cell::before { opacity: 1; }
+.uc.is-soon .cd__cell::before {
+  background: linear-gradient(90deg, transparent,
+    color-mix(in srgb, var(--warn) 62%, transparent), transparent);
+}
+.uc.is-soon:hover .cd__cell {
+  border-color: color-mix(in srgb, var(--warn) 28%, transparent);
+  background: color-mix(in srgb, var(--warn) 6%, var(--bg-sunken));
+  box-shadow: inset 0 0 16px color-mix(in srgb, var(--warn) 8%, transparent);
+}
+
+.cd__n {
+  display: block;
+  font-family: var(--f-num);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--tx-hi);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  /* Moi lan so doi, React thay khoa -> chay lai hieu ung nay */
+  animation: nx-tick 340ms var(--e-out);
+}
+.cd__l {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--f-ui);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--tx-faint);
+  text-transform: uppercase;
+}
+
+/* Thanh tien do: con bao xa toi ngay ra mat */
+.cd__rail {
+  position: relative;
+  height: 3px;
+  margin-top: 10px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+.cd__rail i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--grad-brand);
+  box-shadow: 0 0 10px var(--br-1-soft);
+  transition: width 900ms var(--e-out);
+}
+.uc.is-soon .cd__rail i {
+  background: linear-gradient(90deg, var(--warn), var(--gold));
+  box-shadow: 0 0 10px var(--warn-soft);
+}
+
+/* Da phat hanh — thay cho dong ho 00:00:00 dung im */
+.cd--done {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--r-sm);
+  background: var(--ok-soft);
+  border: 1px solid rgba(47, 224, 164, 0.3);
+  color: var(--ok);
+  font-family: var(--f-ui);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  animation: nx-pop 420ms var(--e-out) both;
+}
+.cd--done i { font-size: 15px; }
+
+/* ----------------------------------------------------------------------------
+   THE THE LOAI (HOME)
+   -------------------------------------------------------------------------- */
+
+.gen {
+  position: relative;
+  height: 112px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  padding: 15px;
+  text-align: left;
+  transition: transform var(--t-base) var(--e-out), box-shadow var(--t-base), border-color var(--t-base);
+}
+.gen:hover { transform: translateY(-5px) scale(1.015); border-color: var(--line-strong); box-shadow: var(--sh-3); }
+.gen::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--gen-grad, var(--grad-brand));
+  opacity: 0.22;
+  transition: opacity var(--t-base) var(--e-out), transform 700ms var(--e-out);
+  z-index: 0;
+}
+.gen:hover::before { opacity: 0.4; transform: scale(1.12); }
+.gen::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(5, 7, 11, 0.86), transparent 70%);
+  z-index: 1;
+}
+.gen__ico {
+  position: absolute;
+  right: 12px; top: 10px;
+  font-size: 42px;
+  color: rgba(255, 255, 255, 0.13);
+  z-index: 1;
+  transition: transform var(--t-base) var(--e-spring), color var(--t-base);
+}
+.gen:hover .gen__ico { transform: scale(1.16) rotate(-7deg); color: rgba(255, 255, 255, 0.25); }
+.gen__txt { position: relative; z-index: 2; }
+.gen__t {
+  font-family: var(--f-display);
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.gen__n {
+  font-family: var(--f-num);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.62);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Luoi the loai */
+.gen__grid {
+  display: grid;
+  /* Dung 6 the loai -> chia chan 6 / 3 / 2 cot, khong bao gio bo lai 1 the le */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+  padding: 0 var(--pad-page);
+}
+@media (max-width: 1560px) { .gen__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 1040px) { .gen__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* fill-mode phai la "backwards", khong duoc la "both" -- y het .nx-grid va
+   .nx-list ben tren. nx-rise ket thuc o "transform: none". Voi "both", frame
+   ket do bi ghim lai o goc animation ngay ca sau khi chay xong, ma goc
+   animation thang moi khai bao thuong bat ke diem chon loc -- ke ca luat
+   .gen:hover { transform: translateY(-5px) scale(1.015); } o dong 804 ngay
+   phia tren. Ket qua: ro chuot vao the loai thi vien va bong doi, nhung the
+   khong nhac len mot ly nao, trong nhu hong.
+
+   "backwards" chi giu frame DAU trong luc the con dang cho toi luot minh
+   (bac thang delay ben duoi); chay xong la buong ra, tra transform lai cho
+   luat hover. */
+.gen__grid > * { animation: nx-rise 480ms var(--e-out) backwards; }
+.gen__grid > *:nth-child(2) { animation-delay: 55ms; }
+.gen__grid > *:nth-child(3) { animation-delay: 110ms; }
+.gen__grid > *:nth-child(4) { animation-delay: 165ms; }
+.gen__grid > *:nth-child(5) { animation-delay: 220ms; }
+.gen__grid > *:nth-child(6) { animation-delay: 275ms; }
+
+/* Dai bang thong ke tren trang chu */
+.stat__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 14px;
+  padding: 0 var(--pad-page) 6px;
+}
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 15px 17px;
+  border-radius: var(--r-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--line);
+  transition: transform var(--t-base) var(--e-out), border-color var(--t-base), box-shadow var(--t-base);
+}
+.stat:hover { transform: translateY(-3px); border-color: var(--line-strong); box-shadow: var(--sh-2); }
+.stat__ico {
+  width: 40px; height: 40px; flex: none;
+  display: grid; place-items: center;
+  border-radius: var(--r-sm);
+  font-size: 19px;
+}
+.stat__n {
+  font-family: var(--f-num);
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--tx-hi);
+  font-variant-numeric: tabular-nums;
+}
+.stat__l {
+  margin-top: 5px;
+  font-size: 10.5px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tx-faint);
+}
+
+
+/* ----------------------------------------------------------------------------
+   HUY HIEU DAT TREN ANH GAME
+   Anh bia sang mau (vd Atomic Heart) lam chu bi chim. Dat mot lop nen toi mo
+   ben duoi, giu nguyen mau chu va vien -> luon doc duoc tren moi anh.
+   -------------------------------------------------------------------------- */
+.gc__flags .nx-badge,
+.uc__tag .nx-badge {
+  background: rgba(6, 10, 18, 0.8);
+  border-color: color-mix(in srgb, currentColor 42%, transparent);
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 999px color-mix(in srgb, currentColor 11%, transparent);
+}
+/* Chi 13 the sap ra mat nen giu duoc lop kinh mo o day */
+.uc__tag .nx-badge {
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+  backdrop-filter: blur(8px) saturate(130%);
+}
+/* Huy hieu tren the game thi khong: gan 300 the x may huy hieu = qua nang.
+   Bu lai bang nen dam hon, mat thuong khong phan biet duoc. */
+.gc__flags .nx-badge {
+  background: rgba(6, 10, 18, 0.92);
+  /* Thu gon lai mot nhip cho vua hang ngang, va cao 22px de tam chu ngang
+     bang tam vien cua diem danh gia (cao 25px, cach day 10px) o ben phai. */
+  height: 22px;
+  padding: 0 7px;
+  gap: 3px;
+  font-size: 9px;
+  letter-spacing: 0.035em;
+  border-radius: 7px;
+}
+.gc__flags .nx-badge i { font-size: 10.5px; }
+
+/* Nut bang rong het khung — the <button> mac dinh chi rong bang noi dung */
+.bn { width: 100%; }
+
+/* ============================================================================
+   NHIP TAN CUA O CHO ANH -- TRAI SANG PHAI
+
+   Dung transition-delay chu KHONG dung animation-delay: khoi
+   prefers-reduced-motion o tokens.css tat sach animation nhung co y giu
+   transition. The dau tien tan truoc, moi the sau tre them 28ms, toi the thu
+   8 thi dung -- keo dai hon nua thi the cuoi cho lau den muc kho chiu.
+
+   Bac thang bam vao ".nx-well.is-done", KHONG bam vao ".nx-well". Ly do:
+   transition khong biet chieu di. Neu de delay o trang thai goc thi luc o
+   phai HIEN LAI (anh loi, doi sang nguon du phong) no cung an theo cung con
+   so do -- o dung hinh nua giay roi moi chiu ve, dung y dinh. De o .is-done
+   thi delay chi ap cho luot AN; luot hien lai an theo base = 0ms, tuc thi.
+
+   Ba con so ung voi ba doi tuong trong transition cua .nx-well:
+   opacity / box-shadow / visibility. Con so thu ba luon lon hon
+   (delay + duration) cua opacity mot chut, de o chi bi cat khoi luong ve
+   SAU khi da mo hoan toan.
+   ========================================================================== */
+.shelf__track > * .nx-well.is-done,
+.nx-grid > * .nx-well.is-done,
+.nx-list > * .nx-well.is-done { transition-delay: 90ms, 0ms, 520ms; }
+.shelf__track > :nth-child(2) .nx-well.is-done,
+.nx-grid > :nth-child(2) .nx-well.is-done,
+.nx-list > :nth-child(2) .nx-well.is-done { transition-delay: 118ms, 28ms, 548ms; }
+.shelf__track > :nth-child(3) .nx-well.is-done,
+.nx-grid > :nth-child(3) .nx-well.is-done,
+.nx-list > :nth-child(3) .nx-well.is-done { transition-delay: 146ms, 56ms, 576ms; }
+.shelf__track > :nth-child(4) .nx-well.is-done,
+.nx-grid > :nth-child(4) .nx-well.is-done,
+.nx-list > :nth-child(4) .nx-well.is-done { transition-delay: 174ms, 84ms, 604ms; }
+.shelf__track > :nth-child(5) .nx-well.is-done,
+.nx-grid > :nth-child(5) .nx-well.is-done,
+.nx-list > :nth-child(5) .nx-well.is-done { transition-delay: 202ms, 112ms, 632ms; }
+.shelf__track > :nth-child(6) .nx-well.is-done,
+.nx-grid > :nth-child(6) .nx-well.is-done,
+.nx-list > :nth-child(6) .nx-well.is-done { transition-delay: 230ms, 140ms, 660ms; }
+.shelf__track > :nth-child(7) .nx-well.is-done,
+.nx-grid > :nth-child(7) .nx-well.is-done,
+.nx-list > :nth-child(7) .nx-well.is-done { transition-delay: 258ms, 168ms, 688ms; }
+.shelf__track > :nth-child(n + 8) .nx-well.is-done,
+.nx-grid > :nth-child(n + 8) .nx-well.is-done,
+.nx-list > :nth-child(n + 8) .nx-well.is-done { transition-delay: 286ms, 196ms, 716ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Bac thang ngan lai con mot nua: 14ms moi the, toi da 130ms.
+     Cot thu ba = 10ms sau khi opacity ket thuc (o day duration con 300ms). */
+  .shelf__track > * .nx-well.is-done,
+  .nx-grid > * .nx-well.is-done,
+  .nx-list > * .nx-well.is-done { transition-delay: 60ms, 0ms, 370ms; }
+  .shelf__track > :nth-child(2) .nx-well.is-done,
+  .nx-grid > :nth-child(2) .nx-well.is-done,
+  .nx-list > :nth-child(2) .nx-well.is-done { transition-delay: 74ms, 14ms, 384ms; }
+  .shelf__track > :nth-child(3) .nx-well.is-done,
+  .nx-grid > :nth-child(3) .nx-well.is-done,
+  .nx-list > :nth-child(3) .nx-well.is-done { transition-delay: 88ms, 28ms, 398ms; }
+  .shelf__track > :nth-child(4) .nx-well.is-done,
+  .nx-grid > :nth-child(4) .nx-well.is-done,
+  .nx-list > :nth-child(4) .nx-well.is-done { transition-delay: 102ms, 42ms, 412ms; }
+  .shelf__track > :nth-child(5) .nx-well.is-done,
+  .nx-grid > :nth-child(5) .nx-well.is-done,
+  .nx-list > :nth-child(5) .nx-well.is-done { transition-delay: 116ms, 56ms, 426ms; }
+  .shelf__track > :nth-child(n + 6) .nx-well.is-done,
+  .nx-grid > :nth-child(n + 6) .nx-well.is-done,
+  .nx-list > :nth-child(n + 6) .nx-well.is-done { transition-delay: 130ms, 70ms, 440ms; }
+}
